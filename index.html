@@ -1,0 +1,932 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Редактор кабельных схем</title>
+<style>
+:root{--bg:#eef1f5;--panel:#fff;--line:#d6dbe3;--text:#1c2430;--muted:#6b7686;--acc:#1a6fe0;--acc2:#e0007a}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font:13px/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg);overflow:hidden}
+#app{display:grid;grid-template-rows:auto 1fr;height:100%}
+header{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px 8px;background:var(--panel);border-bottom:1px solid var(--line);z-index:5}
+header h1{font-size:14px;margin:0 10px 0 2px;white-space:nowrap}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+button,select,input,textarea{font:inherit;color:inherit}
+button{background:#f4f6f9;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;white-space:nowrap}
+button:hover{background:#e8edf4}
+button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+button.danger{color:#b3261e}
+button:disabled{opacity:.4;cursor:default}
+main{display:grid;grid-template-columns:170px 1fr 300px;min-height:0;position:relative}
+aside{background:var(--panel);overflow:auto;padding:10px;min-height:0}
+#palette{border-right:1px solid var(--line)}
+#props{border-left:1px solid var(--line)}
+aside h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:12px 0 6px}
+aside h3:first-child{margin-top:0}
+.pal{display:flex;align-items:center;gap:7px;width:100%;text-align:left;margin-bottom:4px;cursor:grab}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(0,0,0,.35);flex:none}
+#stage{position:relative;min-width:0;min-height:0;background:#cfd5de}
+#svg{position:absolute;inset:0;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;display:block}
+#hint{position:absolute;left:8px;bottom:8px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--muted);pointer-events:none;max-width:70%}
+label.f{display:block;margin:6px 0 2px;color:var(--muted);font-size:11px}
+input[type=text],input[type=number],textarea,select{width:100%;border:1px solid var(--line);border-radius:5px;padding:4px 6px;background:#fff}
+textarea{resize:vertical;min-height:52px}
+.row{display:flex;gap:6px}.row>*{flex:1;min-width:0}
+.port{border:1px solid var(--line);border-radius:7px;padding:6px;margin-bottom:6px;background:#fafbfc}
+.port .row{margin-bottom:4px}
+.port small{color:var(--muted)}
+.btns{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+table.rev{width:100%;border-collapse:collapse}
+table.rev td{padding:1px}
+table.rev input{padding:2px 3px;font-size:11px}
+.kbd{font-size:11px;color:var(--muted)}
+.kbd b{color:var(--text)}
+.mob{display:none}
+#toast{position:fixed;left:50%;top:60px;transform:translateX(-50%);background:#1c2430;color:#fff;padding:7px 14px;border-radius:8px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50}
+#toast.show{opacity:1}
+.pd{fill:#fff;stroke:var(--acc2);stroke-width:1.2;cursor:crosshair}
+.pd:hover{fill:var(--acc2)}
+@media (max-width:860px){
+  main{grid-template-columns:1fr}
+  .mob{display:inline-block}
+  aside{position:absolute;z-index:4;top:0;bottom:0;width:min(86vw,320px);box-shadow:0 0 18px rgba(0,0,0,.25);display:none}
+  #palette{left:0}#props{right:0}
+  aside.open{display:block}
+  #hint{display:none}
+  header h1{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Редактор кабельных схем</h1>
+  <button class="mob" id="bPal">☰ Блоки</button>
+  <button id="bUndo" title="Ctrl+Z">↶</button><button id="bRedo" title="Ctrl+Y">↷</button>
+  <span class="sep"></span>
+  <button id="bZm">−</button><button id="bZp">+</button><button id="bFit">Весь лист</button>
+  <span class="sep"></span>
+  <button id="bSnap" class="on" title="Привязка к сетке">Сетка</button>
+  <button id="bDots" class="on" title="Показывать точки подключения">Порты</button>
+  <button id="bMarq" title="Рамка выделения (на телефоне вместо Shift)">⬚ Выделение</button>
+  <button id="bFrame" class="on" title="Рамка и штамп чертежа">Штамп</button>
+  <span class="sep"></span>
+  <button id="bShare" title="Ссылка со всей схемой внутри">🔗 Ссылка</button>
+  <button id="bJson">⬇ JSON</button><button id="bLoad">⬆ Открыть</button>
+  <button id="bSvg">⬇ SVG</button><button id="bPng">⬇ PNG</button>
+  <button id="bReset" class="danger">Сброс</button>
+  <button class="mob" id="bProps" style="margin-left:auto">⚙ Свойства</button>
+  <input type="file" id="file" accept=".json,application/json" hidden>
+</header>
+<main>
+  <aside id="palette"></aside>
+  <div id="stage">
+    <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#e6e9ef" stroke-width=".5"/></pattern>
+      </defs>
+      <g id="world">
+        <rect x="0" y="0" width="1470" height="1135" fill="#fff" stroke="#9aa4b2" stroke-width=".5"/>
+        <rect id="gridRect" x="0" y="0" width="1470" height="1135" fill="url(#grid)"/>
+        <g id="gFrame"></g><g id="gZones"></g><g id="gLinks"></g><g id="gNodes"></g><g id="gPorts"></g><g id="gSel"></g><g id="gTemp"></g>
+      </g>
+    </svg>
+    <div id="hint"></div>
+  </div>
+  <aside id="props"></aside>
+</main>
+</div>
+<div id="toast"></div>
+
+<script>
+(()=>{
+'use strict';
+/* ================= константы ================= */
+const SHEET={w:1470,h:1135};
+const FONT='"Arial Narrow","Liberation Sans Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif';
+const BLUE='#0000ff',RED='#ff0000',BLACK='#000000',MAG='#e11ee1',TEAL='#1f8a5f';
+const COLORS=[[BLUE,'Сигнал (синий)'],[RED,'Питание (красный)'],[BLACK,'Чёрный'],['#1f8a5f','Зелёный'],[MAG,'Розовый']];
+const SIDES={top:[0,-1],bottom:[0,1],left:[-1,0],right:[1,0]};
+const SIDE_RU={bottom:'снизу',top:'сверху',left:'слева',right:'справа'};
+const TYPES={
+  monitor:{name:'Монитор',w:120,h:97,lp:'above',sw:'#4caf72'},
+  keyboard:{name:'Пульт / трекбол',w:80,h:37,lp:'above',sw:'#5ba3c9'},
+  pc:{name:'Системный блок',w:78,h:115,lp:'above',sw:'#ee931a',bus:true},
+  ups:{name:'ИБП (UPS)',w:47,h:65,lp:'above',sw:'#fff'},
+  display:{name:'Дисплей',w:70,h:69,lp:'above',sw:'#fff'},
+  transceiver:{name:'Трансивер',w:81,h:73,lp:'inside',sw:'#fff',bus:true},
+  buffer:{name:'Буфер данных',w:131,h:61,lp:'inside',sw:'#fff'},
+  matchbox:{name:'Согласующий бокс',w:30,h:60,lp:'right',sw:'#fff'},
+  transducer:{name:'Датчик / антенна',w:38,h:14,lp:'above',sw:'#fff'},
+  box:{name:'Блок (общий)',w:100,h:50,lp:'inside',sw:'#fff'},
+  zone:{name:'Зона (пунктир)',w:300,h:150,lp:'zone',sw:'#fff'},
+  text:{name:'Текст',w:100,h:14,lp:'none',sw:'#fff'}
+};
+const KEY='cableEditor.v1';
+
+/* ================= утилиты ================= */
+const $=s=>document.querySelector(s);
+const cv=document.createElement('canvas').getContext('2d');
+const tw=(s,fs,bold)=>{cv.font=`${bold?'bold ':''}${fs}px ${FONT}`;return cv.measureText(s).width;};
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const lines=s=>String(s||'').split('\n');
+const r1=v=>Math.round(v*100)/100;
+const clone=o=>JSON.parse(JSON.stringify(o));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ================= исходная схема ================= */
+function buildDefault(){
+  const d={v:1,seq:1,frame:true,meta:{
+    title:'AUSTAL H392 70M FAST CREW BOAT\nECDIS & ECHO SOUNDER\nEQUIPMENT CABLE LAYOUT',size:'A3',project:'',drawingNo:'02',
+    notes:"1. ALL EQUIPMENT TO BE SUITABLY GROUNDED TO HULL. 2. CAT 5 CABLE MUST FIT STANDARD RJ45 CONNECTORS. 3. YARD OR CONTRACTOR TO ADVISE IF CABLE LENGTHS ARE ADEQUATE. 4. ANY CABLE OVER 20 METRES NOT IDENTIFIED IN THE CABLE SCHEDULE, SHOULD BE REFERRED TO AMI FOR APPROVAL. 5. CABLES TO ANTENNAS OR RF EMITTERS SHOULD HAVE AT LEAST 1 METRE SEPARATION FROM OTHER CABLES OR ANTENNAS. 6. THIS DRAWING MUST BE USED IN CONJUNCTION WITH THE MATCHING CABLE SCHEDULE. 7. ANY CHANGES OR VARIATION MUST BE REFERRED TO AMI FOR APPROVAL. 8. ALL EQUIPMENT SHALL BE MOUNTED TO COMPLY WITH AIRFLOW, TEMPERATURE, STABILITY AND MAINTENANCE REQUIREMENTS. ALL INPUTS TO BE NMEA WHERE POSSIBLE.",
+    revs:[
+      {rev:'',desc:'INITIAL DRAWING',drwn:'RR',date:'29OCT15',chkd:'ME',apprv:'GB',adate:'30OCT15'},
+      {rev:'A',desc:"UPDATED AS PER YARD'S COMMENTS",drwn:'RR',date:'03NOV15',chkd:'ME',apprv:'GB',adate:'04NOV15'},
+      {rev:'F',desc:'ADDED ALARMS TO MARINE LINK',drwn:'RR',date:'23MAR16',chkd:'ME',apprv:'GB',adate:'29MAR16'},
+      {rev:'',desc:'AS BUILTS',drwn:'RR',date:'09SEP16',chkd:'ME',apprv:'',adate:''},
+      {rev:'',desc:'',drwn:'',date:'',chkd:'',apprv:'',adate:''}],
+    company:'electronics division\n107 Forsyth St. O\'Connor\nWestern Australia 6163\nPO BOX 361\nHamilton Hill Western Australia 6963\nTel: +61 8 9331 0000  Fax: +61 8 9314 2929\nEmail : service@amisales.com.au',
+    footer:'THIS DRAWING AND ALL INFORMATION CONTAINED HEREIN, REMAINS THE PROPERTY OF AMI SALES, ELECTRONICS DIVISION. UNLESS OTHERWISE STATED, NO PART OF THE PUBLICATION MAY BE REPRODUCED OR COPIED IN ANY MANNER WITHOUT THE WRITTEN PERMISSION OF AMI SALES ELECTRONICS DIVISION. AMI SALES RESERVES THE RIGHT TO CHANGE THIS DRAWING AT ANY TIME.'},
+    nodes:[],ports:[],links:[]};
+  const id=p=>p+(d.seq++);
+  const N=(type,x,y,o)=>{const T=TYPES[type];const n=Object.assign({id:id('n'),type,x,y,w:T.w,h:T.h,name:'',code:'',text:'',lp:T.lp,bus:!!T.bus},o||{});d.nodes.push(n);return n;};
+  const P=(n,side,abs,o)=>{const pos=(side==='top'||side==='bottom')?abs-n.x:abs-n.y;const p=Object.assign({id:id('p'),node:n.id,side,pos:r1(pos),cable:'',dest:'',color:BLUE,dir:'none',tag:'',len:0},o||{});d.ports.push(p);return p;};
+  const L=(a,b,o)=>{const l=Object.assign({id:id('l'),from:a.id,to:b.id,label:'',sub:'',color:BLUE,arrow:'none',bend:null},o||{});d.links.push(l);return l;};
+
+  N('zone',36,222,{w:1393,h:740,name:'UNDER\nCONSOLE'});
+  N('zone',943,820,{w:487,h:142,name:'INSIDE HULL',align:'end'});
+  N('text',42,76,{name:'BRIDGE CONSOLE',color:BLUE,fs:10.5,align:'start'});
+
+  /* --- ECDIS #1 / #2 --- */
+  function ecdis(k,mx,tx,pcx,pcCode,monCode,tbCode,monNo,dgNo,dgCode,upsN,upsX,upsCode,upsMain){
+    const mon=N('monitor',mx,115,{name:'ECDIS #'+k,code:monCode,text:'KELVIN HUGHES\n22" MONITOR\nMDD-A20-22\n#'+monNo});
+    const tb=N('keyboard',tx,175,{name:'EDCIS CONTROL/\nTRACK BALL #'+k+'\n(MDD-A101)',code:tbCode});
+    const pc=N('pc',pcx,440,{});
+    const X=pcCode;
+    const mxs=[mx+41.7,mx+54,mx+66.3,mx+78.7];
+    const pt=[0,1,2].map(i=>P(pc,'top',mxs[i],{color:i===0?BLACK:(i===1?BLUE:RED)}));
+    const defs=[['MDP-A988-10m',BLACK],['MDP-A122-10m',BLUE],['MAINS CABLE <10M',RED]];
+    for(let i=0;i<3;i++){
+      const mp=P(mon,'bottom',mxs[i]);
+      L(mp,pt[i],{label:`${monCode}-${X} /${i+1} SUPPLIED`,sub:defs[i][0],color:defs[i][1]});
+    }
+    const m4=P(mon,'bottom',mxs[3]),t4=P(tb,'bottom',tx+40);
+    L(m4,t4,{label:`${monCode}-${tbCode} SUPPLIED`,bend:160});
+    N('text',(mxs[3]+tx+40)/2,365,{name:'2x PS/2 CABLE <2M',fs:7.5,align:'middle'});
+    N('text',pcx+18,404,{name:'MDD-A115-10 10m\nDISPLAY CABLE KIT',fs:8,align:'end'});
+    const ups=N('ups',upsX,495,{name:'OP32\n1KVA UPS #'+k,code:upsCode});
+    return {pc,mon,ups,X,dgNo,dgCode,upsMain:upsCode};
+  }
+  const e1=ecdis(1,84,218,100,'A14203','A14200','A14201',3,1,'J14308',1,288,'A14204');
+  const e2=ecdis(2,462,598,478,'A14207','A14205','A14206',4,2,'J14309',2,660,'A14208');
+
+  /* --- нижние порты системных блоков --- */
+  function pcPorts(e,x0,ethFirst){
+    const X=e.X,pc1=(X==='A14203');
+    const rows=[
+      [`${X}-A09240 0.75mm2 2PR+SCR`,'MARINE LINK','out',''],
+      [`A14521-${X} 0.75mm2 2PR+SCR`,'GYROCOMPASS CHANGE OVER UNIT','both',''],
+      [`A14505-${X} 0.75mm2 1PR+SCR`,'GYROCOMPASS #3','in',''],
+      [`${X}-A14711 SUPPLIED`,'KH VDR MEU','out','SVGA<5M'],
+      [`J14323-${X} 0.75mm2 1PR+SCR`,'SPEED LOG DATA BUFFER','in',''],
+      [`${e.dgCode}-${X} 0.75mm2 1PR+SCR`,`DGPS DATA BUFFER #${e.dgNo}`,'in',''],
+      [`${X}-A14703 0.75mm2 2PR+SCR`,'SAAB R5 AIS J/B','both',''],
+      [`${X}-A12501 0.75mm2 1PR+SCR`,'AMI BNWAS DU-150','out',''],
+      [`${X}-J14420 0.75mm2 1PR+SCR`,'DP WIND SYSTEM(NOT AMI SUPPLY)','none',''],
+      [pc1?'A14103-14203 1 0.75mm2 2PR+SCR':`A14103-${X} 0.75mm2 2PR+SCR`,'KH RADAR PROC. #1','in',''],
+      [pc1?'A14110-14203 0.75mm2 2PR+SCR':`A14110-${X} 0.75mm2 2PR+SCR`,'KH RADAR PROC. #2','none',''],
+      [`A14105-${X} SUPPLIED`,'KH RADAR INTERSWITCH','none','']];
+    const sp=12.27;let i=ethFirst?1:0;const out={};
+    if(ethFirst)out.eth=P(e.pc,'bottom',x0,{cable:'A14203-A14207 CAT5e S-FTP',color:BLUE});
+    rows.forEach(r=>{P(e.pc,'bottom',x0+i*sp,{cable:r[0],dest:r[1],dir:r[2],tag:r[3]});i++;});
+    if(!ethFirst){out.j=P(e.pc,'bottom',x0+i*sp,{cable:`J14215-${X} 0.75mm2 1PR+SCR`,dir:'in'});i++;
+      out.eth=P(e.pc,'bottom',x0+i*sp,{cable:'A14203-A14207 CAT5e S-FTP'});i++;}
+    else{out.j=P(e.pc,'bottom',x0+i*sp,{cable:`J14215-${X} 0.75mm2 1PR+SCR`,dir:'in'});i++;}
+    out.red=P(e.pc,'bottom',x0+i*sp,{cable:`${e.upsMain}-${X} 1.5mm2 3C+E+FR`,color:RED,dir:'in'});
+    return out;
+  }
+  const pp1=pcPorts(e1,59,false),pp2=pcPorts(e2,412.3,true);
+
+  /* --- ИБП --- */
+  function upsPorts(e,xs,pp){
+    const u=e.ups,X=e.X;
+    const a=P(u,'bottom',xs[0],{cable:`${e.upsMain}-${X} 1.5mm2 3C+E+FR`,color:RED,tag:'IEC'});
+    P(u,'bottom',xs[1],{cable:`2E02Q0${e.upsMain==='A14204'?2:4}-${e.upsMain} 1.5mm2 3C+E+FR`,dest:'SHIPS 240V AC SUPPLY(145W)',color:RED,dir:'in',tag:'IEC'});
+    P(u,'bottom',xs[2],{cable:`${e.upsMain}-A09240 0.75mm2 4PR+SCR`,dest:'MARINE LINK',dir:'out'});
+    L(a,pp.red,{label:`${e.upsMain}-${X} 1.5mm2 3C+E+FR`,color:RED,arrow:'to',bend:e.upsMain==='A14204'?132:142});
+  }
+  upsPorts(e1,[297,311.7,324],pp1);upsPorts(e2,[674,689,702],pp2);
+  pp1.red.cable='';pp2.red.cable='';
+
+  /* --- Эхолот Furuno --- */
+  const echo=N('buffer',767,367,{name:'ECHO SOUNDER\nDATA BUFFER',code:'J14215'});
+  const disp=N('display',1063,143,{name:'FURUNO FE-800\nDISPLAY UNIT FE-8010',code:'A14209'});
+  const trx=N('transceiver',1059,367,{name:'FURUNO\nTRANSCEIVER\nUNIT FE-8020',code:'A14210'});
+  const mb=N('matchbox',1083,837,{name:'FURUNO\nMATCHING BOX\nMB-504',code:'A14211'});
+  const tdc=N('transducer',1298,916,{name:'FURUNO\nTRANSDUCER\n200B-8B',code:'A14214'});
+
+  const ex=[796,808.3,820.5,832.8,845,857.3,869.5];
+  const eP2=P(echo,'bottom',ex[0],{dir:'none'}),eP1=P(echo,'bottom',ex[1],{dir:'none'});
+  P(echo,'bottom',ex[2],{cable:'J14215-A14711 0.75mm2 1PR+SCR',dest:'KH VDR MEU',dir:'out'});
+  P(echo,'bottom',ex[3],{cable:'J14215-A14110 0.75mm2 1PR+SCR',dest:'KH RADAR PROC. #2',dir:'out'});
+  P(echo,'bottom',ex[4],{cable:'J14215-A14103 0.75mm2 1PR+SCR',dest:'KH RADAR PROC. #1',dir:'out'});
+  P(echo,'bottom',ex[5],{cable:'J14215-AUSTAL 1.5mm2 2C',dest:"SHIP'S 24V DC SUPPLY (2.4W)",color:RED,dir:'in'});
+  const eT=P(echo,'bottom',ex[6]);
+  L(pp1.j,eP1,{label:'J14215-A14203 0.75mm2 1PR+SCR',arrow:'from',bend:373});
+  L(pp2.j,eP2,{label:'J14215-A14207 0.75mm2 1PR+SCR',arrow:'from',bend:359});
+  L(pp1.eth,pp2.eth,{label:'A14203-A14207 CAT5e S-FTP',bend:345});
+  N('text',315,897,{name:'ETHERNET (SYNC)',fs:7.5,align:'middle'});
+  pp1.eth.cable='';pp2.eth.cable='';pp1.j.cable='';pp2.j.cable='';
+
+  const dx=[1093,1105];
+  const dP1=P(disp,'bottom',dx[0]),dP2=P(disp,'bottom',dx[1],{color:RED,dir:'in'});
+  const tT1=P(trx,'top',dx[0]),tT2=P(trx,'top',dx[1],{color:RED});
+  L(dP1,tT1,{label:'A14209-A14210/1 0.75mm2 4PR+SCR'});
+  L(dP2,tT2,{label:'A14209-A142010 /1 1.5mm2 2C',color:RED,arrow:'from'});
+  const tx=[1080,1093,1105,1117,1130];
+  const tB1=P(trx,'bottom',tx[0]),tB2=P(trx,'bottom',tx[1]);
+  P(trx,'bottom',tx[2],{cable:'J14308-A14210 0.75mm2 1PR+SCR',dest:'DGPS DATA BUFFER #1',dir:'in'});
+  P(trx,'bottom',tx[3],{cable:'J14104-A14210 1.5mm2 3C+E+FR',dest:'YARD SUPPLIED CB',color:RED,dir:'in'});
+  P(trx,'bottom',tx[4],{cable:'A14210-A09240 0.75mm2 1PR+SCR',dest:'MARINE LINK',dir:'out'});
+  L(tB1,eT,{label:'A14210-J14215 0.75mm2 1PR+SCR',bend:134});
+  const mT=P(mb,'top',1093),mB=P(mb,'bottom',1093),tdL=P(tdc,'left',922);
+  L(tB2,mT,{label:'A14210-A14211 0.75mm2 1PR+SCR'});
+  L(mB,tdL,{label:'A14211-A14214 SUPPLIED',sub:'<15M'});
+  return d;
+}
+
+/* ================= состояние ================= */
+let doc,hist=[],hi=-1,sel={n:[],l:null};
+let view={x:0,y:0,k:1};
+const opt={snap:true,dots:true,marq:false};
+let idx={nodes:{},ports:{},linked:{}};
+const svg=$('#svg'),world=$('#world');
+const G={frame:$('#gFrame'),zones:$('#gZones'),links:$('#gLinks'),nodes:$('#gNodes'),ports:$('#gPorts'),sel:$('#gSel'),temp:$('#gTemp')};
+
+function nid(p){doc.seq=(doc.seq||1)+1;return p+doc.seq;}
+function reindex(){
+  idx={nodes:{},ports:{},linked:{}};
+  doc.nodes.forEach(n=>idx.nodes[n.id]=n);
+  doc.ports.forEach(p=>idx.ports[p.id]=p);
+  doc.links=doc.links.filter(l=>idx.ports[l.from]&&idx.ports[l.to]);
+  doc.links.forEach(l=>{idx.linked[l.from]=1;idx.linked[l.to]=1;});
+}
+function bounds(n){
+  if(n.type==='text'){
+    const ls=lines(n.name),fs=n.fs||10;const w=Math.max(8,...ls.map(s=>tw(s,fs)));const h=ls.length*fs*1.2;
+    const x=n.align==='middle'?n.x-w/2:n.align==='end'?n.x-w:n.x;return {x,y:n.y,w,h};
+  }
+  return {x:n.x,y:n.y,w:n.w,h:n.h};
+}
+function portPos(p){
+  const n=idx.nodes[p.node],b=bounds(n);
+  switch(p.side){case 'top':return [b.x+p.pos,b.y];case 'bottom':return [b.x+p.pos,b.y+b.h];case 'left':return [b.x,b.y+p.pos];default:return [b.x+b.w,b.y+p.pos];}
+}
+
+/* ================= история ================= */
+function commitNow(){
+  const s=JSON.stringify(doc);
+  if(s!==hist[hi]){hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>120)hist.shift();hi=hist.length-1;}
+  try{localStorage.setItem(KEY,JSON.stringify({doc,view}));}catch(e){}
+  updateUndo();
+}
+let ct;function commit(){clearTimeout(ct);ct=setTimeout(commitNow,350);}
+function updateUndo(){$('#bUndo').disabled=hi<=0;$('#bRedo').disabled=hi>=hist.length-1;}
+function loadHist(i){
+  hi=i;doc=JSON.parse(hist[hi]);reindex();
+  sel.n=sel.n.filter(id=>idx.nodes[id]);if(sel.l&&!doc.links.find(l=>l.id===sel.l))sel.l=null;
+  renderAll();updateUndo();try{localStorage.setItem(KEY,JSON.stringify({doc,view}));}catch(e){}
+}
+const undo=()=>{clearTimeout(ct);commitNow();if(hi>0)loadHist(hi-1);};
+const redo=()=>{if(hi<hist.length-1)loadHist(hi+1);};
+
+/* ================= отрисовка элементов ================= */
+function arrow(x,y,ux,uy,c){
+  const bx=x-ux*7,by=y-uy*7,px=-uy*2.8,py=ux*2.8;
+  return `<polygon points="${x},${y} ${bx+px},${by+py} ${bx-px},${by-py}" fill="${c}"/>`;
+}
+function ground(x,y){return `<g stroke="#555" stroke-width=".8" fill="none"><path d="M${x} ${y}v5M${x-4} ${y+5}h8M${x-3} ${y+7}h6M${x-1.5} ${y+9}h3"/></g>`;}
+
+function shape(n){
+  const {x,y,w,h}=bounds(n);
+  switch(n.type){
+    case 'monitor':return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#4caf72" stroke="#3a8a58"/>`+ground(x+1,y+h);
+    case 'keyboard':{
+      let k='';for(let r=0;r<3;r++)for(let c=0;c<14;c++)k+=`<rect x="${x+w*0.07+c*(w*0.062)}" y="${y+h*0.22+r*h*0.17}" width="${w*0.05}" height="${h*0.12}" rx="1"/>`;
+      return `<path d="M${x} ${y}H${x+w}V${y+h*.82}Q${x+w/2} ${y+h*1.12} ${x} ${y+h*.82}Z" fill="#5ba3c9" stroke="#3d7ea6"/><g fill="none" stroke="#2f6f99" stroke-width=".5">${k}</g>`;}
+    case 'pc':return `<rect x="${x+4}" y="${y-7}" width="17" height="8" fill="#f0a63a" stroke="#b36b0b"/><rect x="${x+w-21}" y="${y-7}" width="17" height="8" fill="#f0a63a" stroke="#b36b0b"/>`+
+      `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#ee931a" stroke="#b36b0b"/><rect x="${x+3}" y="${y+3}" width="${w-6}" height="${h-12}" fill="none" stroke="#c97a10" stroke-width=".7"/><rect x="${x+3}" y="${y+h-8}" width="${w-6}" height="7" fill="#e08a14" stroke="#b36b0b" stroke-width=".6"/>`+ground(x+w+2,y+h-6);
+    case 'ups':return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111"/><path d="M${x+w*.3} ${y}V${y+h}M${x+w*.8} ${y}V${y+h}" stroke="#111" stroke-width=".8"/><rect x="${x+w*.4}" y="${y+h*.1}" width="${w*.3}" height="${h*.1}" fill="#111"/><rect x="${x+w*.38}" y="${y+h*.26}" width="${w*.34}" height="${h*.12}" fill="none" stroke="#111"/>`;
+    case 'display':return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="#fff" stroke="#111"/><rect x="${x+5}" y="${y+5}" width="${w-10}" height="${h*.65}" fill="#fff" stroke="#111"/>`+[0,1,2,3,4].map(i=>`<rect x="${x+10+i*10}" y="${y+h*.8}" width="6" height="5" fill="none" stroke="#111" stroke-width=".6"/>`).join('')+[[3,3],[w-3,3],[3,h-3],[w-3,h-3]].map(c=>`<circle cx="${x+c[0]}" cy="${y+c[1]}" r="1.6" fill="none" stroke="#111" stroke-width=".6"/>`).join('');
+    case 'transceiver':return `<rect x="${x+5}" y="${y-5}" width="${w-10}" height="6" fill="#fff" stroke="#111"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111"/>`+[[3,3],[w-3,3],[3,h-3],[w-3,h-3],[w/2,3],[w/2,h-3]].map(c=>`<circle cx="${x+c[0]}" cy="${y+c[1]}" r="1.3" fill="none" stroke="#111" stroke-width=".6"/>`).join('');
+    case 'buffer':return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="#fff" stroke="#111" stroke-width="1.2"/><rect x="${x+4}" y="${y+4}" width="${w-8}" height="${h-8}" rx="9" fill="none" stroke="#111" stroke-width=".7"/>`+[[8,8],[w-8,8],[8,h-8],[w-8,h-8]].map(c=>`<circle cx="${x+c[0]}" cy="${y+c[1]}" r="1.6" fill="none" stroke="#111" stroke-width=".6"/>`).join('');
+    case 'matchbox':return `<rect x="${x+w/2-5}" y="${y-5}" width="10" height="6" fill="#fff" stroke="#111"/><rect x="${x+w/2-5}" y="${y+h-1}" width="10" height="6" fill="#fff" stroke="#111"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111"/><rect x="${x+4}" y="${y+6}" width="${w-8}" height="${h-12}" rx="3" fill="none" stroke="#111" stroke-width=".8"/>`+[[3,3],[w-3,3],[3,h-3],[w-3,h-3]].map(c=>`<circle cx="${x+c[0]}" cy="${y+c[1]}" r="1.3" fill="none" stroke="#111" stroke-width=".6"/>`).join('');
+    case 'transducer':return `<rect x="${x+w/2-2.5}" y="${y-11}" width="5" height="12" fill="#fff" stroke="#111"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111"/><path d="M${x+2} ${y+h-3}H${x+w-2}" stroke="#111" stroke-width=".7"/>`;
+    default:return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="#111" stroke-width="1.2"/>`;
+  }
+}
+function labelSVG(n){
+  const {x,y,w,h}=bounds(n);const T=TYPES[n.type];const lp=n.lp||T.lp;
+  const nameCol=n.type==='monitor'||n.type==='keyboard'?'#1f7f9a':'#111';
+  const nm=lines(n.name).filter(s=>s!==''||lines(n.name).length>1);
+  let out='';
+  const mk=(txt,px,py,anc,fill,bold)=>`<text x="${r1(px)}" y="${r1(py)}" text-anchor="${anc}" fill="${fill}" font-size="10"${bold?' font-weight="bold"':''}>${esc(txt)}</text>`;
+  const inner=lines(n.text).filter(Boolean);
+  let L=nm.map(s=>({t:s,c:nameCol,b:n.type==='monitor'}));
+  if(n.code)L.push({t:n.code,c:MAG,b:false});
+  if(lp==='above'){L.forEach((o,i)=>out+=mk(o.t,x+w/2,y-5-(L.length-1-i)*12,'middle',o.c,o.b));
+    inner.forEach((s,i)=>out+=mk(s,x+w/2,y+h/2-(inner.length-1)*6+3.5+i*12,'middle',n.type==='monitor'?'#2d6a4a':'#111'));}
+  else if(lp==='below'){L.forEach((o,i)=>out+=mk(o.t,x+w/2,y+h+12+i*12,'middle',o.c,o.b));
+    inner.forEach((s,i)=>out+=mk(s,x+w/2,y+h/2-(inner.length-1)*6+3.5+i*12,'middle','#111'));}
+  else if(lp==='right'||lp==='left'){const px=lp==='right'?x+w+6:x-6,an=lp==='right'?'start':'end';
+    L.forEach((o,i)=>out+=mk(o.t,px,y+h/2-(L.length-1)*6+3.5+i*12,an,o.c,o.b));}
+  else{ // inside
+    const A=[...nm.map(s=>({t:s,c:'#111'})),...inner.map(s=>({t:s,c:'#111'}))];if(n.code)A.push({t:n.code,c:MAG});
+    A.forEach((o,i)=>out+=mk(o.t,x+w/2,y+h/2-(A.length-1)*6+3.5+i*12,'middle',o.c));}
+  return out;
+}
+function nodeSVG(n){
+  if(n.type==='zone'){
+    const {x,y,w,h}=n;const al=n.align==='end';
+    const ls=lines(n.name);
+    return `<g class="zn" data-node="${n.id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#4a4ad0" stroke-width=".9" stroke-dasharray="6 4" style="pointer-events:none"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="transparent" stroke-width="10" style="pointer-events:stroke"/>`+
+      ls.map((s,i)=>`<text x="${al?x+w-8:x+6}" y="${y+14+i*13}" text-anchor="${al?'end':'start'}" fill="${BLUE}" font-size="10.5" style="pointer-events:none">${esc(s)}</text>`).join('')+
+      `<rect x="${al?x+w-8-Math.max(...ls.map(s=>tw(s,10.5)))-2:x+4}" y="${y+3}" width="${Math.max(...ls.map(s=>tw(s,10.5)))+4}" height="${ls.length*13+2}" fill="transparent"/></g>`;
+  }
+  if(n.type==='text'){
+    const b=bounds(n),fs=n.fs||10,ls=lines(n.name);
+    const px=n.align==='middle'?n.x:n.align==='end'?n.x:n.x;const an=n.align||'start';
+    return `<g data-node="${n.id}"><rect x="${b.x-2}" y="${b.y-2}" width="${b.w+4}" height="${b.h+4}" fill="transparent"/>`+
+      ls.map((s,i)=>`<text x="${px}" y="${r1(n.y+fs*(1+i*1.2)-fs*.15)}" text-anchor="${an}" fill="${n.color||'#111'}" font-size="${fs}">${esc(s)}</text>`).join('')+`</g>`;
+  }
+  return `<g data-node="${n.id}">${shape(n)}${labelSVG(n)}</g>`;
+}
+
+/* --- порты, шины, концы кабелей --- */
+function stubLen(n,side){
+  let m=40;
+  doc.ports.forEach(p=>{if(p.node===n.id&&p.side===side&&!idx.linked[p.id])m=Math.max(m,tw(p.cable||'',9)+18);});
+  return m;
+}
+function portsSVG(showDots){
+  let s='';
+  // шины
+  doc.nodes.forEach(n=>{
+    if(!n.bus)return;
+    const ps=doc.ports.filter(p=>p.node===n.id&&p.side==='bottom');if(!ps.length)return;
+    const b=bounds(n),xs=ps.map(p=>b.x+p.pos);
+    s+=`<line x1="${Math.min(b.x,Math.min(...xs)-7)}" x2="${Math.max(b.x+b.w,Math.max(...xs)+7)}" y1="${b.y+b.h}" y2="${b.y+b.h}" stroke="${BLUE}" stroke-width="2.6"/>`;
+  });
+  doc.ports.forEach(p=>{
+    const n=idx.nodes[p.node];if(!n)return;
+    const [ax,ay]=portPos(p),d=SIDES[p.side],c=p.color||BLUE;
+    if(idx.linked[p.id]){
+      if(p.tag){s+=tagSVG(p,ax,ay,d);}
+      return;
+    }
+    const len=p.len>0?p.len:stubLen(n,p.side);
+    const ex=ax+d[0]*len,ey=ay+d[1]*len,vert=d[0]===0;
+    let g=`<g data-node="${n.id}" data-pmove="${p.id}"><line x1="${ax}" y1="${ay}" x2="${ex}" y2="${ey}" stroke="transparent" stroke-width="9"/><line x1="${ax}" y1="${ay}" x2="${ex}" y2="${ey}" stroke="${c}" stroke-width="1"/>`;
+    if(p.dir==='in'||p.dir==='both')g+=arrow(ax,ay,-d[0],-d[1],c);
+    if(p.dir==='out'||p.dir==='both')g+=arrow(ex,ey,d[0],d[1],c);
+    if(vert){
+      if(p.cable)g+=`<text transform="translate(${r1(ax-3)},${r1(ay+d[1]*8)}) rotate(-90)" text-anchor="${d[1]>0?'end':'start'}" fill="${c}" font-size="9">${esc(p.cable)}</text>`;
+      if(p.dest)g+=`<text transform="translate(${r1(ax+3.5)},${r1(ey+d[1]*6)}) rotate(-90)" text-anchor="${d[1]>0?'end':'start'}" fill="#111" font-size="10">${esc(p.dest)}</text>`;
+    }else{
+      if(p.cable)g+=`<text x="${r1(ax+d[0]*8)}" y="${r1(ay-3)}" text-anchor="${d[0]>0?'start':'end'}" fill="${c}" font-size="9">${esc(p.cable)}</text>`;
+      if(p.dest)g+=`<text x="${r1(ex+d[0]*6)}" y="${r1(ey+3.5)}" text-anchor="${d[0]>0?'start':'end'}" fill="#111" font-size="10">${esc(p.dest)}</text>`;
+    }
+    g+=tagSVG(p,ax,ay,d)+'</g>';
+    s+=g;
+  });
+  if(showDots){
+    const nSel=new Set(sel.n);
+    doc.ports.forEach(p=>{
+      if(!idx.nodes[p.node])return;
+      if(!(opt.dots||nSel.has(p.node)))return;
+      const [ax,ay]=portPos(p);
+      s+=`<circle class="pd" data-pdot="${p.id}" cx="${ax}" cy="${ay}" r="${nSel.has(p.node)?3.4:2.4}"/>`;
+    });
+  }
+  return s;
+}
+function tagSVG(p,ax,ay,d){
+  if(!p.tag)return '';
+  if(d[0]===0)return `<text transform="translate(${r1(ax+10)},${r1(ay+d[1]*6)}) rotate(-90)" text-anchor="${d[1]>0?'end':'start'}" fill="#444" font-size="6.5">${esc(p.tag)}</text>`;
+  return `<text x="${r1(ax+d[0]*6)}" y="${r1(ay+8)}" text-anchor="${d[0]>0?'start':'end'}" fill="#444" font-size="6.5">${esc(p.tag)}</text>`;
+}
+
+/* --- связи --- */
+function route(a,sa,b,sb,bend){
+  const da=SIDES[sa],db=SIDES[sb],va=da[0]===0,vb=db[0]===0;let pts;
+  if(va&&vb){
+    let ym;
+    if(sa===sb){const bd=bend==null?30:bend;ym=sa==='bottom'?Math.max(a[1],b[1])+bd:Math.min(a[1],b[1])-bd;}
+    else ym=(a[1]+b[1])/2+(bend||0);
+    pts=[a,[a[0],ym],[b[0],ym],b];
+  }else if(!va&&!vb){
+    let xm;
+    if(sa===sb){const bd=bend==null?30:bend;xm=sa==='right'?Math.max(a[0],b[0])+bd:Math.min(a[0],b[0])-bd;}
+    else xm=(a[0]+b[0])/2+(bend||0);
+    pts=[a,[xm,a[1]],[xm,b[1]],b];
+  }else if(va)pts=[a,[a[0],b[1]],b];
+  else pts=[a,[b[0],a[1]],b];
+  const out=[pts[0]];
+  for(let i=1;i<pts.length;i++){const p=pts[i],q=out[out.length-1];if(Math.abs(p[0]-q[0])<.01&&Math.abs(p[1]-q[1])<.01)continue;out.push(p);}
+  for(let i=1;i<out.length-1;){const a1=out[i-1],b1=out[i],c1=out[i+1];
+    const cr=(b1[0]-a1[0])*(c1[1]-b1[1])-(b1[1]-a1[1])*(c1[0]-b1[0]);
+    if(Math.abs(cr)<.01)out.splice(i,1);else i++;}
+  return out;
+}
+function bendFromPointer(l,wx,wy){
+  const pa=idx.ports[l.from],pb=idx.ports[l.to],a=portPos(pa),b=portPos(pb),sa=pa.side,sb=pb.side;
+  const va=SIDES[sa][0]===0,vb=SIDES[sb][0]===0;
+  if(va&&vb){return r1(sa===sb?(sa==='bottom'?wy-Math.max(a[1],b[1]):Math.min(a[1],b[1])-wy):wy-(a[1]+b[1])/2);}
+  if(!va&&!vb){return r1(sa===sb?(sa==='right'?wx-Math.max(a[0],b[0]):Math.min(a[0],b[0])-wx):wx-(a[0]+b[0])/2);}
+  return null;
+}
+function roundPath(pts,r){
+  let d=`M${r1(pts[0][0])} ${r1(pts[0][1])}`;
+  for(let i=1;i<pts.length-1;i++){
+    const p0=pts[i-1],p1=pts[i],p2=pts[i+1];
+    const l1=Math.hypot(p1[0]-p0[0],p1[1]-p0[1]),l2=Math.hypot(p2[0]-p1[0],p2[1]-p1[1]),rr=Math.min(r,l1/2,l2/2);
+    const a=[p1[0]-(p1[0]-p0[0])/l1*rr,p1[1]-(p1[1]-p0[1])/l1*rr],b=[p1[0]+(p2[0]-p1[0])/l2*rr,p1[1]+(p2[1]-p1[1])/l2*rr];
+    d+=`L${r1(a[0])} ${r1(a[1])}Q${r1(p1[0])} ${r1(p1[1])} ${r1(b[0])} ${r1(b[1])}`;
+  }
+  const e=pts[pts.length-1];return d+`L${r1(e[0])} ${r1(e[1])}`;
+}
+function linkGeom(l){
+  const pa=idx.ports[l.from],pb=idx.ports[l.to];
+  return route(portPos(pa),pa.side,portPos(pb),pb.side,l.bend);
+}
+function linkSVG(l){
+  const pts=linkGeom(l),c=l.color||BLUE,isSel=sel.l===l.id;
+  const d=roundPath(pts,5);
+  let s=`<g data-link="${l.id}">`;
+  if(isSel)s+=`<path d="${d}" fill="none" stroke="#ffb000" stroke-opacity=".45" stroke-width="7"/>`;
+  s+=`<path d="${d}" fill="none" stroke="transparent" stroke-width="10"/><path d="${d}" fill="none" stroke="${c}" stroke-width="1"/>`;
+  const n=pts.length,last=pts[n-1],pre=pts[n-2],first=pts[0],second=pts[1];
+  const u=(p,q)=>{const L=Math.hypot(q[0]-p[0],q[1]-p[1])||1;return [(q[0]-p[0])/L,(q[1]-p[1])/L];};
+  if(l.arrow==='to'||l.arrow==='both'){const v=u(pre,last);s+=arrow(last[0],last[1],v[0],v[1],c);}
+  if(l.arrow==='from'||l.arrow==='both'){const v=u(second,first);s+=arrow(first[0],first[1],v[0],v[1],c);}
+  if(l.label){
+    const need=tw(l.label,9)+8;let pick=-1,best=0,bl=-1;
+    for(let i=0;i<n-1;i++){const len=Math.hypot(pts[i+1][0]-pts[i][0],pts[i+1][1]-pts[i][1]);if(len>=need&&pick<0)pick=i;if(len>bl){bl=len;best=i;}}
+    const i=pick>=0?pick:best,a=pts[i],b=pts[i+1];let mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+    if(l.sub&&i===0&&pick>=0){const L=Math.hypot(b[0]-a[0],b[1]-a[1]),f=(need/2+14)/L;mx=a[0]+(b[0]-a[0])*f;my=a[1]+(b[1]-a[1])*f;}
+    if(Math.abs(a[0]-b[0])<.01)s+=`<text transform="translate(${r1(mx-3)},${r1(my)}) rotate(-90)" text-anchor="middle" fill="${c}" font-size="9">${esc(l.label)}</text>`;
+    else s+=`<text x="${r1(mx)}" y="${r1(my-3)}" text-anchor="middle" fill="${c}" font-size="9">${esc(l.label)}</text>`;
+  }
+  if(l.sub){
+    const v=u(pre,last),e=[last[0]-v[0]*8,last[1]-v[1]*8];
+    if(Math.abs(v[0])<.01)s+=`<text transform="translate(${r1(e[0]-3)},${r1(e[1])}) rotate(-90)" text-anchor="${v[1]>0?'start':'end'}" fill="#111" font-size="7">${esc(l.sub)}</text>`;
+    else s+=`<text x="${r1(e[0])}" y="${r1(e[1]-3)}" text-anchor="${v[0]>0?'end':'start'}" fill="#111" font-size="7">${esc(l.sub)}</text>`;
+  }
+  return s+'</g>';
+}
+
+/* --- выделение --- */
+function selSVG(){
+  let s='';
+  sel.n.forEach(id=>{
+    const n=idx.nodes[id];if(!n)return;const b=bounds(n);
+    s+=`<rect x="${b.x-3}" y="${b.y-3}" width="${b.w+6}" height="${b.h+6}" fill="none" stroke="${'#e0007a'}" stroke-width="1" stroke-dasharray="4 3" pointer-events="none"/>`;
+    if(n.type!=='text'&&sel.n.length===1)s+=`<rect data-rz="${n.id}" x="${b.x+b.w-1}" y="${b.y+b.h-1}" width="8" height="8" fill="#fff" stroke="#e0007a" style="cursor:nwse-resize"/>`;
+  });
+  if(sel.l){
+    const l=doc.links.find(x=>x.id===sel.l);
+    if(l){const pts=linkGeom(l);if(pts.length>=4){const a=pts[1],b=pts[2];s+=`<circle data-bend="${l.id}" cx="${(a[0]+b[0])/2}" cy="${(a[1]+b[1])/2}" r="4.5" fill="#fff" stroke="#e0007a" stroke-width="1.4" style="cursor:move"/>`;}}
+  }
+  return s;
+}
+
+/* --- рамка и штамп --- */
+function wrapText(t,w,fs){
+  const out=[];String(t||'').split('\n').forEach(par=>{let cur='';par.split(/\s+/).forEach(wd=>{const test=cur?cur+' '+wd:wd;if(tw(test,fs)>w&&cur){out.push(cur);cur=wd;}else cur=test;});out.push(cur);});return out;
+}
+function frameSVG(){
+  const m=doc.meta,B='#12a0e6',T='#1b1bd1';
+  const x0=30,x1=1435,y0=68,y1=1060,yt=968;
+  const tx=(t,x,y,fs,fill,an,extra)=>`<text x="${x}" y="${y}" font-size="${fs}" fill="${fill||'#111'}" text-anchor="${an||'start'}" ${extra||''}>${esc(t)}</text>`;
+  let s=`<g fill="none" stroke="${B}" stroke-width="1"><rect x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" stroke-width="6"/>`+
+    `<path d="M${x0} ${yt}H${x1}M488 ${yt}V${y1}M1030 ${yt}V${y1}M1170 ${yt}V${y1}M1170 1040H${x1}M1228 1040V${y1}M1335 1040V${y1}"/>`;
+  const cols=[38,272,38,55,35,35,67],hd=['REV','DESCRIPTION','DRWN','DATE','CHKD','APPRV','DATE'],keys=['rev','desc','drwn','date','chkd','apprv','adate'];
+  let cx=490;const cxs=[];cols.forEach(w=>{cxs.push(cx);cx+=w;});
+  s+=`<path d="M490 983H1030`;
+  const rows=m.revs||[];const rh=Math.min(14.5,(y1-983)/Math.max(1,rows.length));
+  for(let i=1;i<=rows.length;i++)s+=`M490 ${r1(983+i*rh)}H1030`;
+  cxs.slice(1).forEach(x=>s+=`M${x} ${yt}V${y1}`);
+  s+=`"/></g>`;
+  hd.forEach((h,i)=>s+=tx(h,cxs[i]+cols[i]/2,978.5,7,T,'middle'));
+  rows.forEach((r,ri)=>keys.forEach((k,i)=>{if(r[k])s+=tx(r[k],cxs[i]+cols[i]/2,r1(983+ri*rh+rh/2+2.5),7,'#111','middle');}));
+  // notes
+  s+=tx('NOTES:',40,976,7);
+  wrapText(m.notes,444,6.8).forEach((l,i)=>s+=tx(l,40,r1(984+i*8.4),6.8));
+  // company
+  const cl=lines(m.company);
+  s+=tx('AMI',1103,994,25,T,'middle','font-style="italic" font-weight="bold"');
+  s+=tx(cl[0]||'',1101,1007,9.5,'#111','middle');
+  cl.slice(1).forEach((l,i)=>s+=tx(l,1101,r1(1017+i*7.3),5.2,'#111','middle'));
+  // title
+  s+=tx('DRAWING TITLE',1303,979,7,T,'middle');
+  lines(m.title).forEach((l,i)=>s+=tx(l,1303,r1(996+i*15),11.5,'#222','middle'));
+  s+=tx('SIZE:',1178,1053,8.5,'#111','start')+tx(m.size||'',1203,1053,9.5)+tx('PROJECT NO:',1233,1053,8,T)+tx(m.project||'',1287,1053,8.5)+tx('DRAWING NO:',1339,1053,8,T)+tx(m.drawingNo||'',1428,1053,9.5,'#111','end');
+  const fs=Math.min(7,1395/tw(m.footer||' ',1));
+  s+=tx(m.footer,732,1071,fs,'#111','middle');
+  return s;
+}
+
+/* ================= рендер всего ================= */
+function renderScene(){
+  reindex();
+  G.frame.innerHTML=doc.frame?frameSVG():'';
+  G.zones.innerHTML=doc.nodes.filter(n=>n.type==='zone').map(nodeSVG).join('');
+  G.links.innerHTML=doc.links.map(linkSVG).join('');
+  G.nodes.innerHTML=doc.nodes.filter(n=>n.type!=='zone').map(nodeSVG).join('');
+  G.ports.innerHTML=portsSVG(true);
+  G.sel.innerHTML=selSVG();
+  $('#gridRect').style.display=opt.snap?'':'none';
+}
+function renderAll(){renderScene();renderProps();updateHint();}
+function applyView(){world.setAttribute('transform',`translate(${view.x} ${view.y}) scale(${view.k})`);}
+function toWorld(cx,cy){const r=svg.getBoundingClientRect();return [(cx-r.left-view.x)/view.k,(cy-r.top-view.y)/view.k];}
+function fit(){
+  const r=svg.getBoundingClientRect();
+  const k=Math.min(r.width/SHEET.w,r.height/SHEET.h)*.97;
+  view.k=k;view.x=(r.width-SHEET.w*k)/2;view.y=(r.height-SHEET.h*k)/2;applyView();
+}
+function zoomAt(cx,cy,f){
+  const r=svg.getBoundingClientRect(),px=cx-r.left,py=cy-r.top;
+  const nk=Math.max(.1,Math.min(8,view.k*f));
+  view.x=px-(px-view.x)*(nk/view.k);view.y=py-(py-view.y)*(nk/view.k);view.k=nk;applyView();
+}
+function updateHint(){
+  $('#hint').textContent=sel.n.length>1?`Выбрано блоков: ${sel.n.length}`:'Тяните блок • потяните от точки порта к другому порту, чтобы соединить • двойной щелчок по блоку — новый порт • колесо — масштаб';
+}
+
+/* ================= панель палитры ================= */
+function buildPalette(){
+  let h='<h3>Добавить блок</h3>';
+  Object.keys(TYPES).forEach(t=>h+=`<button class="pal" draggable="true" data-add="${t}"><span class="sw" style="background:${TYPES[t].sw}"></span>${esc(TYPES[t].name)}</button>`);
+  h+='<h3>Подсказки</h3><div class="kbd"><b>Del</b> — удалить<br><b>Ctrl+Z / Y</b> — отмена / возврат<br><b>Ctrl+D</b> — дублировать<br><b>Стрелки</b> — сдвиг<br><b>Shift</b>+клик — несколько блоков<br><b>Пробел</b>+тяни — двигать лист<br>Любая схема сохраняется в браузере автоматически. Для передачи другим — «🔗 Ссылка» или «⬇ JSON».</div>';
+  $('#palette').innerHTML=h;
+}
+function addNode(type,wx,wy){
+  const T=TYPES[type];
+  const n={id:nid('n'),type,x:0,y:0,w:T.w,h:T.h,name:T.name,code:'',text:'',lp:T.lp,bus:!!T.bus};
+  if(type==='text'){n.name='Текст';n.fs=10;n.align='start';n.color='#111111';}
+  if(type==='zone'){n.name='ЗОНА';}
+  if(type==='monitor'||type==='keyboard'||type==='pc')n.name=type==='pc'?'':T.name;
+  const sn=v=>opt.snap?Math.round(v/5)*5:v;
+  n.x=sn(wx-(type==='text'?0:T.w/2));n.y=sn(wy-(type==='text'?0:T.h/2));
+  doc.nodes.push(n);reindex();sel={n:[n.id],l:null};renderAll();commitNow();
+}
+function viewCenter(){const r=svg.getBoundingClientRect();return toWorld(r.left+r.width/2,r.top+r.height/2);}
+
+/* ================= панель свойств ================= */
+const inp=(k,v,type,extra)=>`<input data-k="${k}" type="${type||'text'}" value="${esc(v)}" ${type==='number'?'data-num="1" step="any"':''} ${extra||''}>`;
+const area=(k,v,rows)=>`<textarea data-k="${k}" rows="${rows||3}">${esc(v)}</textarea>`;
+const selOpt=(k,v,opts)=>`<select data-k="${k}">${opts.map(o=>`<option value="${esc(o[0])}"${String(o[0])===String(v)?' selected':''}>${esc(o[1])}</option>`).join('')}</select>`;
+const colorOpts=c=>{const a=COLORS.slice();if(!a.find(x=>x[0].toLowerCase()===String(c).toLowerCase()))a.push([c,c]);return a;};
+function renderProps(){
+  const el=$('#props');let h='';
+  if(sel.l){
+    const l=doc.links.find(x=>x.id===sel.l);
+    if(l){
+      h+=`<h3>Кабель (связь)</h3><label class="f">Маркировка кабеля</label>${inp(`link:${l.id}:label`,l.label)}
+      <label class="f">Подпись у конца (тип, длина)</label>${inp(`link:${l.id}:sub`,l.sub)}
+      <div class="row"><div><label class="f">Цвет</label>${selOpt(`link:${l.id}:color`,l.color,colorOpts(l.color))}</div>
+      <div><label class="f">Стрелки</label>${selOpt(`link:${l.id}:arrow`,l.arrow,[['none','нет'],['to','на конце'],['from','в начале'],['both','обе']])}</div></div>
+      <label class="f">Изгиб (смещение, пусть пусто = авто) — можно тянуть кружок на схеме</label>${inp(`link:${l.id}:bend`,l.bend==null?'':l.bend,'number')}
+      <div class="btns"><button data-act="swap">⇄ Развернуть</button><button class="danger" data-act="dellink">Удалить связь</button></div>`;
+    }
+  }else if(sel.n.length===1){
+    const n=idx.nodes[sel.n[0]],T=TYPES[n.type];
+    h+=`<h3>${esc(T.name)}</h3>`;
+    h+=`<label class="f">${n.type==='text'?'Текст':'Название'} (каждая строка — с новой строки)</label>${area(`node:${n.id}:name`,n.name,3)}`;
+    if(n.type!=='text'&&n.type!=='zone'){
+      h+=`<div class="row"><div><label class="f">Код (розовый)</label>${inp(`node:${n.id}:code`,n.code)}</div>
+      <div><label class="f">Подпись</label>${selOpt(`node:${n.id}:lp`,n.lp||T.lp,[['above','сверху'],['below','снизу'],['right','справа'],['left','слева'],['inside','внутри']])}</div></div>
+      <label class="f">Текст внутри блока</label>${area(`node:${n.id}:text`,n.text,2)}`;
+    }
+    if(n.type==='text'){
+      h+=`<div class="row"><div><label class="f">Размер</label>${inp(`node:${n.id}:fs`,n.fs||10,'number')}</div>
+      <div><label class="f">Выравнивание</label>${selOpt(`node:${n.id}:align`,n.align||'start',[['start','слева'],['middle','по центру'],['end','справа']])}</div>
+      <div><label class="f">Цвет</label>${selOpt(`node:${n.id}:color`,n.color||'#111111',[['#111111','чёрный'],[BLUE,'синий'],[RED,'красный'],[MAG,'розовый']])}</div></div>`;
+    }
+    if(n.type==='zone')h+=`<label class="f">Подпись</label>${selOpt(`node:${n.id}:align`,n.align||'start',[['start','слева'],['end','справа']])}`;
+    h+=`<div class="row"><div><label class="f">X</label>${inp(`node:${n.id}:x`,r1(n.x),'number')}</div><div><label class="f">Y</label>${inp(`node:${n.id}:y`,r1(n.y),'number')}</div>`+
+      (n.type!=='text'?`<div><label class="f">Ширина</label>${inp(`node:${n.id}:w`,r1(n.w),'number')}</div><div><label class="f">Высота</label>${inp(`node:${n.id}:h`,r1(n.h),'number')}</div>`:'')+`</div>`;
+    h+=`<div class="btns"><button data-act="dup">⧉ Дублировать</button><button class="danger" data-act="del">Удалить</button></div>`;
+    if(n.type!=='text'&&n.type!=='zone'){
+      h+=`<h3>Порты (концы кабелей)</h3><label class="f"><input type="checkbox" data-k="node:${n.id}:bus" ${n.bus?'checked':''}> шина (синяя линия вдоль нижних портов)</label>`;
+      doc.ports.filter(p=>p.node===n.id).forEach(p=>{
+        const lk=idx.linked[p.id];
+        h+=`<div class="port"><div class="row">${selOpt(`port:${p.id}:side`,p.side,Object.keys(SIDE_RU).map(k=>[k,SIDE_RU[k]]))}${inp(`port:${p.id}:pos`,p.pos,'number')}<button class="danger" data-delport="${p.id}" style="flex:0 0 32px">✕</button></div>
+        <div class="row">${inp(`port:${p.id}:cable`,p.cable,'text','placeholder="маркировка кабеля"')}</div>
+        ${lk?'<small>соединён с другим портом (кабель — в «связи»)</small>':`<div class="row">${inp(`port:${p.id}:dest`,p.dest,'text','placeholder="куда идёт"')}</div>`}
+        <div class="row">${selOpt(`port:${p.id}:color`,p.color,colorOpts(p.color))}${selOpt(`port:${p.id}:dir`,p.dir,[['none','без стрелки'],['in','вход ▸'],['out','выход ▸'],['both','оба']])}</div>
+        <div class="row">${inp(`port:${p.id}:tag`,p.tag,'text','placeholder="мелкая пометка"')}${lk?'':inp(`port:${p.id}:len`,p.len||'','number','placeholder="длина"')}</div></div>`;
+      });
+      h+=`<div class="btns"><button data-act="addport">＋ Порт</button></div>`;
+    }
+  }else if(sel.n.length>1){
+    h+=`<h3>Выбрано: ${sel.n.length}</h3><div class="btns"><button data-act="dup">⧉ Дублировать</button><button class="danger" data-act="del">Удалить</button></div><div class="kbd">Перетаскивайте — сдвинутся все выбранные.</div>`;
+  }else{
+    const m=doc.meta;
+    h+=`<h3>Лист / штамп</h3>
+    <label class="f">Название чертежа (по строкам)</label>${area('meta:_:title',m.title,3)}
+    <div class="row"><div><label class="f">Формат</label>${inp('meta:_:size',m.size)}</div><div><label class="f">№ проекта</label>${inp('meta:_:project',m.project)}</div><div><label class="f">№ чертежа</label>${inp('meta:_:drawingNo',m.drawingNo)}</div></div>
+    <label class="f">Примечания (NOTES)</label>${area('meta:_:notes',m.notes,6)}
+    <label class="f">Блок компании (1-я строка крупно)</label>${area('meta:_:company',m.company,4)}
+    <label class="f">Нижний текст</label>${area('meta:_:footer',m.footer,3)}
+    <h3>Таблица ревизий</h3><table class="rev"><tr>${['REV','Описание','Чер.','Дата','Пров.','Утв.','Дата'].map(s=>`<td><small>${s}</small></td>`).join('')}</tr>`+
+    m.revs.map((r,i)=>`<tr>${['rev','desc','drwn','date','chkd','apprv','adate'].map(k=>`<td>${inp(`rev:${i}:${k}`,r[k])}</td>`).join('')}</tr>`).join('')+
+    `</table><div class="btns"><button data-act="addrev">＋ Строка</button><button data-act="delrev">− Строка</button></div>`;
+  }
+  el.innerHTML=h;
+}
+function setProp(kind,id,key,v){
+  if(kind==='node'){const n=idx.nodes[id];if(!n)return;
+    if(key==='bus')n.bus=!!v;else n[key]=v;
+    if((key==='w'||key==='h')&&!(v>=5))n[key]=5;}
+  else if(kind==='port'){const p=idx.ports[id];if(!p)return;p[key]=key==='len'?(v||0):v;}
+  else if(kind==='link'){const l=doc.links.find(x=>x.id===id);if(!l)return;if(key==='bend')l.bend=(v===''||isNaN(v))?null:v;else l[key]=v;}
+  else if(kind==='meta'){doc.meta[id==='_'?key:id]=v;}
+  else if(kind==='rev'){doc.meta.revs[+id][key]=v;}
+}
+$('#props').addEventListener('input',e=>{
+  const el=e.target,k=el.dataset.k;if(!k)return;
+  const [kind,id,key]=k.split(':');
+  let v=el.type==='checkbox'?el.checked:el.value;
+  if(el.dataset.num!=null){if(v===''&&!(kind==='link'&&key==='bend')&&key!=='len'){return;}v=v===''?'':parseFloat(v);if(v!==''&&isNaN(v))return;}
+  setProp(kind,id,key,v);renderScene();commit();
+});
+$('#props').addEventListener('change',e=>{if(e.target.dataset.k&&e.target.dataset.k.startsWith('port:')&&/:(side)$/.test(e.target.dataset.k))renderProps();});
+$('#props').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.delport){doc.ports=doc.ports.filter(p=>p.id!==b.dataset.delport);reindex();renderAll();commitNow();return;}
+  const a=b.dataset.act;if(!a)return;
+  if(a==='del')delSel();else if(a==='dup')dupSel();
+  else if(a==='addport'){addPort(sel.n[0]);}
+  else if(a==='dellink'){doc.links=doc.links.filter(l=>l.id!==sel.l);sel.l=null;reindex();renderAll();commitNow();}
+  else if(a==='swap'){const l=doc.links.find(x=>x.id===sel.l);if(l){[l.from,l.to]=[l.to,l.from];if(l.arrow==='to')l.arrow='from';else if(l.arrow==='from')l.arrow='to';renderAll();commitNow();}}
+  else if(a==='addrev'){doc.meta.revs.push({rev:'',desc:'',drwn:'',date:'',chkd:'',apprv:'',adate:''});renderAll();commitNow();}
+  else if(a==='delrev'){doc.meta.revs.pop();renderAll();commitNow();}
+});
+function addPort(nodeId,side,pos){
+  const n=idx.nodes[nodeId];if(!n)return;
+  if(!side){side='bottom';const xs=doc.ports.filter(p=>p.node===nodeId&&p.side==='bottom').map(p=>p.pos);pos=xs.length?Math.max(...xs)+12:12;}
+  const p={id:nid('p'),node:nodeId,side,pos:r1(pos),cable:'',dest:'NEW',color:BLUE,dir:'none',tag:'',len:0};
+  doc.ports.push(p);reindex();renderAll();commitNow();return p;
+}
+
+/* ================= удаление / дублирование ================= */
+function delSel(){
+  if(sel.l){doc.links=doc.links.filter(l=>l.id!==sel.l);sel.l=null;}
+  if(sel.n.length){
+    const S=new Set(sel.n);
+    doc.ports=doc.ports.filter(p=>!S.has(p.node));doc.nodes=doc.nodes.filter(n=>!S.has(n.id));sel.n=[];
+  }
+  reindex();renderAll();commitNow();
+}
+function dupSel(){
+  if(!sel.n.length)return;
+  const S=new Set(sel.n),map={},pm={},newIds=[];
+  doc.nodes.filter(n=>S.has(n.id)).forEach(n=>{const c=clone(n);c.id=nid('n');c.x+=20;c.y+=20;map[n.id]=c.id;doc.nodes.push(c);newIds.push(c.id);});
+  doc.ports.filter(p=>S.has(p.node)).forEach(p=>{const c=clone(p);c.id=nid('p');c.node=map[p.node];pm[p.id]=c.id;doc.ports.push(c);});
+  doc.links.slice().forEach(l=>{if(pm[l.from]&&pm[l.to]){const c=clone(l);c.id=nid('l');c.from=pm[l.from];c.to=pm[l.to];doc.links.push(c);}});
+  reindex();sel={n:newIds,l:null};renderAll();commitNow();
+}
+
+/* ================= взаимодействие ================= */
+const pointers=new Map();let st={mode:null};let spaceDown=false;
+const snapV=(v,g)=>opt.snap?Math.round(v/g)*g:v;
+function setSel(n,l){sel={n:n||[],l:l||null};renderAll();}
+svg.addEventListener('pointerdown',e=>{
+  svg.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){
+    const [a,b]=[...pointers.values()];st={mode:'pinch',d:Math.hypot(a.x-b.x,a.y-b.y),cx:(a.x+b.x)/2,cy:(a.y+b.y)/2};return;
+  }
+  if(pointers.size>2)return;
+  const [wx,wy]=toWorld(e.clientX,e.clientY);
+  const T=e.target.closest('[data-pdot],[data-rz],[data-bend],[data-pmove],[data-node],[data-link]');
+  st={mode:null,sx:e.clientX,sy:e.clientY,wx,wy,moved:false,vx:view.x,vy:view.y};
+  if(e.button===1||spaceDown){st.mode='pan';return;}
+  if(T&&T.dataset.pdot){
+    const p=idx.ports[T.dataset.pdot];if(!sel.n.includes(p.node)||sel.n.length!==1)setSel([p.node],null);
+    st.mode='link';st.port=p.id;return;
+  }
+  if(T&&T.dataset.rz){const n=idx.nodes[T.dataset.rz];st.mode='resize';st.id=n.id;st.w0=n.w;st.h0=n.h;return;}
+  if(T&&T.dataset.bend){st.mode='bend';st.id=T.dataset.bend;return;}
+  if(T&&T.dataset.pmove){
+    const p=idx.ports[T.dataset.pmove];
+    if(!(sel.n.length===1&&sel.n[0]===p.node))setSel([p.node],null);
+    st.mode='pmove';st.id=p.id;return;
+  }
+  if(T&&T.dataset.node){
+    const id=T.dataset.node;
+    if(e.shiftKey){sel.l=null;sel.n=sel.n.includes(id)?sel.n.filter(x=>x!==id):[...sel.n,id];renderAll();}
+    else if(!sel.n.includes(id)){setSel([id],null);}
+    else if(sel.l){sel.l=null;renderAll();}
+    st.mode='drag';st.id=id;st.collapse=!e.shiftKey&&sel.n.length>1;
+    st.starts=sel.n.map(i=>({id:i,x:idx.nodes[i].x,y:idx.nodes[i].y}));return;
+  }
+  if(T&&T.dataset.link){setSel([],T.dataset.link);return;}
+  // фон
+  if(e.shiftKey||opt.marq){st.mode='marq';st.add=e.shiftKey;return;}
+  st.mode='pan';st.bg=true;
+});
+svg.addEventListener('pointermove',e=>{
+  if(pointers.has(e.pointerId))pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(st.mode==='pinch'&&pointers.size>=2){
+    const [a,b]=[...pointers.values()];const d=Math.hypot(a.x-b.x,a.y-b.y),cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;
+    const r=svg.getBoundingClientRect();
+    view.x+=cx-st.cx;view.y+=cy-st.cy;st.cx=cx;st.cy=cy;
+    if(st.d>0)zoomAt(cx,cy,d/st.d);st.d=d;applyView();return;
+  }
+  if(!st.mode)return;
+  const dxs=e.clientX-st.sx,dys=e.clientY-st.sy;
+  if(!st.moved&&Math.hypot(dxs,dys)<3)return;
+  st.moved=true;
+  const [wx,wy]=toWorld(e.clientX,e.clientY);
+  if(st.mode==='pan'){view.x=st.vx+dxs;view.y=st.vy+dys;applyView();}
+  else if(st.mode==='drag'){
+    let dx=wx-st.wx,dy=wy-st.wy;const p0=st.starts[0];
+    const first=st.starts.find(s=>s.id===st.id)||p0;
+    dx=snapV(first.x+dx,5)-first.x;dy=snapV(first.y+dy,5)-first.y;
+    st.starts.forEach(s=>{const n=idx.nodes[s.id];n.x=r1(s.x+dx);n.y=r1(s.y+dy);});
+    sched();
+  }
+  else if(st.mode==='resize'){const n=idx.nodes[st.id];n.w=Math.max(10,snapV(st.w0+wx-st.wx,5));n.h=Math.max(8,snapV(st.h0+wy-st.wy,5));sched();}
+  else if(st.mode==='bend'){const l=doc.links.find(x=>x.id===st.id);const b=bendFromPointer(l,wx,wy);if(b!=null)l.bend=snapV(b,1);sched();}
+  else if(st.mode==='pmove'){
+    const p=idx.ports[st.id],n=idx.nodes[p.node],b=bounds(n);
+    p.pos=r1(snapV((p.side==='top'||p.side==='bottom')?wx-b.x:wy-b.y,.5));sched();
+  }
+  else if(st.mode==='link'){
+    const p=idx.ports[st.port],[ax,ay]=portPos(p);
+    G.temp.innerHTML=`<line x1="${ax}" y1="${ay}" x2="${wx}" y2="${wy}" stroke="#e0007a" stroke-width="1.4" stroke-dasharray="4 3" pointer-events="none"/>`;
+  }
+  else if(st.mode==='marq'){
+    const x=Math.min(st.wx,wx),y=Math.min(st.wy,wy),w=Math.abs(wx-st.wx),h=Math.abs(wy-st.wy);
+    G.temp.innerHTML=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="rgba(224,0,122,.08)" stroke="#e0007a" stroke-dasharray="4 3" pointer-events="none"/>`;
+    st.rect=[x,y,w,h];
+  }
+});
+let raf=0;function sched(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;renderScene();});}
+function endPtr(e){
+  pointers.delete(e.pointerId);
+  if(st.mode==='pinch'){if(pointers.size<2){st={mode:null};}return;}
+  const m=st.mode;G.temp.innerHTML='';
+  if(m==='drag'){
+    if(!st.moved&&st.collapse)setSel([st.id],null);
+    else if(st.moved){renderAll();commitNow();}
+  }else if(m==='resize'||m==='bend'||m==='pmove'){if(st.moved){renderAll();commitNow();}}
+  else if(m==='pan'&&st.bg&&!st.moved){setSel([],null);}
+  else if(m==='pan'&&st.moved){try{localStorage.setItem(KEY,JSON.stringify({doc,view}));}catch(_){}}
+  else if(m==='marq'){
+    if(st.rect){const [x,y,w,h]=st.rect;const ids=doc.nodes.filter(n=>{const b=bounds(n);return b.x>=x&&b.y>=y&&b.x+b.w<=x+w&&b.y+b.h<=y+h;}).map(n=>n.id);
+      setSel(st.add?[...new Set([...sel.n,...ids])]:ids,null);}
+    else if(!st.add)setSel([],null);
+  }
+  else if(m==='link'&&st.moved){
+    const t=document.elementFromPoint(e.clientX,e.clientY);
+    const dot=t&&t.closest&&t.closest('[data-pdot]');const nd=t&&t.closest&&t.closest('[data-node]');
+    const from=idx.ports[st.port];
+    let to=null;
+    if(dot&&dot.dataset.pdot!==st.port)to=idx.ports[dot.dataset.pdot];
+    else if(!dot&&nd&&nd.dataset.node){
+      const n=idx.nodes[nd.dataset.node];
+      if(n&&n.type!=='text'&&n.type!=='zone'&&n.id!==from.node){
+        const [wx,wy]=toWorld(e.clientX,e.clientY),b=bounds(n);
+        const d={top:Math.abs(wy-b.y),bottom:Math.abs(wy-b.y-b.h),left:Math.abs(wx-b.x),right:Math.abs(wx-b.x-b.w)};
+        const side=Object.keys(d).sort((a,c)=>d[a]-d[c])[0];
+        const pos=(side==='top'||side==='bottom')?wx-b.x:wy-b.y;
+        to={id:nid('p'),node:n.id,side,pos:r1(snapV(Math.max(0,pos),1)),cable:'',dest:'',color:from.color,dir:'none',tag:'',len:0};
+        doc.ports.push(to);
+      }
+    }
+    if(to&&to.node!==from.node){
+      const l={id:nid('l'),from:from.id,to:to.id,label:from.cable||to.cable||'',sub:'',color:from.color||BLUE,arrow:'none',bend:null};
+      doc.links.push(l);reindex();setSel([],l.id);commitNow();
+    }else renderAll();
+  }
+  st={mode:null};
+}
+svg.addEventListener('pointerup',endPtr);svg.addEventListener('pointercancel',endPtr);
+svg.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.clientX,e.clientY,Math.exp(-e.deltaY*(e.ctrlKey?.01:.0016)));},{passive:false});
+svg.addEventListener('dblclick',e=>{
+  const t=document.elementFromPoint(e.clientX,e.clientY),nd=t&&t.closest&&t.closest('[data-node]');
+  if(!nd||nd.dataset.pmove)return;
+  const n=idx.nodes[nd.dataset.node];if(!n)return;
+  if(n.type==='text'||n.type==='zone'){setSel([n.id],null);const ta=$('#props textarea');if(ta)ta.focus();return;}
+  const [wx,wy]=toWorld(e.clientX,e.clientY),b=bounds(n);
+  const d={top:Math.abs(wy-b.y),bottom:Math.abs(wy-b.y-b.h),left:Math.abs(wx-b.x),right:Math.abs(wx-b.x-b.w)};
+  const side=Object.keys(d).sort((a,c)=>d[a]-d[c])[0];
+  const pos=(side==='top'||side==='bottom')?wx-b.x:wy-b.y;
+  sel={n:[n.id],l:null};addPort(n.id,side,snapV(pos,1));
+});
+/* drag&drop из палитры + клик */
+$('#palette').addEventListener('click',e=>{const b=e.target.closest('[data-add]');if(!b)return;const [x,y]=viewCenter();addNode(b.dataset.add,x,y);$('#palette').classList.remove('open');});
+$('#palette').addEventListener('dragstart',e=>{const b=e.target.closest('[data-add]');if(b)e.dataTransfer.setData('text/plain',b.dataset.add);});
+svg.addEventListener('dragover',e=>e.preventDefault());
+svg.addEventListener('drop',e=>{e.preventDefault();const t=e.dataTransfer.getData('text/plain');if(TYPES[t]){const [x,y]=toWorld(e.clientX,e.clientY);addNode(t,x,y);}});
+/* клавиатура */
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){spaceDown=true;e.preventDefault();}
+  if(/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  const ctrl=e.ctrlKey||e.metaKey;
+  if(e.key==='Delete'||e.key==='Backspace'){if(sel.n.length||sel.l){delSel();e.preventDefault();}}
+  else if(ctrl&&e.key.toLowerCase()==='z'){e.shiftKey?redo():undo();e.preventDefault();}
+  else if(ctrl&&e.key.toLowerCase()==='y'){redo();e.preventDefault();}
+  else if(ctrl&&e.key.toLowerCase()==='d'){dupSel();e.preventDefault();}
+  else if(ctrl&&e.key.toLowerCase()==='a'){setSel(doc.nodes.map(n=>n.id),null);e.preventDefault();}
+  else if(e.key==='Escape'){setSel([],null);}
+  else if(e.key.startsWith('Arrow')&&sel.n.length){
+    const s=e.shiftKey?10:1,dx=e.key==='ArrowLeft'?-s:e.key==='ArrowRight'?s:0,dy=e.key==='ArrowUp'?-s:e.key==='ArrowDown'?s:0;
+    sel.n.forEach(id=>{const n=idx.nodes[id];n.x+=dx;n.y+=dy;});renderAll();commit();e.preventDefault();
+  }
+});
+window.addEventListener('keyup',e=>{if(e.code==='Space')spaceDown=false;});
+
+/* ================= кнопки панели инструментов ================= */
+$('#bUndo').onclick=undo;$('#bRedo').onclick=redo;
+$('#bZp').onclick=()=>{const r=svg.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,1.25);};
+$('#bZm').onclick=()=>{const r=svg.getBoundingClientRect();zoomAt(r.left+r.width/2,r.top+r.height/2,.8);};
+$('#bFit').onclick=fit;
+$('#bSnap').onclick=e=>{opt.snap=!opt.snap;e.currentTarget.classList.toggle('on',opt.snap);renderScene();};
+$('#bDots').onclick=e=>{opt.dots=!opt.dots;e.currentTarget.classList.toggle('on',opt.dots);renderScene();};
+$('#bMarq').onclick=e=>{opt.marq=!opt.marq;e.currentTarget.classList.toggle('on',opt.marq);};
+$('#bFrame').onclick=e=>{doc.frame=!doc.frame;e.currentTarget.classList.toggle('on',doc.frame);renderScene();commitNow();};
+$('#bPal').onclick=()=>{$('#palette').classList.toggle('open');$('#props').classList.remove('open');};
+$('#bProps').onclick=()=>{$('#props').classList.toggle('open');$('#palette').classList.remove('open');};
+$('#bReset').onclick=()=>{if(confirm('Вернуть исходную схему? Все ваши изменения будут потеряны (если не сохранили в JSON).')){doc=buildDefault();hist=[];hi=-1;sel={n:[],l:null};reindex();renderAll();commitNow();fit();}};
+
+function download(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+$('#bJson').onclick=()=>download('cable-scheme.json',new Blob([JSON.stringify(doc,null,1)],{type:'application/json'}));
+$('#bLoad').onclick=()=>$('#file').click();
+$('#file').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!Array.isArray(d.nodes)||!Array.isArray(d.ports)||!Array.isArray(d.links))throw 0;
+    doc=d;doc.meta=doc.meta||buildDefault().meta;doc.seq=doc.seq||1000;if(doc.frame==null)doc.frame=true;
+    hist=[];hi=-1;sel={n:[],l:null};reindex();renderAll();commitNow();fit();toast('Схема загружена');}catch(_){toast('Не удалось прочитать файл');}};
+  r.readAsText(f);e.target.value='';
+};
+function exportSVG(){
+  reindex();
+  let vb;
+  if(doc.frame)vb=[0,0,SHEET.w,SHEET.h];
+  else{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;doc.nodes.forEach(n=>{const b=bounds(n);x0=Math.min(x0,b.x);y0=Math.min(y0,b.y-40);x1=Math.max(x1,b.x+b.w);y1=Math.max(y1,b.y+b.h+200);});vb=[x0-20,y0-20,x1-x0+40,y1-y0+40];}
+  const body=(doc.frame?frameSVG():'')+doc.nodes.filter(n=>n.type==='zone').map(nodeSVG).join('')+doc.links.map(linkSVG).join('')+doc.nodes.filter(n=>n.type!=='zone').map(nodeSVG).join('')+portsSVG(false);
+  return {svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb.join(' ')}" width="${vb[2]*2}" height="${vb[3]*2}"><rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="#fff"/><g font-family='${FONT.replace(/"/g,"&quot;")}'>${body}</g></svg>`,w:vb[2]*3,h:vb[3]*3};
+}
+$('#bSvg').onclick=()=>download('cable-scheme.svg',new Blob([exportSVG().svg],{type:'image/svg+xml'}));
+$('#bPng').onclick=()=>{
+  const o=exportSVG(),img=new Image();
+  img.onload=()=>{const c=document.createElement('canvas');c.width=o.w;c.height=o.h;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);c.toBlob(b=>download('cable-scheme.png',b),'image/png');};
+  img.onerror=()=>toast('Не удалось создать PNG');
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(o.svg);
+};
+/* ссылка со схемой внутри */
+const b64u=buf=>{let s='';const u=new Uint8Array(buf);for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');};
+const unb64u=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;};
+async function pack(o){const cs=new CompressionStream('deflate-raw'),w=cs.writable.getWriter();w.write(new TextEncoder().encode(JSON.stringify(o)));w.close();return b64u(await new Response(cs.readable).arrayBuffer());}
+async function unpack(s){const ds=new DecompressionStream('deflate-raw'),w=ds.writable.getWriter();w.write(unb64u(s));w.close();return JSON.parse(new TextDecoder().decode(await new Response(ds.readable).arrayBuffer()));}
+$('#bShare').onclick=async()=>{
+  try{
+    clearTimeout(ct);commitNow();
+    const url=location.href.split('#')[0]+'#d='+await pack(doc);
+    try{await navigator.clipboard.writeText(url);toast('Ссылка скопирована ('+Math.round(url.length/1024)+' КБ)');}catch(_){prompt('Скопируйте ссылку:',url);}
+    history.replaceState(null,'',url);
+  }catch(_){toast('Ваш браузер не поддерживает сжатие ссылки — используйте «⬇ JSON»');}
+};
+
+/* ================= запуск ================= */
+async function boot(){
+  buildPalette();
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'null');}catch(_){}
+  if(saved&&saved.doc&&Array.isArray(saved.doc.nodes)){doc=saved.doc;if(saved.view)view=saved.view;}
+  else doc=buildDefault();
+  if(location.hash.startsWith('#d=')){
+    try{
+      const d=await unpack(location.hash.slice(3));
+      if(d&&Array.isArray(d.nodes)){
+        if(!saved||confirm('Открыть схему из ссылки? Ваша сохранённая в этом браузере версия будет заменена (можно предварительно сохранить её через «⬇ JSON»).')){doc=d;saved=null;view={x:0,y:0,k:1};}
+      }
+    }catch(_){toast('Ссылка повреждена');}
+  }
+  doc.frame=doc.frame!==false;$('#bFrame').classList.toggle('on',doc.frame);
+  reindex();renderAll();commitNow();
+  if(saved&&view&&view.k)applyView();else{view={x:0,y:0,k:1};fit();}
+}
+window.addEventListener('resize',()=>{});
+window.__ed={get doc(){return doc;},get sel(){return sel;},fit,addNode};
+boot();
+})();
+</script>
+</body>
+</html>
