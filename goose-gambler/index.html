@@ -201,6 +201,17 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;left:30%;right:30%
 .stepper b{min-width:34px;text-align:center;font-size:20px}
 .stepper button{width:36px;height:36px;border-radius:11px;background:var(--card2);font-weight:900;font-size:18px}
 .empty{color:var(--dim);font-size:13px;text-align:center;padding:8px 0}
+.kp{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:8px}
+.kp.few{grid-template-columns:repeat(3,1fr)}
+.kp.num{grid-template-columns:repeat(3,1fr)}
+.kp button{background:var(--card2);border-radius:13px;padding:14px 0;font-size:21px;font-weight:900;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.kp button:active{background:var(--gold);color:#241a02;transform:scale(.95)}
+.kp button.max{background:#1b4a33;color:#b9f5d4}.kp button.min{background:#57202f;color:#ffc4cf}
+.bigq{font-size:30px;font-weight:900;text-align:center;margin:4px 0;color:var(--gold)}
+.diceDisp{font-size:44px;font-weight:900;text-align:center;min-height:52px}
+.whatroll{text-align:center;font-size:15px;font-weight:700;color:#e6def5}
+.rollmode .phys{padding:7px 10px}
+.rollmode .phys.on{background:var(--orange);color:#2b1503}
 </style>
 </head>
 <body>
@@ -413,6 +424,7 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;left:30%;right:30%
   <div class="card">
     <h2><span class="ic">⚙️</span>Настройки</h2>
     <label class="row"><input type="checkbox" id="optSound" style="width:auto"> Звуки</label>
+    <label class="row" style="padding:10px;border-radius:12px;background:var(--card2)"><input type="checkbox" id="optPhys" style="width:auto"> <span><b>🎲 Живые кубики</b><br><small class="muted">приложение говорит, что кидать, ты вводишь, что выпало</small></span></label>
     <label class="row" style="margin-top:8px"><input type="checkbox" id="optVib" style="width:auto"> Вибрация</label>
     <label class="row" style="margin-top:8px"><input type="checkbox" id="optAnim" style="width:auto"> Анимация бросков</label>
     <label class="row" style="margin-top:8px" id="keepRow"><input type="checkbox" id="optKeep" style="width:auto"> Не гасить экран во время игры</label>
@@ -432,6 +444,7 @@ nav.tabs button.on::before{content:"";position:absolute;top:0;left:30%;right:30%
   <button data-m="dis" class="dis">⬇ Помеха</button>
   <button data-m="nor" class="nor on">Обычно</button>
   <button data-m="adv" class="adv">⬆ Преим.</button>
+  <button class="phys" id="physBtn">📱</button>
 </div>
 
 <nav class="tabs">
@@ -559,7 +572,7 @@ function fresh(){return{
  money:{pp:0,gp:150,sp:20,cp:7},
  inv:'Кожаный доспех\nЛёгкий арбалет + 20 болтов\n2 кинжала\n10 дротиков\nНабор артиста, лютня, набор для грима\nСчастливые игральные кости\nКрапленая колода карт\nДеловой костюм (сшит под гусиную шею)',
  notes:'Отыгрыш:\n• На любую ситуацию: «Ставлю 10 золотых, что всё будет нормально».\n• Гогочет, когда нервничает. Гогочет, когда рад. Просто гогочет.\n• Монеты судьбы называет «чаевыми мастеру».\n',
- log:[],mode:'nor',sound:true,vib:true,anim:true,keep:false};}
+ log:[],mode:'nor',sound:true,vib:true,anim:true,keep:false,physical:false};}
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))||fresh();}catch(e){S=fresh();}
 S=Object.assign(fresh(),S);
@@ -593,6 +606,39 @@ function rollF(f){let total=0;const parts=[];f=String(f).replace(/\s/g,'').repla
   if(m){const k=+(m[2]||1),s=+m[3],sgn=m[1]?-1:1,rs=[];for(let i=0;i<k;i++)rs.push(R(s));total+=rs.reduce((a,b)=>a+b,0)*sgn;parts.push(`[${rs.join(',')}]`);}
   else if(+p){total+=+p;parts.push(p);}});
  return{total,txt:parts.join(' + ')};}
+const CANCEL='CANCEL';
+window.addEventListener('unhandledrejection',e=>{if(e.reason===CANCEL)e.preventDefault();});
+const virt=(k,s)=>{const a=[];for(let i=0;i<k;i++)a.push(R(s));return a;};
+/* Главная точка всех бросков: в режиме «живые кубики» спрашивает у игрока, иначе кидает сам */
+async function dice(k,s,what,note){if(!S.physical||k<=0)return virt(k,s);return await askDice(k,s,what,note);}
+function askDice(k,s,what,note){return new Promise((res,rej)=>{
+ modal('🎲 Брось кубики',b=>{
+  b.append(h('div',{class:'whatroll'},what),h('div',{class:'bigq'},`${k>1?k+' × ':''}к${s}`));
+  if(note)b.append(h('div',{class:'note',style:'margin:0 0 8px'},note));
+  if(s<=20&&(k===1||(k===2&&s===20))){
+   const picked=[];const st=h('div',{class:'muted',style:'text-align:center;min-height:20px'},k===2?'Нажми, что выпало на первом кубике':'Нажми, что выпало');
+   const kp=h('div',{class:'kp'+(s<=6?' few':'')});
+   for(let i=1;i<=s;i++)kp.append(h('button',{class:i===s?'max':i===1?'min':'',on:{click:()=>{picked.push(i);vib(15);
+    if(picked.length===k){closeModal();res(picked);}else st.innerHTML=`Первый: <b>${i}</b>. Теперь второй кубик`;}}},String(i)));
+   b.append(st,kp);
+  }else{
+   let val='';const min=k,max=k*s;const disp=h('div',{class:'diceDisp'},'—');
+   const ok=h('button',{class:'btn gold wide',style:'margin-top:8px;padding:15px',on:{click:()=>{closeModal();res([+val]);}}},'Готово');
+   const upd=()=>{disp.textContent=val||'—';ok.disabled=!(val!==''&&+val>=min&&+val<=max);};
+   const kp=h('div',{class:'kp num'});
+   [1,2,3,4,5,6,7,8,9,'⌫',0,'C'].forEach(x=>kp.append(h('button',{on:{click:()=>{vib(10);if(x==='⌫')val=val.slice(0,-1);else if(x==='C')val='';else if(val.length<3)val=(val+x).replace(/^0+/,'');upd();}}},String(x))));
+   b.append(h('div',{class:'muted',style:'text-align:center'},`Сложи все кубики и введи сумму (${min}–${max})`),disp,kp,ok);upd();
+  }
+  b.append(h('button',{class:'btn ghost wide',style:'margin-top:10px',on:{click:()=>{closeModal();res(virt(k,s));}}},'📱 Кинь за меня'));
+ },()=>rej(CANCEL));});}
+/* Бросок формулы вида «2d8+4»: в живом режиме кубики спрашиваются, модификатор прибавляется сам */
+async function rollFA(f,label){f=String(f).replace(/\s/g,'').replace(/-/g,'+-');
+ const parts=f.split('+').filter(Boolean);let cons=0;const groups=[];
+ parts.forEach(p=>{const m=p.match(/^(-?)(\d*)d(\d+)$/);if(m)groups.push({k:+(m[2]||1),s:+m[3],sgn:m[1]?-1:1});else cons+=(+p||0);});
+ let total=cons;const txt=[];
+ for(const g of groups){const vals=await dice(g.k,g.s,`${label}: брось ${g.k>1?g.k:''}к${g.s}${cons?`, прибавлю ${sg(cons)}`:''}`);
+  total+=vals.reduce((a,b)=>a+b,0)*g.sgn;txt.push(`[${vals.join(',')}]`);}
+ if(cons)txt.push(String(cons));return{total,txt:txt.join(' + ')};}
 const dbl=f=>f.replace(/(\d*)d(\d+)/g,(m,k,s)=>`${(+(k||1))*2}d${s}`);
 let AX=null;const ctx=()=>{if(!AX){try{AX=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AX&&AX.state==='suspended')AX.resume();return AX;};
 function honkSound(){if(!S.sound)return;const c=ctx();if(!c)return;
@@ -629,14 +675,16 @@ function toast({title='',value='',body='',extra='',cls='',actions=[],multi=null,
  if(actions.length){const a=h('div',{class:'acts'});actions.forEach(([l,fn,c])=>a.append(h('button',{class:'btn sm '+(c||'gold'),on:{click:e=>{e.stopPropagation();fn();}}},l)));t.append(a);}
  t.append(h('div',{class:'hint'},'нажми, чтобы закрыть'));
  t.classList.add('show');if(cls)t.classList.add(cls);
- if(roll&&S.anim&&typeof value==='number'){v.classList.add('rolling');let n=0;rollT=setInterval(()=>{v.textContent=R(Math.max(20,value+5));if(++n>7){clearInterval(rollT);v.textContent=value;v.classList.remove('rolling');}},45);}
+ if(roll&&S.anim&&!S.physical&&typeof value==='number'){v.classList.add('rolling');let n=0;rollT=setInterval(()=>{v.textContent=R(Math.max(20,value+5));if(++n>7){clearInterval(rollT);v.textContent=value;v.classList.remove('rolling');}},45);}
  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms||(actions.length?9000:3600));}
 const hideToast=()=>$('#toast').classList.remove('show');
 $('#toast').addEventListener('click',hideToast);
 function addLog(s){S.log.unshift({t:new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),s});S.log=S.log.slice(0,100);renderLog();}
-function modal(title,build){const b=$('#mbox');b.innerHTML='';b.append(h('div',{class:'grab'}),h('h2',{},title,h('button',{class:'x',on:{click:closeModal}},'✕')));build(b);$('#modal').classList.add('show');}
-function closeModal(){$('#modal').classList.remove('show');}
-$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+let modalCancel=null;
+function modal(title,build,onCancel){if(modalCancel){const c=modalCancel;modalCancel=null;c();}modalCancel=onCancel||null;
+ const b=$('#mbox');b.innerHTML='';b.append(h('div',{class:'grab'}),h('h2',{},title,h('button',{class:'x',on:{click:()=>closeModal(true)}},'✕')));build(b);$('#modal').classList.add('show');}
+function closeModal(user){$('#modal').classList.remove('show');if(user===true&&modalCancel){const c=modalCancel;modalCancel=null;c();}else modalCancel=null;}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal(true);});
 function ask(title,text,yes,yesLabel='Да'){modal(title,b=>{b.append(h('p',{class:'muted'},text),h('div',{class:'grid2'},h('button',{class:'btn ghost',on:{click:closeModal}},'Отмена'),h('button',{class:'btn gold',on:{click:()=>{closeModal();yes();}}},yesLabel)));});}
 function onHold(el,fn){let t,held=false,sx=0,sy=0;
  el.addEventListener('pointerdown',e=>{held=false;sx=e.clientX;sy=e.clientY;t=setTimeout(()=>{held=true;vib(25);fn();},450);});
@@ -654,7 +702,7 @@ function addEffect(name,rounds,key){if(key)S.effects=S.effects.filter(e=>e.key!=
 function dropEffectSide(e){if(e.key&&e.key.startsWith('die:'))delete S.active[e.key.slice(4)];if(e.key==='conc')S.conc=null;if(e.key==='die:d6'&&e.inv)S.conds=S.conds.filter(c=>c!=='Невидим');}
 function removeEffect(id){const e=S.effects.find(x=>x.id===id);if(!e)return;S.effects=S.effects.filter(x=>x.id!==id);dropEffectSide(e);renderAll();save();}
 const fmtLeft=r=>r>=10?Math.floor(r/10)+' мин'+(r%10?` ${r%10} р.`:''):r+' р.';
-function startCombat(){const r=core('Инициатива',M('dex'),'check');
+async function startCombat(){const r=await core('Инициатива',M('dex'),'check');
  S.combat={round:1,init:r.total,used:{action:null,bonus:null,reaction:null},coinRound:false,ac:(S.lastAC||15)};
  addLog(`⚔️ Бой начат, инициатива ${r.total}`);showRoll('Инициатива — бой!',r,{extra:'Раунд 1'});renderAll();save();}
 function nextRound(){if(!S.combat)return;
@@ -692,14 +740,16 @@ document.querySelectorAll('.rollmode button').forEach(b=>b.addEventListener('cli
 function modeFlag(){const f=[];if(S.oneShot)f.push((S.oneShot.m==='adv'?'⬆ преим.':'⬇ помеха')+' на след. бросок');
  for(const k in S.pend)if(S.pend[k])f.push(`${k==='attack'?'атака':k==='check'?'проверка':'спас'}: ${S.pend[k]==='adv'?'⬆':'⬇'}`);
  $('#modeFlag').textContent=f.join(' · ');$('#temptPend').textContent=f.length?('Ждут применения: '+f.join(', ')):'Нет отложенных эффектов.';}
-function core(label,bonus,type='check',o={}){
+async function core(label,bonus,type='check',o={}){
  let adv=0;const why=[];
  if(S.mode==='adv'){adv++;why.push('режим ⬆');}if(S.mode==='dis'){adv--;why.push('режим ⬇');}
  if(o.adv){adv++;why.push(o.adv);}
- if(S.oneShot){adv+=S.oneShot.m==='adv'?1:-1;why.push(S.oneShot.src);
-  if(S.oneShot.src==='Искушение судьбы'&&type!=='raw')S.pend[type]=S.oneShot.m==='adv'?'dis':'adv';S.oneShot=null;}
- else if(S.pend[type]){adv+=S.pend[type]==='adv'?1:-1;why.push('Искушение: обратный эффект');S.pend[type]=null;}
- const a=R(20),b=R(20);let n=a,shown=`${a}`;
+ const one=S.oneShot,pend=!one&&S.pend[type];
+ if(one){adv+=one.m==='adv'?1:-1;why.push(one.src);}else if(pend){adv+=pend==='adv'?1:-1;why.push('Искушение: обратный эффект');}
+ const two=adv!==0;
+ const vals=await dice(two?2:1,20,`${label}: брось ${two?'2 к20':'к20'}, прибавлю ${sg(bonus)}`,two?(adv>0?'⬆ Преимущество: возьму больший':'⬇ Помеха: возьму меньший'):'');
+ if(one){if(one.src==='Искушение судьбы'&&type!=='raw')S.pend[type]=one.m==='adv'?'dis':'adv';S.oneShot=null;}else if(pend)S.pend[type]=null;
+ const a=vals[0],b=two?vals[1]:R(20);let n=a,shown=`${a}`;
  if(adv>0){n=Math.max(a,b);shown=`${a} | ${b} ⬆`;}else if(adv<0){n=Math.min(a,b);shown=`${a} | ${b} ⬇`;}
  const total=n+bonus,crit=n===20,fail=n===1;
  if(S.level>=3&&(crit||fail)){const k=crit?'g':'i';if(S.omen[k]<CHA())S.omen[k]++;}
@@ -710,7 +760,7 @@ function showRoll(label,r,o={}){clack();vib(r.crit?[40,40,140]:r.fail?[220]:30);
  const ex=(r.crit?'НАТУРАЛЬНАЯ 20! ':'')+(r.fail?'Натуральная 1… ':'')+((r.crit||r.fail)&&S.level>=3?`<br><small>${r.crit?'+1 доброе':'+1 дурное'} знамение</small>`:'');
  toast({title:label,value:r.total,roll:true,body:`к20: ${r.shown} ${sg(r.bonus)}${r.why.length?'<br><small>'+r.why.join(', ')+'</small>':''}`,extra:(o.extra?o.extra+'<br>':'')+ex,cls:r.crit?'crit':r.fail?'fail':'',actions:o.actions||[]});
  modeFlag();renderLuck();save();}
-function d20(label,bonus,type='check',o={}){const r=core(label,bonus,type,o);showRoll(label,r,o);return r;}
+async function d20(label,bonus,type='check',o={}){const r=await core(label,bonus,type,o);showRoll(label,r,o);return r;}
 
 /* ======================= ШАПКА ======================= */
 function renderHeader(){
@@ -740,12 +790,18 @@ function renderAttacks(){const box=$('#attacks');box.innerHTML='';const multi=S.
  box.append(h('div',{class:'weapon'},h('div',{},h('div',{class:'nm'},'Злая насмешка'),h('div',{class:'info'},`СЛ ${DC()} Мдр · ${cantripDice()} психический + помеха`)),
   h('div',{class:'acts'},h('button',{class:'btn sm purple',on:{click:()=>finishCast(vm,0)}},'Каст'))));
  if(multi)box.append(h('div',{class:'note'},'«×2» — действие «Атака» с Дополнительной атакой: оба броска и урон сразу. «Быстро смыться»: Рывок, Отход или Уклонение бонусным действием.'));}
-function attack(w,count){spend('action',w.n);
- const res=[];let sum=0;const ac=S.combat?S.combat.ac:null;
- for(let i=0;i<count;i++){const r=core(`${w.n}${count>1?' #'+(i+1):''}`,w.b,'attack',{keepMode:i<count-1});
+async function attack(w,count){
+ const res=[];let sum=0;const ac=S.combat?S.combat.ac:null;const lazy=S.physical&&ac==null;
+ for(let i=0;i<count;i++){const nm=`${w.n}${count>1?' #'+(i+1):''}`;const r=await core(nm,w.b,'attack',{keepMode:i<count-1});
   const hit=ac==null?null:(r.crit||(!r.fail&&r.total>=ac));let dmg=null;
-  if(hit!==false){dmg=Math.max(0,rollF(r.crit?dbl(w.f):w.f).total);if(hit)sum+=dmg;}res.push({r,hit,dmg});}
- invisBreak('ты атаковал');clack();vib(res.some(x=>x.r.crit)?[40,40,140]:40);
+  if(hit!==false&&!lazy){dmg=Math.max(0,(await rollFA(r.crit?dbl(w.f):w.f,`${nm} — урон${r.crit?' (КРИТ: кубики ×2)':''}`)).total);if(hit)sum+=dmg;}res.push({r,hit,dmg});}
+ spend('action',w.n);invisBreak('ты атаковал');
+ if(lazy){addLog(`${w.n}: ${res.map(x=>x.r.total).join(', ')}`);
+  toast({title:`${w.n}${count>1?' ×2':''}: попал?`,value:res.map(x=>x.r.total).join(' / '),multi:res.map((x,i)=>[`${count>1?(i+1)+') ':''}${x.r.shown} ${sg(w.b)}${x.r.crit?' 💥':''}`,`<b>${x.r.total}</b>`]),
+   body:'Скажи мастеру результат. Если попал, кидай урон:',cls:res.some(x=>x.r.crit)?'crit':'',
+   actions:res.map((x,i)=>[`⚔️ Урон${count>1?' #'+(i+1):''}${x.r.crit?' (крит)':''}`,async()=>{hideToast();const d=await rollFA(x.r.crit?dbl(w.f):w.f,`${w.n} — урон${x.r.crit?' (КРИТ: кубики ×2)':''}`);
+    addLog(`${w.n} — урон ${d.total}`);toast({title:`${w.n} — урон${x.r.crit?' (крит)':''}`,value:Math.max(0,d.total),body:`${d.txt} · ${w.dt}`});},'red'])});
+  modeFlag();renderLuck();save();return;}clack();vib(res.some(x=>x.r.crit)?[40,40,140]:40);
  const rows=res.map((x,i)=>[`${count>1?(i+1)+') ':''}${x.r.shown} ${sg(w.b)} = <b>${x.r.total}</b>${x.r.crit?' 💥':''}${x.r.fail?' 💩':''}`,x.hit===null?`урон ${x.dmg}`:x.hit?`✔ ${x.dmg}`:'✖']);
  const crit=res.some(x=>x.r.crit&&x.hit!==false);
  if(ac!=null){const anyHit=res.some(x=>x.hit);addLog(`${w.n}: ${res.map(x=>x.hit?'✔'+x.dmg:'✖').join(' ')} = ${sum}`);
@@ -762,23 +818,24 @@ function renderDice(){const g=$('#diceGrid');g.innerHTML='';$('#drNote').textCon
    h('button',{class:'btn sm wide '+({d4:'blue',d6:'green',d8:'purple',d10:'red'})[k],on:{click:()=>useDie(k)}},locked?'🔒':left(k)?'Бросить':'Пусто'));
   pips(card.querySelector('.pips'),CHA(),S.used[k]);g.append(card);});
  pips($('#rerollPips'),CHA(),S.used.reroll);$('#bReroll').disabled=S.level<7||left('reroll')<=0;}
-function useDie(k){const d=DIE[k];if(S.level<d.lv)return;
+async function useDie(k){const d=DIE[k];if(S.level<d.lv)return;
  if(left(k)<=0){toast({title:'Кубик '+k.toUpperCase(),value:'0',body:'Использования закончились до длинного отдыха.',cls:'fail'});return;}
- spend('action','кубик '+k.toUpperCase());
- if(d.self){dieEffect(k);return;}
- const r=core(`Кубик ${k.toUpperCase()} — атака`,SATK(),'attack');
+ if(d.self){spend('action','кубик '+k.toUpperCase());dieEffect(k);return;}
+ const r=await core(`Кубик ${k.toUpperCase()} — атака`,SATK(),'attack');spend('action','кубик '+k.toUpperCase());
  if(S.combat){const hit=r.crit||(!r.fail&&r.total>=S.combat.ac);
-  if(hit){showRoll(`Кубик ${k.toUpperCase()} · КД ${S.combat.ac}`,r,{extra:'✔ Попал! Бросаю эффект…'});setTimeout(()=>dieEffect(k),1000);}
+  if(hit){showRoll(`Кубик ${k.toUpperCase()} · КД ${S.combat.ac}`,r,{extra:'✔ Попал! Бросаю эффект…'});setTimeout(()=>dieEffect(k),S.physical?600:1000);}
   else showRoll(`Кубик ${k.toUpperCase()} · КД ${S.combat.ac}`,r,{extra:'✖ Мимо. Кубик укатился под стол, использование не потрачено.'});}
  else showRoll(`Кубик ${k.toUpperCase()} — атака`,r,{actions:[['✔ Попал → эффект',()=>dieEffect(k),'gold'],['✖ Мимо',()=>{hideToast();addLog('Кубик '+k.toUpperCase()+': мимо');},'ghost']]});}
-function dieEffect(k,isReroll){const d=DIE[k],r=R(d.tbl.length);if(!isReroll)S.used[k]++;
- let text,extra='';
- if(k==='d10'){const e=D10[r-1],dm=rollF('1d10');text=`1d10 урона ${e.d}. ${e.t}`;extra=`💥 Урон: <b>${dm.total}</b> ${e.d}`;
-  if(e.x){const xr=rollF(e.x);extra+=`<br>${e.xl}: <b>${xr.total}</b>`;}
+async function dieEffect(k,isReroll){const d=DIE[k];
+ const r=(await dice(1,d.tbl.length,`${k.toUpperCase()} ${d.n}${isReroll?' (переброс)':''}: брось к${d.tbl.length}, это номер эффекта`))[0];
+ if(!isReroll)S.used[k]++;
+ let text,extra='';const P=S.physical;
+ if(k==='d10'){const e=D10[r-1],dm=await rollFA('1d10',`D10: урон ${e.d}`);text=`1d10 урона ${e.d}. ${e.t}`;extra=`💥 Урон: <b>${dm.total}</b> ${e.d}`;
+  if(e.x){if(P)extra+=`<br>${e.xl}: брось ${e.x.replace('d','к')}`;else{const xr=rollF(e.x);extra+=`<br>${e.xl}: <b>${xr.total}</b>`;}}
   if(e.sv)extra+=`<br>Спасбросок ${AB_GEN[e.sv]}: СЛ ${DC()}`;
   if(e.tr)addEffect('🎯 '+e.tn,e.tr,'tgt10_'+r);}
- else if(k==='d8'){text=d.tbl[r-1];if(D8SAVE[r-1])extra=`Спасбросок ${AB_GEN[D8SAVE[r-1]]}: СЛ ${DC()}`;if(r===1)extra=`Штраф: −${R(8)}`;}
- else if(k==='d4'){text=d.tbl[r-1];if(r===4)extra=`Спасбросок Ловкости: СЛ ${DC()} · урон ${rollF('1d6').total}`;if(r===3)extra='1d4 за каждые 5 фт';}
+ else if(k==='d8'){text=d.tbl[r-1];if(D8SAVE[r-1])extra=`Спасбросок ${AB_GEN[D8SAVE[r-1]]}: СЛ ${DC()}`;if(r===1)extra=P?'Штраф: брось к8':`Штраф: −${R(8)}`;}
+ else if(k==='d4'){text=d.tbl[r-1];if(r===4)extra=`Спасбросок Ловкости: СЛ ${DC()} · урон ${P?'брось к6':rollF('1d6').total}`;if(r===3)extra='1d4 за каждые 5 фт';}
  else{text=d.tbl[r-1];
   if(r===1){const th=S.level+M('cha');S.temp=Math.max(S.temp,th);extra=`+${th} временных хитов (уже начислено)`;}
   if(r===2)extra='Спасброски на вкладке «Персонаж» уже считаются с мастерством';
@@ -789,7 +846,7 @@ function dieEffect(k,isReroll){const d=DIE[k],r=R(d.tbl.length);if(!isReroll)S.u
  if(d.dur){S.active[k]={r,text};addEffect(`${k.toUpperCase()}: ${text}`,CHA()*10,'die:'+k);if(k==='d6'&&r===5)S.effects[S.effects.length-1].inv=true;}
  addLog(`Кубик ${k.toUpperCase()}${isReroll?' (переброс)':''}: ${r} — ${text}`);jingle(true);vib([20,30,20,30,70]);
  const acts=[];if(S.level>=7&&left('reroll')>0)acts.push(['🔁 Переброс (бонусное)',()=>{S.used.reroll++;spend('bonus','переброс');dieEffect(k,true);},'purple']);
- toast({title:`${k.toUpperCase()} ${d.n}: выпало`,value:r,roll:true,body:text+(d.dur?`<br><small>Длится ${CHA()} мин. — таймер запущен</small>`:''),extra,actions:acts});
+ toast({title:`${k.toUpperCase()} ${d.n}: выпало`,value:r,roll:!P,body:text+(d.dur?`<br><small>Длится ${CHA()} мин. — таймер запущен</small>`:''),extra,actions:acts});
  renderAll();save();}
 function invisBreak(why){if(S.conds.includes('Невидим')&&d6is(5)){S.conds=S.conds.filter(c=>c!=='Невидим');delete S.active.d6;S.effects=S.effects.filter(e=>e.key!=='die:d6');addLog('Невидимость D6 спала: '+why);}}
 $('#bReroll').addEventListener('click',()=>{modal('🔁 Какой кубик перебросить?',b=>{const o=h('div',{class:'opts'});
@@ -820,7 +877,7 @@ function gamble(key,label){
  if(key===S.lastGamble&&key!=='attack'&&key!=='save'){toast({title:'Ставка',value:'✋',body:'Нельзя ставить два раза подряд на один и тот же навык.',cls:'fail'});return;}
  const th=gTh();
  modal('🎰 Ставка: '+label,b=>{b.append(h('p',{class:'muted'},`Угадай натуральный к20. Угадал — автоматический успех, не угадал — провал. Осталось ставок: ${left('gamble')}.`));
-  const go=hi=>{closeModal();S.used.gamble++;S.lastGamble=key;const n=R(20),win=hi?n>=th:n<th;clack();setTimeout(()=>{jingle(win);vib(win?[50,50,160]:[320]);},180);
+  const go=async hi=>{closeModal();const n=(await dice(1,20,`Ставка «${label}» (${hi?th+' и выше':'ниже '+th}): брось к20`))[0];S.used.gamble++;S.lastGamble=key;const win=hi?n>=th:n<th;clack();setTimeout(()=>{jingle(win);vib(win?[50,50,160]:[320]);},180);
    addLog(`🎰 Ставка «${label}» ${hi?th+'+':'<'+th}: ${n} → ${win?'АВТОУСПЕХ':'ПРОВАЛ'}`);
    toast({title:`Ставка «${label}»: ${hi?th+' и выше':'ниже '+th}`,value:n,roll:true,extra:win?'🎉 УГАДАЛ! Автоматический успех!':'💀 Не угадал. Автоматический провал.',cls:win?'crit':'fail'});renderLuck();save();};
   b.append(h('div',{class:'grid2'},h('button',{class:'btn green',style:'padding:18px',on:{click:()=>go(true)}},`⬆ ${th} и выше`),h('button',{class:'btn red',style:'padding:18px',on:{click:()=>go(false)}},`⬇ ${th-1} и ниже`)));});}
@@ -830,8 +887,8 @@ $('#bGamble').addEventListener('click',()=>{modal('🎰 На что ставим
  o.append(h('div',{class:'row'},sel,h('button',{class:'btn gold',on:{click:()=>{closeModal();gamble(sel.value,sel.options[sel.selectedIndex].text);}}},'Ставка')));b.append(o);});});
 document.querySelectorAll('[data-omen]').forEach(b=>b.addEventListener('click',()=>{if(S.level<3)return;const k=b.dataset.omen[0],op=b.dataset.omen[1];
  if(op==='+')S.omen[k]=Math.min(CHA(),S.omen[k]+1);
- else{if(S.omen[k]<=0)return;S.omen[k]--;const r=rollF('1'+totemDie());addLog(`Тотем: ${k==='g'?'+':'−'}${r.total}`);jingle(k==='g');
-  toast({title:k==='g'?'Доброе знамение':'Дурное знамение',value:(k==='g'?'+':'−')+r.total,body:`${totemDie()} к броску d20 существа в 30 фт от тотема`,cls:k==='g'?'crit':'fail'});}
+ else{if(S.omen[k]<=0)return;(async()=>{const r=await rollFA('1'+totemDie(),k==='g'?'Доброе знамение':'Дурное знамение');S.omen[k]--;addLog(`Тотем: ${k==='g'?'+':'−'}${r.total}`);jingle(k==='g');
+  toast({title:k==='g'?'Доброе знамение':'Дурное знамение',value:(k==='g'?'+':'−')+r.total,body:`${totemDie()} к броску d20 существа в 30 фт от тотема`,cls:k==='g'?'crit':'fail'});renderLuck();save();})();}
  renderLuck();save();}));
 function rollMenu(label,bonus,type,key){modal(label+' '+sg(bonus),b=>{const o=h('div',{class:'opts'});
  o.append(h('button',{class:'btn gold',style:'padding:15px',on:{click:()=>{closeModal();d20(label,bonus,type);}}},'🎲 Бросить'));
@@ -855,7 +912,7 @@ function renderConds(){const c=$('#conds');c.innerHTML='';
  CONDS.forEach(n=>c.append(h('span',{class:'chip'+(S.conds.includes(n)?' on':''),on:{click:()=>{S.conds=S.conds.includes(n)?S.conds.filter(x=>x!==n):[...S.conds,n];renderConds();renderHeader();save();}}},n)));}
 function renderDeath(){$('#deathCard').style.display=S.hp<=0?'block':'none';pips($('#dsS'),3,0);pips($('#dsF'),3,0);
  [...$('#dsS').children].forEach((p,i)=>p.classList.toggle('used',i>=S.death.s));[...$('#dsF').children].forEach((p,i)=>{p.classList.toggle('used',i>=S.death.f);p.classList.toggle('red',i<S.death.f);});}
-$('#bDeath').addEventListener('click',()=>{const n=R(20);clack();
+$('#bDeath').addEventListener('click',async()=>{const n=(await dice(1,20,'Спасбросок от смерти: брось к20'))[0];clack();
  if(n===20){S.hp=1;S.death={s:0,f:0};S.conds=S.conds.filter(c=>c!=='Без сознания');addLog('☠️ 20! Гусь восстал');jingle(true);toast({title:'Спасбросок от смерти',value:20,extra:'ГУСЬ ВОССТАЛ! 1 хит.',cls:'crit'});}
  else if(n===1){S.death.f=Math.min(3,S.death.f+2);addLog('☠️ 1: два провала');toast({title:'Спасбросок от смерти',value:1,extra:'Два провала',cls:'fail'});}
  else if(n>=10){S.death.s++;addLog('☠️ '+n+': успех');toast({title:'Спасбросок от смерти',value:n,extra:'Успех'});}
@@ -908,17 +965,21 @@ function spellRow(sp,castable){const isP=S.prepared.includes(sp.id);
 function cast(sp){if(sp.lv===0){finishCast(sp,0);return;}const s=slotsFor();
  modal('✨ '+sp.n,b=>{b.append(h('p',{class:'muted'},sp.t));const o=h('div',{class:'opts'});
   for(let i=sp.lv;i<=5;i++){if(!s[i])continue;const free=s[i]-S.slotsUsed[i-1];
-   o.append(h('button',{class:'btn '+(free>0?'gold':''),disabled:free<=0,on:{click:()=>{closeModal();S.slotsUsed[i-1]++;finishCast(sp,i);}}},`Ячейка ${i} ур. · свободно ${free}${i>sp.lv&&(sp.dmg||sp.heal)?' · усиление':''}`));}
+   o.append(h('button',{class:'btn '+(free>0?'gold':''),disabled:free<=0,on:{click:()=>{closeModal();finishCast(sp,i);}}},`Ячейка ${i} ур. · свободно ${free}${i>sp.lv&&(sp.dmg||sp.heal)?' · усиление':''}`));}
   if(sp.ritual)o.append(h('button',{class:'btn blue',on:{click:()=>{closeModal();finishCast(sp,'ritual');}}},'Ритуалом (+10 минут, без ячейки)'));b.append(o);});}
-function finishCast(sp,lvl){const up=typeof lvl==='number'&&lvl>sp.lv?lvl-sp.lv:0;
+async function finishCast(sp,lvl){const up=typeof lvl==='number'&&lvl>sp.lv?lvl-sp.lv:0;
+ let rC=null,rD=null,rH=null,fD=null,fH=null;
+ if(sp.cantrip)rC=await rollFA(cantripDice(),sp.n+' — урон');
+ if(sp.dmg){fD=sp.dmg;if(up&&sp.up)fD=(+sp.dmg.split('d')[0]+(+sp.up.split('d')[0])*up)+'d'+sp.dmg.split('d')[1];rD=await rollFA(fD,sp.n+' — урон');}
+ if(sp.heal){fH=(1+up)+'d'+sp.heal.split('d')[1]+'+'+M('cha');rH=await rollFA(fH,sp.n+' — лечение');}
+ if(typeof lvl==='number'&&lvl>0)S.slotsUsed[lvl-1]++;
  if(sp.ct==='action'||sp.ct==='bonus')spend(sp.ct,sp.n);
  let body=`<small>${lvl==='ritual'?'Ритуал':lvl?'Ячейка '+lvl+' ур.':'Заговор'} · ${CT_RU[sp.ct]}</small>`,value='✨',extra='',roll=false;
  if(sp.conc){if(S.conc&&S.conc!==sp.n)body+=`<br>Концентрация на «${S.conc}» сброшена.`;S.conc=sp.n;addEffect('🧠 '+sp.n,sp.conc,'conc');}
  if(sp.save)extra=`Спасбросок ${AB_GEN[sp.save]}: СЛ ${DC()}`;
- if(sp.cantrip){const r=rollF(cantripDice());value=r.total;roll=true;body+=`<br>${cantripDice()}: ${r.txt} ${sp.dt}`;}
- if(sp.dmg){let f=sp.dmg;if(up&&sp.up)f=(+sp.dmg.split('d')[0]+(+sp.up.split('d')[0])*up)+'d'+sp.dmg.split('d')[1];
-  const r=rollF(f);value=r.total;roll=true;body+=`<br>${f}: ${r.txt} (${sp.dt})<br><small>При успешном спасброске: ${Math.floor(r.total/2)}</small>`;}
- if(sp.heal){const f=(1+up)+'d'+sp.heal.split('d')[1]+'+'+M('cha');const r=rollF(f);value=r.total;roll=true;body+=`<br>Лечение ${f}: ${r.txt}`;}
+ if(rC){value=rC.total;roll=true;body+=`<br>${cantripDice()}: ${rC.txt} ${sp.dt}`;}
+ if(rD){value=rD.total;roll=true;body+=`<br>${fD}: ${rD.txt} (${sp.dt})<br><small>При успешном спасброске: ${Math.floor(rD.total/2)}</small>`;}
+ if(rH){value=rH.total;roll=true;body+=`<br>Лечение ${fH}: ${rH.txt}`;}
  if(sp.dmg||sp.cantrip)invisBreak('ты колдовал урон');
  addLog(`✨ ${sp.n}${typeof lvl==='number'&&lvl?' ('+lvl+' ур.)':''}${typeof value==='number'?': '+value:''}`);jingle(true);vib(40);
  const acts=[];if(sp.heal)acts.push(['💚 Вылечить себя на '+value,()=>{hideToast();applyHeal(value);},'green']);
@@ -952,9 +1013,12 @@ $('#armorSel').addEventListener('change',e=>{S.armor=e.target.value;renderAll();
 $('#cName').addEventListener('input',e=>{S.name=e.target.value;renderHeader();save();});
 $('#cBg').addEventListener('input',e=>{S.bg=e.target.value;save();});$('#cAl').addEventListener('input',e=>{S.al=e.target.value;save();});
 $('#optSound').addEventListener('change',e=>{S.sound=e.target.checked;save();});$('#optVib').addEventListener('change',e=>{S.vib=e.target.checked;save();});
-$('#optAnim').addEventListener('change',e=>{S.anim=e.target.checked;save();});$('#optKeep').addEventListener('change',e=>{S.keep=e.target.checked;keepScreen();save();});
+$('#optAnim').addEventListener('change',e=>{S.anim=e.target.checked;save();});
+function setPhys(on){S.physical=!!on;const b=$('#physBtn');b.classList.toggle('on',S.physical);b.textContent=S.physical?'🎲 Живые':'📱 Авто';$('#optPhys').checked=S.physical;save();}
+$('#optPhys').addEventListener('change',e=>{setPhys(e.target.checked);toast({title:'Кубики',value:S.physical?'🎲':'📱',body:S.physical?'Живые кубики: я скажу, что кидать, ты вводишь, что выпало.':'Виртуальные кубики: кидаю сам.',ms:2200});});
+$('#physBtn').addEventListener('click',()=>{setPhys(!S.physical);vib(20);toast({title:'Кубики',value:S.physical?'🎲':'📱',body:S.physical?'<b>Живые кубики.</b> Я скажу, что кидать, ты вводишь, что выпало.':'<b>Авто.</b> Кидаю сам.',ms:2200});});$('#optKeep').addEventListener('change',e=>{S.keep=e.target.checked;keepScreen();save();});
 function keepScreen(){try{if(NATIVE&&Android.keepScreenOn)Android.keepScreenOn(!!S.keep);}catch(e){}}
-$('#bWager').addEventListener('click',()=>{const r=R(12);clack();setTimeout(()=>jingle(r>=7),150);addLog('🎰 Ставка на рост: '+r+' — '+WAGER[r-1]);
+$('#bWager').addEventListener('click',async()=>{const r=(await dice(1,12,'Ставка на рост: брось к12'))[0];clack();setTimeout(()=>jingle(r>=7),150);addLog('🎰 Ставка на рост: '+r+' — '+WAGER[r-1]);
  toast({title:'Ставка на рост (d12)',value:r,roll:true,body:WAGER[r-1],cls:r===12?'crit':r<=3?'fail':''});});
 $('#bExport').addEventListener('click',()=>{const name='gus-igrok-'+new Date().toISOString().slice(0,10)+'.json',data=JSON.stringify(S,null,1);
  if(NATIVE&&Android.saveFile){const m=Android.saveFile(name,data);toast({title:'Копия',value:'💾',body:m});return;}
@@ -983,7 +1047,7 @@ function applyDmg(n,resist){if(n<=0)return;let d=resist?Math.floor(n/2):n;const 
   if(d-was>=maxHP())toast({title:'Мгновенная смерть',value:'🪦',body:'Остаток урона не меньше максимума хитов.',cls:'fail'});
   else toast({title:'Гусь падает!',value:'0',body:'Без сознания. Кидай спасброски от смерти на вкладке «Бой».',cls:'fail'});}
  else{const acts=[];
-  if(S.conc){const cdc=Math.max(10,Math.floor(raw/2));acts.push([`🧠 Спас концентрации (СЛ ${cdc})`,()=>{hideToast();const r=core('Концентрация: '+S.conc,M('con'),'save');const ok=r.total>=cdc;
+  if(S.conc){const cdc=Math.max(10,Math.floor(raw/2));acts.push([`🧠 Спас концентрации (СЛ ${cdc})`,async()=>{hideToast();const r=await core('Концентрация: '+S.conc,M('con'),'save');const ok=r.total>=cdc;
    if(!ok){addLog('Концентрация потеряна: '+S.conc);S.conc=null;S.effects=S.effects.filter(e=>e.key!=='conc');}
    showRoll('Концентрация, СЛ '+cdc,r,{extra:ok?'✔ Удержал!':'✖ Концентрация потеряна'});renderAll();save();},'purple']);}
   toast({title:resist?'Урон (сопротивление)':'Урон',value:'−'+raw,body:`${resist?n+' → ½<br>':''}Хиты: ${S.hp}/${maxHP()}${S.temp?` (+${S.temp} врем.)`:''}${t?`<br><small>${t} поглощено временными</small>`:''}`,cls:'fail',actions:acts});}
@@ -1004,7 +1068,7 @@ function longRest(){S.hp=maxHP();S.temp=0;S.hdUsed=Math.max(0,S.hdUsed-Math.max(
 $('#bLong').addEventListener('click',()=>ask('Длинный отдых?','Восстановить хиты, ячейки и все умения.',longRest,'Отдыхаем'));
 $('#bShort').addEventListener('click',()=>{modal('☕ Короткий отдых',b=>{const info=h('p',{class:'muted'});
  const upd=()=>{info.textContent=`Кости хитов: ${S.level-S.hdUsed}/${S.level} (к6 ${sg(M('con'))}). Хиты ${S.hp}/${maxHP()}.`;};upd();
- const btn=h('button',{class:'btn gold wide',style:'padding:15px',on:{click:()=>{if(S.hdUsed>=S.level||S.hp>=maxHP())return;S.hdUsed++;const r=rollF('1d6'),v=Math.max(0,r.total+M('con'));
+ const btn=h('button',{class:'btn gold wide',style:'padding:15px',on:{click:async()=>{if(S.hdUsed>=S.level||S.hp>=maxHP())return;const r=await rollFA('1d6','Кость хитов'),v=Math.max(0,r.total+M('con'));S.hdUsed++;
   S.hp=Math.min(maxHP(),S.hp+v);addLog(`☕ Кость хитов: +${v}`);clack();vib(30);upd();renderHeader();save();btn.textContent=`🎲 +${v}! Ещё кость`;}}},'🎲 Потратить кость хитов');
  b.append(info,btn,h('div',{class:'note'},'По тексту класса у Gambler нет ресурсов, которые восстанавливаются на коротком отдыхе.'));});});
 
@@ -1012,11 +1076,11 @@ $('#bShort').addEventListener('click',()=>{modal('☕ Короткий отды�
 function go(p){document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.p===p));
  document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p));window.scrollTo({top:0});}
 document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.p);vib(10);}));
-window.onAndroidBack=function(){if($('#modal').classList.contains('show')){closeModal();return true;}
+window.onAndroidBack=function(){if($('#modal').classList.contains('show')){closeModal(true);return true;}
  if($('#toast').classList.contains('show')){hideToast();return true;}
  if(!$('#p-fight').classList.contains('on')){go('fight');return true;}return false;};
 function renderAll(){renderHeader();renderFight();renderChar();renderSpells();renderFeats();renderInv();renderLvl();renderLog();}
-setMode(S.mode||'nor');renderAll();save();keepScreen();
+setMode(S.mode||'nor');setPhys(S.physical);renderAll();save();keepScreen();
 document.addEventListener('pointerdown',()=>ctx(),{once:true});
 if(!NATIVE&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
