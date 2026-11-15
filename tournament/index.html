@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+</head>
+<body>
+<title>Турнирный пульт</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: sticky scoreboard header with tabs; each tab is a working surface (settings+rules, group cards, waves by table, bracket). */
+:root{
+  --bg:#eef3ef; --surface:#ffffff; --surface2:#e3ebe5; --line:#cbd8cf;
+  --fg:#12201a; --muted:#5a6d63; --accent:#0d7a49; --accent-fg:#ffffff;
+  --gold:#b87a00; --gold-bg:#fbefcf; --ok-bg:#d8f0e2; --bad:#b4372e; --bad-bg:#f7dfdc;
+  --head:#10241b; --head-fg:#e7f2eb;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1511; --surface:#15201a; --surface2:#1c2a22; --line:#2a3c32;
+  --fg:#e3ede7; --muted:#93a89b; --accent:#3cc382; --accent-fg:#06140d;
+  --gold:#e8b23c; --gold-bg:#3a2e12; --ok-bg:#163826; --bad:#ef7d72; --bad-bg:#3d1c19;
+  --head:#08100c; --head-fg:#e3ede7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1511; --surface:#15201a; --surface2:#1c2a22; --line:#2a3c32;
+  --fg:#e3ede7; --muted:#93a89b; --accent:#3cc382; --accent-fg:#06140d;
+  --gold:#e8b23c; --gold-bg:#3a2e12; --ok-bg:#163826; --bad:#ef7d72; --bad-bg:#3d1c19;
+  --head:#08100c; --head-fg:#e3ede7; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:14px;line-height:1.45}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--head)}
+.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--head);color:var(--head-fg)}
+header.top .wrap{padding-block:12px 0;display:flex;flex-direction:column;gap:10px}
+.brand{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px}
+.brand h1{font-family:var(--f-display);font-weight:700;font-size:28px;letter-spacing:.02em;margin:0;text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip b{font-weight:700}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs a{color:var(--head-fg);opacity:.7;text-decoration:none;padding:9px 14px 10px;font-family:var(--f-display);font-size:18px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;border-bottom:3px solid transparent;white-space:nowrap}
+nav.tabs a[aria-current="page"]{opacity:1;border-color:var(--accent)}
+nav.tabs a:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+main .wrap{padding-block:20px 60px}
+h2{font-family:var(--f-display);font-size:24px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;margin:0 0 10px;text-wrap:balance}
+h3{font-size:15px;margin:0 0 8px}
+p{margin:0 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:12.5px}
+.banner{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:10px 14px;border-radius:8px;margin-bottom:16px;background:var(--gold-bg);border:1px solid color-mix(in srgb,var(--gold) 40%,transparent)}
+.banner.ok{background:var(--ok-bg);border-color:color-mix(in srgb,var(--accent) 40%,transparent)}
+.banner.bad{background:var(--bad-bg);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+.banner p{margin:0;flex:1 1 260px;min-width:0}
+button,.btn{font:inherit;font-weight:600;font-size:13px;padding:8px 14px;border-radius:7px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.warn{border-color:var(--bad);color:var(--bad)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cols{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.form{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label,.lbl{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
+.field input[type=number],.field input[type=time],.field select,.field textarea,input.search{font:inherit;padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--fg);width:100%}
+.field textarea{min-height:90px;resize:vertical;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.nrow{display:flex;gap:10px;align-items:center}
+.nrow input[type=range]{flex:1;accent-color:var(--accent)}
+.nrow input[type=number]{width:80px}
+.check{display:flex;gap:8px;align-items:center;font-size:13.5px}
+.check input{accent-color:var(--accent);width:16px;height:16px}
+.preview{border-top:1px dashed var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;font-variant-numeric:tabular-nums}
+.kv span:first-child{color:var(--muted)}
+.rules ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:10px}
+.rules li{max-width:72ch}
+.rules li b{font-weight:600}
+.scroll{overflow-x:auto;max-width:100%}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:5px 6px;text-align:right;white-space:nowrap}
+th{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+.scale tr.cur td{background:var(--ok-bg);font-weight:600}
+.scale td{border-bottom:1px solid var(--line)}
+/* groups */
+.progress{height:8px;border-radius:99px;background:var(--surface2);overflow:hidden;margin:6px 0 4px}
+.progress i{display:block;height:100%;background:var(--accent)}
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.gcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 12px 8px;min-width:0}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.ghead .gname{font-family:var(--f-display);font-size:22px;font-weight:700;letter-spacing:.03em}
+.st td{border-bottom:1px solid var(--surface2)}
+.st td.nm{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.st tr.q td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.st tr.q{background:color-mix(in srgb,var(--ok-bg) 70%,transparent)}
+.st tr.c{background:color-mix(in srgb,var(--gold-bg) 80%,transparent)}
+.st tr.c td:first-child{box-shadow:inset 3px 0 0 var(--gold)}
+.st tr.hl td.nm{text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px}
+.pts{font-weight:700}
+details.ms{margin-top:6px}
+details.ms summary{cursor:pointer;font-size:12.5px;color:var(--muted);padding:4px 0}
+.mlist{display:flex;flex-direction:column;gap:4px;padding:4px 0}
+.mrow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:center;font-size:13px}
+.mrow .a{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow .b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow .meta{grid-column:1/-1;font-size:11px;color:var(--muted);text-align:center;margin-top:-2px}
+.score{display:inline-flex;align-items:center;gap:3px}
+.sc{width:38px;padding:4px 2px;text-align:center;font:600 14px/1 var(--f-body);font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:5px;background:var(--bg);color:var(--fg)}
+.sc.filled{background:var(--surface2)}
+.win{font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin:4px 0 14px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.race{margin-bottom:18px}
+.race td.cut{border-top:2px dashed var(--bad)}
+/* schedule */
+.waves{display:flex;flex-direction:column;gap:12px}
+.wave{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.wave.now{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.whead{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin-bottom:8px}
+.whead .wn{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.tag.now{background:var(--accent);color:var(--accent-fg)}
+.tag.done{background:var(--ok-bg);color:var(--accent)}
+.stations{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.stn{border:1px solid var(--surface2);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.stn.hit{border-color:var(--accent);background:color-mix(in srgb,var(--ok-bg) 60%,transparent)}
+.stn .sn{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:flex;justify-content:space-between}
+.searchbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.searchbar input{max-width:320px}
+.found{font-size:13px}
+/* bracket */
+.bracket{display:flex;gap:18px;overflow-x:auto;padding-bottom:10px;max-width:100%}
+.rnd{display:flex;flex-direction:column;min-width:230px;flex:0 0 230px}
+.rnd h3{font-family:var(--f-display);font-size:17px;letter-spacing:.04em;text-transform:uppercase;margin:0 0 8px;color:var(--muted)}
+.rcol{display:flex;flex-direction:column;justify-content:space-around;flex:1;gap:10px}
+.pm{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px 8px;display:flex;flex-direction:column;gap:3px}
+.pm .side{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:6px;align-items:center;font-size:13px}
+.pm .seed{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pm .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm .tbd{color:var(--muted);font-style:italic}
+.pm .when{font-size:11px;color:var(--muted)}
+.pm.done .side.lose .nm{color:var(--muted)}
+.champion{font-family:var(--f-display);font-size:30px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:13.5px;max-width:calc(100% - 32px);z-index:20;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.sect{margin-top:22px}
+@media (prefers-reduced-motion:no-preference){.progress i{transition:width .3s}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>Турнирный пульт</h1><div class="chips" id="chips"></div></div>
+    <nav class="tabs" id="tabs">
+      <a href="#format" data-tab="format">Формат</a>
+      <a href="#groups" data-tab="groups">Группы</a>
+      <a href="#schedule" data-tab="schedule">Расписание</a>
+      <a href="#playoff" data-tab="playoff">Плей-офф</a>
+    </nav>
+  </div>
+</header>
+<main><div class="wrap" id="view"></div></main>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+"use strict";
+const STORE = "tourney-v1";
+const DEF = {n:72, groupSize:"auto", playoff:"auto", stations:9, matchMin:12, budgetH:5, draws:true, third:true, start:"18:00", names:""};
+let S = null;            // tournament state
+let draft = null;        // settings being edited
+let tab = "format";
+let query = "";
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function rng32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function shuffle(arr, r){for(let i=arr.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+const pow2floor = x => x < 2 ? 2 : 2 ** Math.floor(Math.log2(x));
+function gName(i){const L="ABCDEFGHIJKLMNOPQRSTUVWXYZ";return i<26?L[i]:L[Math.floor(i/26)-1]+L[i%26]}
+function fmtDur(min){const h=Math.floor(min/60),m=Math.round(min%60);return h?`${h} ч ${String(m).padStart(2,"0")} мин`:`${m} мин`}
+function clock(start, addMin){const [h,m]=(start||"18:00").split(":").map(Number);const t=(h*60+m+addMin)%1440;return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")}
+function plural(n,a,b,c){const m10=n%10,m100=n%100;return m10===1&&m100!==11?a:(m10>=2&&m10<=4&&(m100<10||m100>=20)?b:c)}
+let toastT;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,3200)}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(S))}catch(e){}}
+function load(){try{const s=localStorage.getItem(STORE);return s?JSON.parse(s):null}catch(e){return null}}
+
+/* ---------- format planning ---------- */
+function nameList(cfg){
+  const list = (cfg.names||"").split("\n").map(s=>s.trim()).filter(Boolean);
+  if (list.length >= 8) return list;
+  const w = cfg.n >= 100 ? 3 : 2;
+  return Array.from({length:cfg.n},(_,i)=>"Участник "+String(i+1).padStart(w,"0"));
+}
+function groupSizes(n, s){
+  const G = Math.max(2, Math.floor(n/s));
+  const base = Math.floor(n/G), extra = n % G;
+  return Array.from({length:G},(_,i)=> base + (i<extra?1:0));
+}
+function roundRobin(members){
+  const list = members.slice(); if (list.length%2) list.push(null);
+  const m = list.length, out = [];
+  for (let r=0;r<m-1;r++){
+    for (let i=0;i<m/2;i++){const a=list[i],b=list[m-1-i]; if(a!==null&&b!==null) out.push({a,b,gr:r})}
+    list.splice(1,0,list.pop());
+  }
+  return out;
+}
+function scheduleWaves(matches, T){
+  let rest = matches.slice(), w = 0;
+  while (rest.length){
+    const busy = new Set(), next = []; let slot = 0;
+    for (const m of rest){
+      if (slot<T && !busy.has(m.a) && !busy.has(m.b)){m.wave=w;m.st=++slot;busy.add(m.a);busy.add(m.b)}
+      else next.push(m);
+    }
+    rest = next; w++;
+  }
+  return w;
+}
+function playoffSize(cfg, n, G){
+  if (cfg.playoff !== "auto") return Math.min(+cfg.playoff, pow2floor(n));
+  return pow2floor(Math.min(2*G + Math.floor(G/2), Math.floor(n/2)));
+}
+function composition(sizes, P){
+  const comp = []; let rem = P;
+  for (let k=0; rem>0; k++){
+    const of = sizes.filter(z=>z>k).length; if (!of) break;
+    const take = Math.min(rem, of); comp.push({place:k+1, take, of}); rem -= take;
+  }
+  return comp;
+}
+function playoffRounds(P, third){
+  const rounds = []; for (let m=P/2; m>=1; m/=2) rounds.push(m);
+  if (third && rounds.length>=2) rounds[rounds.length-1] += 1;
+  return rounds; // matches per round (last includes 3rd place match)
+}
+function plan(cfg, n, s){
+  const sizes = groupSizes(n, s), G = sizes.length;
+  let id = 0; const groups = sizes.map(z=>Array.from({length:z},()=>id++));
+  const gm = groups.flatMap(g=>roundRobin(g));
+  const gw = scheduleWaves(gm, cfg.stations);
+  const P = playoffSize(cfg, n, G);
+  const pr = playoffRounds(P, cfg.third);
+  const pw = pr.reduce((a,m)=>a+Math.ceil(m/cfg.stations),0);
+  return {s, sizes, G, P, comp:composition(sizes,P), groupMatches:gm.length, playoffMatches:pr.reduce((a,b)=>a+b,0),
+          groupWaves:gw, playoffWaves:pw, minutes:(gw+pw)*cfg.matchMin};
+}
+function chooseS(cfg, n){
+  if (cfg.groupSize !== "auto") return +cfg.groupSize;
+  for (const s of [4,3]) if (plan(cfg,n,s).minutes <= cfg.budgetH*60) return s;
+  return 3;
+}
+
+/* ---------- tournament ---------- */
+function create(cfg, seed){
+  const names = nameList(cfg), n = names.length;
+  const s = chooseS(cfg, n), pl = plan(cfg, n, s);
+  const r = rng32(seed);
+  const ids = shuffle([...Array(n).keys()], r);
+  const lot = Array.from({length:n},()=>r());
+  const groups = pl.sizes.map(()=>[]);
+  // snake draw
+  let k = 0;
+  for (let round=0; k<n; round++){
+    const order = [...groups.keys()]; if (round%2) order.reverse();
+    for (const g of order){ if (k<n && groups[g].length < pl.sizes[g]) groups[g].push(ids[k++]) }
+  }
+  const matches = [];
+  groups.forEach((g,gi)=>roundRobin(g).forEach(m=>matches.push({...m,g:gi})));
+  matches.sort((x,y)=>x.gr-y.gr || x.g-y.g);
+  scheduleWaves(matches, cfg.stations);
+  matches.forEach((m,i)=>{m.id=i;m.sa=null;m.sb=null});
+  return {v:1, cfg:{...cfg}, seed, names, s, plan:pl, groups, matches, lot, bracket:null, demo:false};
+}
+
+const PTS = (a,b) => a>b?3:(a===b?1:0);
+function groupTable(gi){
+  const ms = S.matches.filter(m=>m.g===gi);
+  const rows = S.groups[gi].map(id=>({id,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0}));
+  const R = Object.fromEntries(rows.map(r=>[r.id,r]));
+  let played = 0;
+  for (const m of ms){
+    if (m.sa===null) continue; played++;
+    const A=R[m.a],B=R[m.b];
+    A.p++;B.p++;A.gf+=m.sa;A.ga+=m.sb;B.gf+=m.sb;B.ga+=m.sa;
+    A.pts+=PTS(m.sa,m.sb);B.pts+=PTS(m.sb,m.sa);
+    if(m.sa>m.sb){A.w++;B.l++}else if(m.sa<m.sb){B.w++;A.l++}else{A.d++;B.d++}
+  }
+  rows.sort((a,b)=>b.pts-a.pts);
+  const out = [];
+  for (let i=0;i<rows.length;){
+    let j=i; while(j<rows.length&&rows[j].pts===rows[i].pts) j++;
+    const cl = rows.slice(i,j);
+    if (cl.length>1){
+      const set = new Set(cl.map(r=>r.id)), h = {}; cl.forEach(r=>h[r.id]={pts:0,d:0});
+      for (const m of ms) if (m.sa!==null && set.has(m.a) && set.has(m.b)){
+        h[m.a].pts+=PTS(m.sa,m.sb);h[m.b].pts+=PTS(m.sb,m.sa);h[m.a].d+=m.sa-m.sb;h[m.b].d+=m.sb-m.sa;
+      }
+      cl.sort((x,y)=>(h[y.id].pts-h[x.id].pts)||(h[y.id].d-h[x.id].d)||((y.gf-y.ga)-(x.gf-x.ga))||(y.gf-x.gf)||(S.lot[x.id]-S.lot[y.id]));
+    }
+    out.push(...cl); i=j;
+  }
+  return {gi, rows:out, played, total:ms.length, done:played===ms.length};
+}
+function crossCmp(x,y){
+  const px=x.p||1, py=y.p||1, e=1e-9;
+  const d1=y.pts/py-x.pts/px; if (Math.abs(d1)>e) return d1;
+  const d2=(y.gf-y.ga)/py-(x.gf-x.ga)/px; if (Math.abs(d2)>e) return d2;
+  const d3=y.gf/py-x.gf/px; if (Math.abs(d3)>e) return d3;
+  return S.lot[x.id]-S.lot[y.id];
+}
+function compute(){
+  const tables = S.groups.map((_,gi)=>groupTable(gi));
+  const played = tables.reduce((a,t)=>a+t.played,0), total = S.matches.length;
+  const status = {}, qualifiers = []; let race = null;
+  S.plan.comp.forEach(c=>{
+    const k = c.place-1;
+    const cand = tables.filter(t=>t.rows.length>k).map(t=>({...t.rows[k], g:t.gi}));
+    cand.sort(crossCmp);
+    cand.forEach((r,i)=>{ const q=i<c.take; status[r.id]={q, place:c.place, partial:c.take<c.of}; if(q) qualifiers.push({id:r.id,g:r.g,place:c.place}) });
+    if (c.take < c.of) race = {c, cand};
+  });
+  return {tables, played, total, complete: played===total, status, qualifiers, race};
+}
+
+/* ---------- bracket ---------- */
+function seedOrder(P){let s=[1];while(s.length<P){const n=s.length*2;s=s.flatMap(x=>[x,n+1-x])}return s}
+function makeBracket(C){
+  const q = C.qualifiers, P = q.length;
+  const slots = seedOrder(P).map(seed=>({...q[seed-1], seed}));
+  const pairs = []; for (let i=0;i<P;i+=2) pairs.push([slots[i],slots[i+1]]);
+  // avoid same-group first-round pairs: swap lower seeds between pairs
+  for (let i=0;i<pairs.length;i++){
+    if (pairs[i][0].g !== pairs[i][1].g) continue;
+    let best=-1, bestDist=1e9;
+    for (let j=0;j<pairs.length;j++){
+      if (j===i) continue;
+      const ok = pairs[i][0].g!==pairs[j][1].g && pairs[j][0].g!==pairs[i][1].g;
+      const dist = Math.abs(pairs[i][1].seed-pairs[j][1].seed);
+      if (ok && dist<bestDist){best=j;bestDist=dist}
+    }
+    if (best>=0){const t=pairs[i][1];pairs[i][1]=pairs[best][1];pairs[best][1]=t}
+  }
+  const seeds = {}; q.forEach((x,i)=>seeds[x.id]=i+1);
+  return {P, r1:pairs.map(p=>[p[0].id,p[1].id]), seeds, res:{}, sig:q.map(x=>x.id).join(",")};
+}
+function bracketView(){
+  const B = S.bracket; if (!B) return null;
+  const R = Math.log2(B.P), rounds = [];
+  const mk = (key,a,b) => {
+    const r = B.res[key]; const ok = r && a!==null && b!==null && r.a===a && r.b===b;
+    const sa = ok?r.sa:null, sb = ok?r.sb:null;
+    return {key,a,b,sa,sb, winner: ok?(sa>sb?a:b):null, loser: ok?(sa>sb?b:a):null};
+  };
+  let cur = B.r1.map((p,i)=>mk("0-"+i,p[0],p[1])); rounds.push(cur);
+  for (let r=1;r<R;r++){
+    const nx=[]; for(let i=0;i<cur.length;i+=2) nx.push(mk(r+"-"+(i/2),cur[i].winner,cur[i+1].winner));
+    rounds.push(nx); cur = nx;
+  }
+  let third = null;
+  if (S.cfg.third && R>=2){const sf=rounds[R-2]; third=mk("t",sf[0].loser,sf[1].loser)}
+  // timing: waves after group stage
+  const T = S.cfg.stations; let w = S.plan.groupWaves;
+  rounds.forEach((rd,ri)=>{
+    const list = ri===R-1 && third ? [...rd, third] : rd;
+    list.forEach((m,i)=>{m.wave = w + Math.floor(i/T); m.st = i%T+1});
+    w += Math.ceil(list.length/T);
+  });
+  return {rounds, third, R};
+}
+const roundName = m => m===1?"Финал":m===2?"Полуфинал":"1/"+m+" финала";
+
+/* ---------- demo ---------- */
+function randScore(r, allowDraw){
+  let a=Math.floor(r()*4), b=Math.floor(r()*4);
+  if (a===b && !allowDraw){ if (r()<.5) a++; else b++ }
+  return [a,b];
+}
+function demoFillGroups(frac){
+  const r = rng32(Date.now()%100000);
+  const lastWave = frac>=1 ? Infinity : Math.floor(S.plan.groupWaves*frac);
+  S.matches.forEach(m=>{ if (m.sa===null && m.wave<lastWave){ [m.sa,m.sb]=randScore(r,S.cfg.draws) } });
+}
+function demoFillPlayoff(){
+  const r = rng32(Date.now()%100000);
+  for (let guard=0; guard<20; guard++){
+    const V = bracketView(); let changed=false;
+    for (const m of [...V.rounds.flat(), ...(V.third?[V.third]:[])]){
+      if (m.a!==null && m.b!==null && m.sa===null){ const [x,y]=randScore(r,false); S.bracket.res[m.key]={a:m.a,b:m.b,sa:x,sb:y}; changed=true }
+    }
+    if (!changed) break;
+  }
+}
+
+/* ---------- rendering ---------- */
+const nm = id => id===null||id===undefined ? "" : esc(S.names[id]);
+function scoreBox(kind,key,sa,sb,disabled){
+  const f = v => v===null||v===undefined ? "" : v;
+  const dis = disabled ? " disabled" : "";
+  return `<span class="score"><input class="sc${sa!==null?" filled":""}" id="sc-${kind}-${key}-a" data-kind="${kind}" data-key="${key}" inputmode="numeric" maxlength="3" aria-label="Счёт первого" value="${f(sa)}"${dis}>:<input class="sc${sb!==null?" filled":""}" id="sc-${kind}-${key}-b" data-kind="${kind}" data-key="${key}" inputmode="numeric" maxlength="3" aria-label="Счёт второго" value="${f(sb)}"${dis}></span>`;
+}
+function chips(C){
+  const p = S.plan, sz = {};
+  p.sizes.forEach(z=>sz[z]=(sz[z]||0)+1);
+  const gtxt = Object.entries(sz).sort((a,b)=>b[0]-a[0]).map(([z,c])=>`${c}×${z}`).join(" + ");
+  $("#chips").innerHTML = [
+    `<b>${S.names.length}</b> участников`, `<b>${p.G}</b> групп (${gtxt})`, `плей-офф <b>${p.P}</b>`,
+    `<b>${p.groupMatches+p.playoffMatches}</b> матчей`, `<b>${S.cfg.stations}</b> столов`, `≈ <b>${fmtDur(p.minutes)}</b>`,
+    `группы: <b>${C.played}/${C.total}</b>`
+  ].map(t=>`<span class="chip">${t}</span>`).join("");
+}
+function rulesHTML(cfg, p, n){
+  const sz = {}; p.sizes.forEach(z=>sz[z]=(sz[z]||0)+1);
+  const gtxt = Object.entries(sz).sort((a,b)=>b[0]-a[0]).map(([z,c])=>`${c} ${plural(c,"группа","группы","групп")} по ${z}`).join(" и ");
+  const placeWord = k => ({1:"победители",2:"вторые места",3:"третьи места",4:"четвёртые места"})[k] || k+"-е места";
+  const compTxt = p.comp.map(c=> c.take===c.of ? `все ${placeWord(c.place)} групп (${c.take})` : `${c.take} ${plural(c.take,"лучший","лучших","лучших")} из ${c.of} (${placeWord(c.place)})`).join(" + ");
+  const partial = p.comp.find(c=>c.take<c.of);
+  const minG = Math.min(...p.sizes), maxG = Math.max(...p.sizes);
+  const gamesTxt = minG===maxG ? `${minG-1}` : `${minG-1}–${maxG-1}`;
+  const R = Math.log2(p.P);
+  const rnames = []; for (let m=p.P/2;m>=1;m/=2) rnames.push(roundName(m));
+  return `<ol>
+  <li><b>Жеребьёвка.</b> ${n} участников делятся на ${p.G} групп: ${gtxt}. Распределение случайное, змейкой, поэтому размеры групп отличаются максимум на одного человека.</li>
+  <li><b>Групповой этап.</b> Внутри группы каждый играет с каждым по одному матчу, то есть ${gamesTxt} ${plural(maxG-1,"матч","матча","матчей")} на участника. Победа — 3 очка${cfg.draws?", ничья — 1":""}, поражение — 0.${cfg.draws?"":" Ничьих нет: при равном счёте играется решающий розыгрыш, в таблицу вносится итоговый счёт."}</li>
+  <li><b>Места в группе при равенстве очков:</b> очки в матчах между этими участниками → разница в этих матчах → общая разница → забито всего → жребий (фиксируется при жеребьёвке).</li>
+  <li><b>Кто проходит в плей-офф (${p.P} мест):</b> ${compTxt}.${partial?` Чтобы сравнить ${placeWord(partial.place)} из групп разного размера, используются средние за матч: очки → разница → забито → жребий.`:""}</li>
+  <li><b>Посев.</b> Сначала идут победители групп, затем вторые места и т. д.; внутри — по тем же средним показателям. Пары первого раунда: 1-й посев против ${p.P}-го, 2-й против ${p.P-1}-го и так далее. Участники из одной группы в первом раунде не встречаются, если это можно избежать обменом соседних посевов.</li>
+  <li><b>Плей-офф.</b> Одиночное выбывание, ${R} ${plural(R,"раунд","раунда","раундов")}: ${rnames.join(" → ")}. Ничьих нет${cfg.third?"; проигравшие в полуфиналах играют за 3-е место":""}.</li>
+  <li><b>Расписание.</b> Игра идёт волнами: в каждой волне все ${cfg.stations} ${plural(cfg.stations,"стол","стола","столов")} заняты одновременно, участник играет не больше одного матча за волну. Групповой этап — ${p.groupWaves} волн, плей-офф — ${p.playoffWaves}. При ${cfg.matchMin} мин на волну (матч + пересадка) всего ≈ ${fmtDur(p.minutes)}.</li>
+  </ol>`;
+}
+function scaleTable(cfg, curN){
+  let rows = "";
+  const ns = []; for (let n=50;n<=150;n+=10) ns.push(n);
+  if (!ns.includes(curN)) ns.push(curN);
+  ns.sort((a,b)=>a-b);
+  for (const n of ns){
+    const s = chooseS({...cfg,names:""}, n), p = plan(cfg, n, s);
+    const comp = p.comp.map(c=>c.take===c.of?`${c.of}×${c.place}-е`:`${c.take} лучш. ${c.place}-х`).join(" + ");
+    rows += `<tr class="${n===curN?"cur":""}"><td>${n}</td><td>${p.G} × ~${s}</td><td>${p.P}</td><td style="text-align:left">${comp}</td><td>${p.groupMatches+p.playoffMatches}</td><td>${p.groupWaves+p.playoffWaves}</td><td>${fmtDur(p.minutes)}</td></tr>`;
+  }
+  return `<div class="scroll"><table class="scale"><thead><tr><th>Участн.</th><th>Группы</th><th>Плей-офф</th><th style="text-align:left">Кто выходит</th><th>Матчей</th><th>Волн</th><th>Время</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function viewFormat(){
+  const d = draft, names = nameList(d), n = names.length;
+  const s = chooseS(d, n), p = plan(d, n, s);
+  const hasResults = S.matches.some(m=>m.sa!==null) || S.bracket;
+  const over = p.minutes > d.budgetH*60;
+  return `<div class="cols">
+  <section class="panel form" aria-label="Настройки турнира">
+    <h2>Настройка</h2>
+    <div class="field"><label for="f-n">Участников</label>
+      <div class="nrow"><input type="range" id="f-n-r" min="50" max="150" value="${Math.min(150,Math.max(50,d.n))}" data-f="n"><input type="number" id="f-n" min="8" max="256" value="${d.n}" data-f="n"></div>
+      <span class="small muted">Если ниже вписан список имён (от 8 строк), число берётся из списка: сейчас ${n}.</span></div>
+    <div class="field"><label for="f-names">Имена участников, по одному на строку</label><textarea id="f-names" data-f="names" placeholder="Анна&#10;Борис&#10;Команда «Север»&#10;…">${esc(d.names)}</textarea></div>
+    <div class="two">
+      <div class="field"><label for="f-gs">Размер группы</label><select id="f-gs" data-f="groupSize">
+        ${["auto","3","4","5"].map(v=>`<option value="${v}"${d.groupSize===v?" selected":""}>${v==="auto"?"Авто":"по "+v}</option>`).join("")}</select></div>
+      <div class="field"><label for="f-po">Плей-офф</label><select id="f-po" data-f="playoff">
+        ${["auto","8","16","32","64","128"].map(v=>`<option value="${v}"${d.playoff===v?" selected":""}>${v==="auto"?"Авто":v+" участников"}</option>`).join("")}</select></div>
+      <div class="field"><label for="f-st">Игровых столов</label><input type="number" id="f-st" min="1" max="60" value="${d.stations}" data-f="stations"></div>
+      <div class="field"><label for="f-mm">Мин на матч</label><input type="number" id="f-mm" min="2" max="120" value="${d.matchMin}" data-f="matchMin"></div>
+      <div class="field"><label for="f-bh">Лимит, часов</label><input type="number" id="f-bh" min="1" max="24" step="0.5" value="${d.budgetH}" data-f="budgetH"></div>
+      <div class="field"><label for="f-start">Начало</label><input type="time" id="f-start" value="${d.start}" data-f="start"></div>
+    </div>
+    <label class="check"><input type="checkbox" id="f-dr" data-f="draws"${d.draws?" checked":""}> Ничьи в группах разрешены</label>
+    <label class="check"><input type="checkbox" id="f-3" data-f="third"${d.third?" checked":""}> Матч за 3-е место</label>
+    <div class="preview">
+      <span class="lbl">Получится</span>
+      <div class="kv"><span>Группы</span><span>${p.G} × ~${s}${d.groupSize==="auto"?" (авто)":""}</span></div>
+      <div class="kv"><span>Плей-офф</span><span>${p.P} участников</span></div>
+      <div class="kv"><span>Матчей</span><span>${p.groupMatches} + ${p.playoffMatches}</span></div>
+      <div class="kv"><span>Волн</span><span>${p.groupWaves} + ${p.playoffWaves}</span></div>
+      <div class="kv"><span>Время</span><span style="color:${over?"var(--bad)":"inherit"}">≈ ${fmtDur(p.minutes)}${over?" — больше лимита":""}</span></div>
+    </div>
+    <div class="row">
+      <button class="primary" id="b-create" data-confirm="${hasResults?1:""}">Создать турнир</button>
+      <button id="b-draft-reset">Вернуть текущие</button>
+    </div>
+    <span class="small muted">«Создать турнир» заново проводит жеребьёвку и стирает введённые результаты.</span>
+  </section>
+  <div style="display:flex;flex-direction:column;gap:20px;min-width:0">
+    ${S.demo?`<div class="banner"><p><b>Это пример.</b> Участники и часть результатов сгенерированы, чтобы было видно, как всё работает. Введите своих участников слева и нажмите «Создать турнир».</p></div>`:""}
+    <section class="panel rules"><h2>Правила этого турнира</h2>${rulesHTML(S.cfg, S.plan, S.names.length)}</section>
+    <section class="panel"><h2>Как формат зависит от числа участников</h2>
+      <p class="muted small">При текущих настройках (${d.stations} столов, ${d.matchMin} мин на матч, лимит ${d.budgetH} ч${d.groupSize==="auto"?", размер группы — авто: 4, а если не влезает в лимит — 3":""}). Выделена строка для ${n}.</p>
+      ${scaleTable(d, n)}</section>
+    <section class="panel"><h2>Резервная копия</h2>
+      <p class="small muted">Турнир хранится только в этом браузере. Скопируйте копию, чтобы перенести на другое устройство или не потерять.</p>
+      <div class="row"><button id="b-export">Скопировать турнир</button><button id="b-import">Загрузить из поля</button></div>
+      <div class="field" style="margin-top:10px"><label for="f-json">Данные турнира (JSON)</label><textarea id="f-json" placeholder="Вставьте сюда скопированный турнир"></textarea></div>
+    </section>
+  </div></div>`;
+}
+
+function stRows(t, C, hl){
+  return t.rows.map((r,i)=>{
+    const st = C.status[r.id];
+    const cls = (st ? (st.q ? (st.partial ? "c":"q") : "") : "") + (hl.has(r.id)?" hl":"");
+    return `<tr class="${cls}"><td>${i+1}</td><td class="nm" style="text-align:left" title="${nm(r.id)}">${nm(r.id)}</td><td>${r.p}</td><td>${r.w}</td>${S.cfg.draws?`<td>${r.d}</td>`:""}<td>${r.l}</td><td>${r.gf}–${r.ga}</td><td class="pts">${r.pts}</td></tr>`;
+  }).join("");
+}
+function hlSet(){
+  if (!query) return new Set();
+  const q = query.toLowerCase(); const s = new Set();
+  S.names.forEach((n,i)=>{ if (n.toLowerCase().includes(q)) s.add(i) });
+  return s;
+}
+function viewGroups(C){
+  const hl = hlSet();
+  const pct = Math.round(C.played/C.total*100);
+  let race = "";
+  if (C.race){
+    const {c,cand} = C.race;
+    const label = c.place===1?"победителей":c.place===2?"вторых мест":c.place+"-х мест";
+    race = `<section class="panel race"><h2>Гонка ${label}</h2>
+    <p class="small muted">Проходят ${c.take} из ${c.of}. Сравнение по средним за матч, потому что группы бывают разного размера.${C.complete?"":" Пока группы не доиграны, это промежуточная картина."}</p>
+    <div class="scroll"><table><thead><tr><th>#</th><th style="text-align:left">Участник</th><th>Гр.</th><th>И</th><th>Очки/матч</th><th>Разн./матч</th><th>Забито/матч</th></tr></thead><tbody>
+    ${cand.slice(0, c.take+8).map((r,i)=>{const p=r.p||1;return `<tr${i<c.take?' class="q"':""}><td class="${i===c.take?"cut":""}">${i+1}</td><td class="${i===c.take?"cut":""}" style="text-align:left">${nm(r.id)}</td><td class="${i===c.take?"cut":""}">${gName(r.g)}</td><td class="${i===c.take?"cut":""}">${r.p}</td><td class="${i===c.take?"cut":""}">${(r.pts/p).toFixed(2)}</td><td class="${i===c.take?"cut":""}">${((r.gf-r.ga)/p).toFixed(2)}</td><td class="${i===c.take?"cut":""}">${(r.gf/p).toFixed(2)}</td></tr>`}).join("")}
+    </tbody></table></div></section>`;
+  }
+  const cards = C.tables.map(t=>{
+    const ms = S.matches.filter(m=>m.g===t.gi).sort((a,b)=>a.wave-b.wave);
+    const open = hl.size && t.rows.some(r=>hl.has(r.id));
+    return `<article class="gcard"><div class="ghead"><span class="gname">Группа ${gName(t.gi)}</span><span class="small muted">${t.played}/${t.total} матчей${t.done?" ✓":""}</span></div>
+    <div class="scroll"><table class="st"><thead><tr><th>#</th><th style="text-align:left">Участник</th><th>И</th><th>В</th>${S.cfg.draws?"<th>Н</th>":""}<th>П</th><th>Счёт</th><th>О</th></tr></thead><tbody>${stRows(t,C,hl)}</tbody></table></div>
+    <details class="ms"${open?" open":""}><summary>Матчи и счёт</summary><div class="mlist">
+    ${ms.map(m=>`<div class="mrow"><span class="a${m.sa!==null&&m.sa>m.sb?" win":""}">${nm(m.a)}</span>${scoreBox("g",m.id,m.sa,m.sb)}<span class="b${m.sa!==null&&m.sb>m.sa?" win":""}">${nm(m.b)}</span><span class="meta">волна ${m.wave+1} · стол ${m.st} · ${clock(S.cfg.start,m.wave*S.cfg.matchMin)}</span></div>`).join("")}
+    </div></details></article>`;
+  }).join("");
+  return `${S.demo?`<div class="banner"><p><b>Пример с выдуманными результатами.</b> Свой турнир создаётся на вкладке «Формат».</p></div>`:""}
+  <div class="row" style="justify-content:space-between;align-items:flex-end;margin-bottom:6px">
+    <div style="flex:1 1 260px;min-width:0"><h2>Групповой этап</h2><div class="progress"><i style="width:${pct}%"></i></div><span class="small muted">Сыграно ${C.played} из ${C.total} (${pct}%)</span></div>
+    <div class="row"><input class="search" id="q-g" type="search" placeholder="Найти участника" value="${esc(query)}" style="max-width:220px"><button id="b-demo-g">Заполнить случайно</button></div>
+  </div>
+  <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>проходит в плей-офф</span>${C.race?`<span><i class="sw" style="background:var(--gold)"></i>проходит как один из лучших (может измениться)</span>`:""}</div>
+  ${race}<div class="ggrid">${cards}</div>`;
+}
+
+function viewSchedule(C){
+  const hl = hlSet(), T = S.cfg.stations;
+  const byWave = [];
+  S.matches.forEach(m=>(byWave[m.wave] ||= []).push(m));
+  const nowWave = byWave.findIndex(w=>w.some(m=>m.sa===null));
+  let found = "";
+  if (hl.size){
+    const items = S.matches.filter(m=>hl.has(m.a)||hl.has(m.b)).sort((a,b)=>a.wave-b.wave);
+    found = items.length ? `<div class="found">${items.slice(0,12).map(m=>`<span class="tag">волна ${m.wave+1}, стол ${m.st}: ${nm(m.a)} — ${nm(m.b)}</span>`).join(" ")}${items.length>12?" …":""}</div>` : `<span class="small muted">Никого не нашлось</span>`;
+  }
+  const waves = byWave.map((list,w)=>{
+    const done = list.every(m=>m.sa!==null), now = w===nowWave;
+    list.sort((a,b)=>a.st-b.st);
+    return `<section class="wave${now?" now":""}" id="wave-${w}"><div class="whead"><span class="wn">Волна ${w+1}</span><span class="muted">${clock(S.cfg.start,w*S.cfg.matchMin)}</span>
+      <span class="tag${done?" done":now?" now":""}">${done?"сыграна":now?"сейчас":"впереди"}</span><span class="small muted">${list.length} из ${T} столов</span></div>
+      <div class="stations">${list.map(m=>`<div class="stn${hl.has(m.a)||hl.has(m.b)?" hit":""}"><span class="sn"><span>Стол ${m.st}</span><span>группа ${gName(m.g)}</span></span>
+      <div class="mrow"><span class="a${m.sa!==null&&m.sa>m.sb?" win":""}">${nm(m.a)}</span>${scoreBox("g",m.id,m.sa,m.sb)}<span class="b${m.sa!==null&&m.sb>m.sa?" win":""}">${nm(m.b)}</span></div></div>`).join("")}</div></section>`;
+  }).join("");
+  let po = "";
+  const V = bracketView();
+  if (V){
+    const all = []; V.rounds.forEach((rd,ri)=>rd.forEach(m=>all.push({...m,rn:roundName(rd.length)}))); if (V.third) all.push({...V.third,rn:"За 3-е место"});
+    const bw = {}; all.forEach(m=>(bw[m.wave] ||= []).push(m));
+    po = `<h2 class="sect">Плей-офф</h2><div class="waves">${Object.keys(bw).map(Number).sort((a,b)=>a-b).map(w=>`<section class="wave"><div class="whead"><span class="wn">Волна ${w+1}</span><span class="muted">${clock(S.cfg.start,w*S.cfg.matchMin)}</span></div><div class="stations">
+      ${bw[w].map(m=>`<div class="stn${hl.has(m.a)||hl.has(m.b)?" hit":""}"><span class="sn"><span>Стол ${m.st}</span><span>${m.rn}</span></span><div class="mrow"><span class="a">${m.a!==null?nm(m.a):'<span class="muted">ждёт</span>'}</span><span class="muted">${m.sa!==null?m.sa+":"+m.sb:"–:–"}</span><span class="b">${m.b!==null?nm(m.b):'<span class="muted">ждёт</span>'}</span></div></div>`).join("")}</div></section>`).join("")}</div>`;
+  }
+  return `<h2>Расписание по столам</h2>
+  <p class="muted">Каждая волна — это одновременный запуск всех столов. Ведущий объявляет волну, участники идут к своему столу, после матча счёт вводится прямо сюда.</p>
+  <div class="searchbar"><input class="search" id="q-s" type="search" placeholder="Где я играю? Введите имя" value="${esc(query)}">${nowWave>=0?`<a class="btn" href="#wave-${nowWave}" id="b-jump">К текущей волне (${nowWave+1})</a>`:'<span class="tag done">Групповой этап завершён</span>'}</div>
+  ${found}<div class="waves" style="margin-top:12px">${waves}</div>${po}`;
+}
+
+function viewPlayoff(C){
+  const sig = C.qualifiers.map(x=>x.id).join(",");
+  if (!S.bracket){
+    const list = C.qualifiers.map((x,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${nm(x.id)}</td><td>${gName(x.g)}</td><td>${x.place}-е место</td></tr>`).join("");
+    return `<h2>Плей-офф на ${S.plan.P}</h2>
+    ${C.complete?`<div class="banner ok"><p>Групповой этап завершён. Сетка составляется по посеву ниже.</p><button class="primary" id="b-bracket">Сформировать сетку</button></div>`
+    :`<div class="banner"><p>Сыграно ${C.played} из ${C.total} групповых матчей. Сетка формируется, когда группы доиграны. Ниже — посев, если бы этап закончился сейчас.</p><button id="b-demo-g2">Доиграть группы случайно (демо)</button></div>`}
+    <div class="panel"><div class="scroll"><table><thead><tr><th>Посев</th><th style="text-align:left">Участник</th><th>Группа</th><th>Место</th></tr></thead><tbody>${list}</tbody></table></div></div>`;
+  }
+  const V = bracketView();
+  const stale = S.bracket.sig !== sig;
+  const final = V.rounds[V.R-1][0];
+  const box = (m, title) => {
+    const side = (id, sc, k) => {
+      const won = m.winner!==null && m.winner===id, lost = m.winner!==null && m.winner!==id;
+      return `<div class="side${won?" win":""}${lost?" lose":""}"><span class="seed">${id!==null?S.bracket.seeds[id]:""}</span><span class="nm">${id!==null?nm(id):'<span class="tbd">ждёт соперника</span>'}</span>${k==="a"?"":""}</div>`;
+    };
+    return `<div class="pm${m.winner!==null?" done":""}">${title?`<span class="when"><b>${title}</b></span>`:""}
+      ${side(m.a)}${side(m.b)}
+      <div class="row" style="justify-content:space-between"><span class="when">волна ${m.wave+1} · стол ${m.st} · ${clock(S.cfg.start,m.wave*S.cfg.matchMin)}</span>${scoreBox("p",m.key,m.sa,m.sb,m.a===null||m.b===null)}</div></div>`;
+  };
+  const cols = V.rounds.map((rd,ri)=>`<div class="rnd"><h3>${roundName(rd.length)}</h3><div class="rcol">${rd.map(m=>box(m)).join("")}${ri===V.R-1&&V.third?box(V.third,"Матч за 3-е место"):""}</div></div>`).join("");
+  return `<div class="row" style="justify-content:space-between;margin-bottom:10px"><h2 style="margin:0">Плей-офф на ${S.bracket.P}</h2>
+    <div class="row"><button id="b-demo-p">Заполнить случайно</button><button class="warn" id="b-rebracket" data-confirm="1">Пересобрать сетку</button></div></div>
+  ${stale?`<div class="banner bad"><p>Результаты групп изменились после того, как сетка была составлена: состав или посев теперь другие. Пересоберите сетку, если это нужно (введённые счета плей-офф сотрутся).</p></div>`:""}
+  ${final.winner!==null?`<div class="banner ok"><p><span class="lbl">Победитель</span><br><span class="champion">${nm(final.winner)}</span>${V.third&&V.third.winner!==null?`<br><span class="small">2-е место — ${nm(final.loser)}, 3-е место — ${nm(V.third.winner)}</span>`:""}</p></div>`:""}
+  <p class="muted small">Счёт вводится справа внизу у каждого матча; победитель сам переходит в следующий раунд. Ничьих нет: если игра закончилась вничью, впишите счёт после решающего розыгрыша. Число слева от имени — посев.</p>
+  <div class="bracket">${cols}</div>`;
+}
+
+function render(){
+  const fid = document.activeElement && document.activeElement.id;
+  const C = compute();
+  chips(C);
+  document.querySelectorAll("#tabs a").forEach(a=>a.setAttribute("aria-current", a.dataset.tab===tab?"page":"false"));
+  const v = $("#view");
+  v.innerHTML = tab==="groups"?viewGroups(C):tab==="schedule"?viewSchedule(C):tab==="playoff"?viewPlayoff(C):viewFormat();
+  if (fid){const el=document.getElementById(fid); if (el){el.focus(); if (el.setSelectionRange && el.type==="search") el.setSelectionRange(el.value.length,el.value.length)}}
+}
+
+/* ---------- events ---------- */
+function commitScore(inp){
+  const box = inp.closest(".score"), [ia,ib] = box.querySelectorAll(".sc");
+  const va = ia.value.trim(), vb = ib.value.trim();
+  const kind = inp.dataset.kind, key = inp.dataset.key;
+  const valid = v => /^\d{1,3}$/.test(v);
+  if (va==="" && vb===""){
+    if (kind==="g"){const m=S.matches[+key]; m.sa=m.sb=null} else delete S.bracket.res[key];
+    S.demo=false; save(); setTimeout(render,0); return;
+  }
+  if (va==="" || vb==="") return; // wait for the second number
+  if (!valid(va) || !valid(vb)){toast("Счёт — целые числа от 0"); return}
+  const a = +va, b = +vb;
+  if (kind==="g"){
+    if (!S.cfg.draws && a===b){toast("Ничьи выключены: впишите счёт после решающего розыгрыша"); return}
+    const m = S.matches[+key]; m.sa=a; m.sb=b;
+  } else {
+    if (a===b){toast("В плей-офф нужен победитель: впишите итоговый счёт после овертайма"); return}
+    const V = bracketView(); const m = [...V.rounds.flat(), ...(V.third?[V.third]:[])].find(x=>x.key===key);
+    if (!m || m.a===null || m.b===null) return;
+    S.bracket.res[key] = {a:m.a,b:m.b,sa:a,sb:b};
+  }
+  save(); setTimeout(render,0);
+}
+function confirmed(btn){
+  if (!btn.dataset.confirm) return true;
+  if (btn.dataset.armed){return true}
+  btn.dataset.armed="1"; const old=btn.textContent; btn.textContent="Нажмите ещё раз — данные сотрутся";
+  setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=old}},3500);
+  return false;
+}
+document.addEventListener("change", e=>{
+  const t = e.target;
+  if (t.classList.contains("sc")) return commitScore(t);
+  if (t.dataset.f){
+    const f = t.dataset.f;
+    let v = t.type==="checkbox" ? t.checked : t.value;
+    if (["n","stations","matchMin","budgetH"].includes(f)){
+      v = +v; const lim = {n:[8,256],stations:[1,60],matchMin:[2,120],budgetH:[1,24]}[f];
+      if (!isFinite(v)) v = DEF[f]; v = Math.min(lim[1],Math.max(lim[0],v)); if (f!=="budgetH") v=Math.round(v);
+    }
+    draft[f] = v; setTimeout(render,0);
+  }
+});
+document.addEventListener("input", e=>{
+  const t = e.target;
+  if (t.id==="f-n-r"){draft.n=+t.value; const num=$("#f-n"); if(num) num.value=t.value}
+  if (t.id==="q-g"||t.id==="q-s"){query=t.value; clearTimeout(t._d); t._d=setTimeout(render,250)}
+});
+document.addEventListener("keydown", e=>{ if (e.key==="Enter" && e.target.classList && e.target.classList.contains("sc")) e.target.blur() });
+document.addEventListener("click", e=>{
+  const b = e.target.closest("button"); if (!b) return;
+  switch (b.id){
+    case "b-create":
+      if (!confirmed(b)) return;
+      S = create(draft, Math.floor(Math.random()*1e9)); draft={...S.cfg}; save(); tab="groups"; location.hash="groups"; render(); toast("Турнир создан, жеребьёвка проведена"); break;
+    case "b-draft-reset": draft={...S.cfg}; render(); break;
+    case "b-demo-g": case "b-demo-g2": demoFillGroups(1); save(); render(); break;
+    case "b-bracket": S.bracket = makeBracket(compute()); save(); render(); break;
+    case "b-rebracket": if (!confirmed(b)) return; S.bracket = makeBracket(compute()); save(); render(); break;
+    case "b-demo-p": demoFillPlayoff(); save(); render(); break;
+    case "b-export": {
+      const txt = JSON.stringify(S); const ta=$("#f-json"); ta.value = txt;
+      (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(()=>toast("Скопировано в буфер обмена"), ()=>{ta.select();toast("Текст выделен в поле — скопируйте его вручную")});
+      break; }
+    case "b-import": {
+      try { const o = JSON.parse($("#f-json").value); if (!o.matches||!o.groups||!o.names) throw 0; S=o; draft={...S.cfg}; save(); render(); toast("Турнир загружен") }
+      catch(err){ toast("Не получилось прочитать данные: вставьте текст, скопированный кнопкой «Скопировать турнир»") }
+      break; }
+  }
+});
+function route(){const h=location.hash.slice(1); tab=["format","groups","schedule","playoff"].includes(h)?h:"format"; render()}
+window.addEventListener("hashchange", route);
+
+/* ---------- boot ---------- */
+S = load();
+if (!S || !S.matches){
+  S = create(DEF, 20261115); S.demo = true; demoFillGroups(0.55);
+}
+draft = {...S.cfg};
+route();
+</script>
+
+</body>
+</html>
