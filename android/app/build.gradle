@@ -1,0 +1,62 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.goosegambler.sheet'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.goosegambler.sheet'
+        minSdk 24
+        targetSdk 34
+        versionCode 2
+        versionName '2.0'
+    }
+
+    // Ключ лежит в репозитории, чтобы любые следующие сборки ставились поверх
+    // старой версии без удаления (и без потери данных персонажа).
+    signingConfigs {
+        release {
+            storeFile rootProject.file('goose-release.jks')
+            storePassword 'goosegambler'
+            keyAlias 'goose'
+            keyPassword 'goosegambler'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        main {
+            assets.srcDirs += layout.buildDirectory.dir('webassets').get().asFile
+        }
+    }
+}
+
+// Веб-часть берётся из папки goose-gambler/ — один источник для APK и для веб-версии.
+tasks.register('copyWeb', Copy) {
+    from(rootProject.file('../goose-gambler')) {
+        include 'index.html', 'icon.svg'
+    }
+    into layout.buildDirectory.dir('webassets/www')
+}
+preBuild.dependsOn 'copyWeb'

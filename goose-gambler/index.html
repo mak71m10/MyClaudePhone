@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-<meta name="theme-color" content="#16121f">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#120f1a">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Гусь-Игрок</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -13,145 +13,194 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{
-  --bg:#16121f;--card:#221c30;--card2:#2b2440;--line:#3a3150;--text:#f1ecf9;--muted:#a79fbd;
-  --gold:#f5c542;--red:#ef5a6f;--green:#4fd18b;--blue:#5ab0ff;--purple:#b78cff;--orange:#f08a24;
-  --r:14px;
+  --bg:#120f1a;--bg2:#17131f;--card:#1f1a2b;--card2:#2a2339;--card3:#352c48;--line:#352d47;
+  --text:#f3eefb;--muted:#9f96b6;--dim:#6f6787;
+  --gold:#f5c542;--red:#ff5d73;--green:#45d68a;--blue:#58aefc;--purple:#b48cff;--orange:#ff9a3c;--teal:#3fd0c9;
+  --r:16px;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
 html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-body{padding-bottom:calc(132px + env(safe-area-inset-bottom));overscroll-behavior-y:contain}
-button{font:inherit;color:inherit;border:0;cursor:pointer}
-input,select,textarea{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%}
-textarea{min-height:120px;resize:vertical}
-h2{font-size:17px;margin:0 0 10px}
-h3{font-size:15px;margin:0 0 6px}
-small,.muted{color:var(--muted)}
+body{padding-bottom:calc(122px + env(safe-area-inset-bottom));overscroll-behavior-y:contain}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none}
+input,select,textarea{font:inherit;color:var(--text);background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:9px 11px;width:100%;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{min-height:130px;resize:vertical;line-height:1.45}
+h2{font-size:15px;margin:0;display:flex;align-items:center;gap:8px}
+h2 .ic{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--card2);font-size:16px;flex:none}
+h2 small{font-weight:500;color:var(--muted);font-size:12px}
+h3{font-size:14px;margin:0 0 4px}
+.muted{color:var(--muted)}
 .wrap{max-width:720px;margin:0 auto;padding:0 12px}
 
-/* шапка */
-header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 80%,transparent);padding:calc(8px + env(safe-area-inset-top)) 0 6px}
+header{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 88%,rgba(18,15,26,0) 100%);padding:calc(8px + env(safe-area-inset-top)) 0 6px}
 .hero{display:flex;align-items:center;gap:10px}
-.avatar{width:46px;height:46px;border-radius:12px;background:var(--card2);display:grid;place-items:center;font-size:28px;flex:none}
-.hero .nm{font-weight:700;font-size:17px;line-height:1.1}
+.avatar{width:48px;height:48px;border-radius:15px;background:linear-gradient(140deg,#3b2f57,#231c33);display:grid;place-items:center;font-size:29px;flex:none;box-shadow:inset 0 0 0 1px #4a3d68}
+.hero .nm{font-weight:800;font-size:17px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hero .sub{font-size:12px;color:var(--muted)}
-.honkbtn{margin-left:auto;background:var(--orange);color:#1b1306;font-weight:800;border-radius:12px;padding:10px 12px;font-size:14px;box-shadow:0 3px 0 #9a5410}
-.honkbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #9a5410}
+.honkbtn{margin-left:auto;background:linear-gradient(180deg,#ffb35c,#ff8a1f);color:#2b1503;font-weight:900;border-radius:14px;padding:10px 13px;font-size:14px;box-shadow:0 4px 0 #a5520c;flex:none}
+.honkbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #a5520c}
 
-.hpbar{margin-top:8px;background:var(--card);border-radius:var(--r);padding:8px 10px;display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
-.hpnum{font-weight:800;font-size:22px;min-width:86px}
-.hpnum small{font-size:13px;font-weight:600}
-.meter{height:12px;background:#120e1b;border-radius:8px;overflow:hidden;position:relative}
-.meter>i{position:absolute;inset:0 auto 0 0;background:var(--green);border-radius:8px;transition:width .25s}
-.meter>b{position:absolute;inset:0 auto 0 0;background:var(--blue);opacity:.75;border-radius:8px}
+.hpcard{margin-top:8px;background:var(--card);border-radius:var(--r);padding:9px 10px;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;box-shadow:inset 0 0 0 1px var(--line)}
+.hpnum{font-weight:900;font-size:26px;min-width:84px;line-height:1;text-align:left}
+.hpnum small{font-size:13px;font-weight:600;color:var(--muted)}
+.hpnum .tmp{display:block;font-size:11px;color:var(--blue);font-weight:700;margin-top:2px}
+.meter{height:14px;background:#0c0a12;border-radius:9px;overflow:hidden;position:relative}
+.meter>i{position:absolute;inset:0 auto 0 0;background:var(--green);border-radius:9px;transition:width .3s,background .3s}
+.meter>b{position:absolute;inset:0 auto 0 0;background:repeating-linear-gradient(45deg,#58aefc,#58aefc 4px,#3f8fd8 4px,#3f8fd8 8px);opacity:.85;border-radius:9px}
+.hpsub{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hpbtns{display:flex;gap:6px}
-.hpbtns button{background:var(--card2);border-radius:10px;padding:8px 10px;font-weight:700}
-.hpbtns .dmg{background:#4a1e2a;color:#ffb3bf}.hpbtns .heal{background:#173d2b;color:#a8f0c8}
+.hpbtns button{border-radius:12px;width:44px;height:44px;font-weight:900;font-size:22px}
+.hpbtns .dmg{background:#4a1b29;color:#ff9fb0}.hpbtns .heal{background:#163e2b;color:#9ff0c6}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
-.stat{background:var(--card);border-radius:12px;padding:6px 4px;text-align:center}
-.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.stat{background:var(--card);border-radius:13px;padding:6px 3px;text-align:center;box-shadow:inset 0 0 0 1px var(--line)}
+.stat b{display:block;font-size:19px;line-height:1.15}.stat span{font-size:10.5px;color:var(--muted)}
 button.stat:active{background:var(--card2)}
 
-/* вкладки */
-nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#120e1b;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-nav.tabs button{flex:1;background:none;padding:8px 2px 9px;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
-nav.tabs button i{font-style:normal;font-size:20px}
-nav.tabs button.on{color:var(--gold)}
-.page{display:none;padding-top:6px}.page.on{display:block}
+.cstrip{display:none;margin-top:6px;background:linear-gradient(90deg,#3a1520,#271532);border-radius:13px;padding:7px 9px;align-items:center;gap:6px;box-shadow:inset 0 0 0 1px #5a2a3d}
+.cstrip.on{display:flex}
+.cstrip .rd{font-weight:900;font-size:13px;white-space:nowrap}
+.econ{display:flex;gap:4px;flex:1;justify-content:center}
+.econ span{font-size:10.5px;font-weight:700;padding:4px 6px;border-radius:9px;background:#1d4d35;color:#b9f5d4}
+.econ span.used{background:#2a2339;color:#6f6787;text-decoration:line-through}
+.cstrip .nx{background:var(--gold);color:#241a02;font-weight:800;border-radius:10px;padding:6px 9px;font-size:12px;white-space:nowrap}
 
-/* броски: панель режима */
-.rollmode{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));z-index:29;display:flex;justify-content:center;gap:6px;padding:6px;background:linear-gradient(0deg,var(--bg) 70%,transparent)}
-.rollmode button{background:var(--card2);border-radius:20px;padding:7px 12px;font-size:13px;font-weight:600}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(14,11,20,.97);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;padding:7px 2px 8px;font-size:10.5px;color:var(--dim);display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+nav.tabs button i{font-style:normal;font-size:21px;filter:grayscale(1);opacity:.6;transition:.15s}
+nav.tabs button.on{color:var(--gold)}
+nav.tabs button.on i{filter:none;opacity:1;transform:translateY(-1px)}
+nav.tabs button.on::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--gold)}
+.page{display:none;padding-top:4px}.page.on{display:block;animation:fade .18s}
+@keyframes fade{from{opacity:.3;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.rollmode{position:fixed;left:0;right:0;bottom:calc(56px + env(safe-area-inset-bottom));z-index:29;display:flex;justify-content:center;gap:5px;padding:6px 8px;background:linear-gradient(0deg,var(--bg) 65%,rgba(18,15,26,0))}
+.rollmode button{background:var(--card2);border-radius:20px;padding:7px 13px;font-size:13px;font-weight:700;color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .rollmode button.on.adv{background:var(--green);color:#082414}
 .rollmode button.on.nor{background:var(--text);color:#16121f}
 .rollmode button.on.dis{background:var(--red);color:#2a060c}
-.rollmode .flag{font-size:11px;color:var(--gold);align-self:center;max-width:120px;line-height:1.1}
+.rollmode .flag{position:absolute;bottom:100%;left:0;right:0;text-align:center;font-size:11px;color:var(--gold);font-weight:700;pointer-events:none;padding:0 8px}
 
-.card{background:var(--card);border-radius:var(--r);padding:12px;margin:10px 0}
+.card{background:var(--card);border-radius:var(--r);padding:12px;margin:10px 0;box-shadow:inset 0 0 0 1px var(--line)}
+.card>h2{margin-bottom:10px}
 .row{display:flex;gap:8px;align-items:center}
-.row.wrapr{flex-wrap:wrap}
-.grow{flex:1}
-.btn{background:var(--card2);border-radius:12px;padding:10px 12px;font-weight:600;text-align:center}
-.btn:active{filter:brightness(1.25)}
-.btn.gold{background:var(--gold);color:#241a02}
-.btn.red{background:#5a2232;color:#ffc4cf}
-.btn.green{background:#1d4d35;color:#b9f5d4}
-.btn.blue{background:#1d3b5c;color:#c4e2ff}
-.btn.purple{background:#3c2a63;color:#e3d4ff}
-.btn.sm{padding:6px 9px;font-size:13px;border-radius:10px}
-.btn:disabled{opacity:.35}
+.wrapr{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.btn{background:var(--card2);border-radius:13px;padding:11px 12px;font-weight:700;text-align:center;transition:transform .06s}
+.btn:active{transform:scale(.97);filter:brightness(1.2)}
+.btn.gold{background:linear-gradient(180deg,#ffd76a,#f0b92c);color:#241a02}
+.btn.red{background:#57202f;color:#ffc4cf}
+.btn.green{background:#1b4a33;color:#b9f5d4}
+.btn.blue{background:#1b3a5b;color:#c4e2ff}
+.btn.purple{background:#3a2961;color:#e3d4ff}
+.btn.teal{background:#15443f;color:#b5f3ee}
+.btn.ghost{background:transparent;box-shadow:inset 0 0 0 1px var(--line);color:var(--muted)}
+.btn.sm{padding:7px 10px;font-size:13px;border-radius:11px}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.33;pointer-events:none}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
 
-.abil{background:var(--card2);border-radius:12px;padding:8px 4px;text-align:center}
-.abil .m{font-size:22px;font-weight:800}.abil .s{font-size:12px;color:var(--muted)}.abil .n{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.list>div{display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.abil{background:var(--card2);border-radius:14px;padding:9px 4px;text-align:center}
+.abil:active{background:var(--card3)}
+.abil .m{font-size:24px;font-weight:900;line-height:1.1}.abil .s{display:inline-block;font-size:12px;color:var(--muted);background:var(--bg2);border-radius:8px;padding:0 7px;margin-top:2px}.abil .n{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.list>div{display:flex;align-items:center;gap:9px;padding:10px 4px;border-bottom:1px solid var(--line)}
 .list>div:last-child{border-bottom:0}
-.list .v{font-weight:800;min-width:40px;text-align:right}
-.dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--muted);flex:none}
-.dot.p{background:var(--muted)}.dot.e{background:var(--gold);border-color:var(--gold)}
+.list>div:active{background:var(--card2);border-radius:10px}
+.list .v{font-weight:900;min-width:42px;text-align:center;background:var(--card2);border-radius:9px;padding:3px 0}
+.dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--dim);flex:none}
+.dot.p{background:var(--text);border-color:var(--text)}.dot.e{background:var(--gold);border-color:var(--gold);box-shadow:0 0 0 2px #4a3b0f}
 
-.attack{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
-.attack:last-child{border-bottom:0}
-.attack .nm{font-weight:700}.attack small{display:block}
+.weapon{display:grid;grid-template-columns:1fr auto;gap:6px 8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.weapon:last-child{border-bottom:0}
+.weapon .nm{font-weight:800}
+.weapon .info{font-size:12.5px;color:var(--muted)}
+.weapon .acts{display:flex;gap:6px}
 
 .pips{display:flex;gap:5px;flex-wrap:wrap}
-.pip{width:22px;height:22px;border-radius:7px;background:var(--gold);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
-.pip.used{background:#3a3150;box-shadow:none}
-.coin{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe48a,#d4a017);border:2px solid #8a6400}
-.coin.dm{background:radial-gradient(circle at 35% 35%,#d7b3ff,#7b4cc4);border-color:#4a2a80}
+.pip{width:20px;height:20px;border-radius:7px;background:var(--gold);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25)}
+.pip.used{background:#2e2740;box-shadow:inset 0 0 0 1px var(--line)}
+.pip.red{background:var(--red)}
+.coin{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe9a0,#d4a017);border:2px solid #8a6400;box-shadow:0 2px 0 #5c4300}
 
-.tag{display:inline-block;background:var(--card2);border-radius:8px;padding:2px 7px;font-size:12px;color:var(--muted);margin:2px 3px 0 0}
-.tag.gold{background:#4a3b0f;color:var(--gold)}
-.tag.on{background:#1d4d35;color:#b9f5d4}
-.feat{padding:10px 0;border-bottom:1px solid var(--line)}
+.tag{display:inline-block;background:var(--card2);border-radius:8px;padding:2px 8px;font-size:11.5px;color:var(--muted);margin:3px 4px 0 0}
+.tag.gold{background:#463710;color:var(--gold)}
+.tag.on{background:#1b4a33;color:#b9f5d4}
+.tag.red{background:#4d1b28;color:#ffb0bf}
+.feat{padding:11px 0;border-bottom:1px solid var(--line)}
 .feat:last-child{border-bottom:0}
-.feat .lv{font-size:11px;color:var(--gold);font-weight:700}
-.feat p{margin:4px 0 0;color:#d6cfe6;font-size:14px}
-.locked{opacity:.4}
-.note{font-size:12px;color:var(--muted);border-left:3px solid var(--gold);padding-left:8px;margin-top:8px}
+.feat .lv{font-size:11px;color:var(--gold);font-weight:800}
+.feat p{margin:4px 0 0;color:#d9d2e8;font-size:14px}
+.locked{opacity:.38}
+.note{font-size:12.5px;color:var(--muted);border-left:3px solid var(--gold);padding:2px 0 2px 9px;margin-top:10px}
 
-.die{background:var(--card2);border-radius:14px;padding:10px;text-align:center}
-.die .big{font-size:26px;font-weight:900}
-.die.active{outline:2px solid var(--gold)}
-.die .eff{font-size:12px;color:var(--muted);min-height:16px}
+.dice{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.die{border-radius:15px;padding:10px;text-align:center;background:var(--card2)}
+.die .shape{font-size:25px;font-weight:900}
+.die .t{font-size:12px;font-weight:700;color:#d9d2e8}
+.die .eff{font-size:11.5px;color:var(--muted);min-height:30px;margin:4px 0;line-height:1.25}
+.die.active{box-shadow:0 0 0 2px var(--gold) inset}
+.die.d4{background:linear-gradient(160deg,#1d3a5c,#1a2233)}
+.die.d6{background:linear-gradient(160deg,#1b4a33,#172620)}
+.die.d8{background:linear-gradient(160deg,#3a2961,#1f1a30)}
+.die.d10{background:linear-gradient(160deg,#5a2030,#26161d)}
+.die .pips{justify-content:center;margin:4px 0 7px}
+.die .pip{width:14px;height:14px;border-radius:5px}
 
-.spell{padding:10px 0;border-bottom:1px solid var(--line)}
+.eff-item{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--card2);margin-top:6px}
+.eff-item .n{flex:1;font-size:13.5px}
+.eff-item .left{font-size:12px;font-weight:800;color:var(--gold);white-space:nowrap}
+.eff-item button{color:var(--muted);font-size:18px;padding:0 4px}
+
+.spell{padding:11px 0;border-bottom:1px solid var(--line)}
 .spell:last-child{border-bottom:0}
 .spell .top{display:flex;align-items:center;gap:8px}
 .spell .nm{font-weight:700;flex:1}
-.spell .d{display:none;margin-top:6px;font-size:14px;color:#d6cfe6}
+.spell .d{display:none;margin-top:7px;font-size:14px;color:#d9d2e8}
 .spell.open .d{display:block}
-.slotrow{display:flex;align-items:center;gap:8px;padding:6px 0}
-.slotrow b{width:52px}
+.slotrow{display:flex;align-items:center;gap:10px;padding:7px 0}
+.slotrow b{width:52px;font-size:13px}
+.slotrow .pip{width:26px;height:26px;border-radius:9px}
 
 .log{font-size:13px}
-.log div{padding:6px 0;border-bottom:1px solid var(--line)}
-.log time{color:var(--muted);font-size:11px;margin-right:6px}
+.log div{padding:7px 0;border-bottom:1px solid var(--line)}
+.log time{color:var(--dim);font-size:11px;margin-right:6px}
+.chip{display:inline-flex;gap:4px;align-items:center;background:var(--card2);border-radius:20px;padding:6px 11px;margin:3px;font-size:13px}
+.chip.on{background:#57202f;color:#ffc4cf}
 
-/* всплывающий результат */
-#toast{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.8);opacity:0;pointer-events:none;z-index:60;background:#0e0b15f2;border:2px solid var(--gold);border-radius:20px;padding:16px 22px;text-align:center;min-width:220px;max-width:88vw;transition:all .18s}
+#toast{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%) scale(.85);opacity:0;pointer-events:none;z-index:60;background:linear-gradient(180deg,#221b31,#15111e);border:2px solid var(--gold);border-radius:24px;padding:16px 18px 14px;text-align:center;width:min(340px,90vw);transition:opacity .16s,transform .16s;box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:80vh;overflow:auto}
 #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
-#toast .t{font-size:13px;color:var(--muted)}
-#toast .v{font-size:52px;font-weight:900;line-height:1.05}
-#toast .b{font-size:13px;color:#d6cfe6;margin-top:4px}
-#toast .x{font-size:14px;margin-top:8px;color:var(--gold);font-weight:700}
-#toast.crit{border-color:var(--green)}#toast.crit .v{color:var(--green)}
-#toast.fail{border-color:var(--red)}#toast.fail .v{color:var(--red)}
-#toast .acts{display:flex;gap:6px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+#toast .t{font-size:13px;color:var(--muted);font-weight:600}
+#toast .v{font-size:58px;font-weight:900;line-height:1.05;margin:2px 0;font-variant-numeric:tabular-nums}
+#toast .v.rolling{color:var(--dim)}
+#toast .b{font-size:13.5px;color:#d9d2e8;margin-top:2px}
+#toast .x{font-size:14px;margin-top:8px;color:var(--gold);font-weight:800}
+#toast.crit{border-color:var(--green);background:linear-gradient(180deg,#183527,#12161a)}#toast.crit .v{color:var(--green)}
+#toast.fail{border-color:var(--red);background:linear-gradient(180deg,#3a1520,#15111a)}#toast.fail .v{color:var(--red)}
+#toast .acts{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+#toast .multi{text-align:left;margin-top:6px;font-size:13.5px}
+#toast .multi div{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+#toast .multi div:last-child{border-bottom:0}
+#toast .hint{font-size:10.5px;color:var(--dim);margin-top:10px}
 
-/* модалка */
-#modal{position:fixed;inset:0;z-index:70;background:#000a;display:none;align-items:flex-end;justify-content:center}
-#modal.show{display:flex}
-#modal .box{background:var(--card);width:100%;max-width:720px;border-radius:20px 20px 0 0;padding:16px 14px calc(18px + env(safe-area-inset-bottom));max-height:86vh;overflow:auto}
-#modal .box h2{display:flex;align-items:center}
-#modal .box h2 button{margin-left:auto;background:var(--card2);border-radius:10px;padding:4px 10px}
+#modal{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center}
+#modal.show{display:flex;animation:fade .15s}
+#modal .box{background:var(--card);width:100%;max-width:720px;border-radius:22px 22px 0 0;padding:8px 14px calc(18px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+#modal .grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+#modal .box h2{margin-bottom:10px}
+#modal .box h2 .x{margin-left:auto;background:var(--card2);border-radius:10px;padding:4px 11px;font-size:16px}
 .opts{display:grid;gap:8px;margin-top:8px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
-.honkfx{position:fixed;inset:0;z-index:80;pointer-events:none;display:grid;place-items:center;font-size:64px;font-weight:900;color:var(--orange);text-shadow:0 4px 0 #000;opacity:0;transition:opacity .15s}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center}
+.honkfx{position:fixed;inset:0;z-index:80;pointer-events:none;display:grid;place-items:center;font-size:62px;font-weight:900;color:var(--orange);text-shadow:0 5px 0 #000,0 0 40px rgba(255,154,60,.6);opacity:0;transition:opacity .15s}
 .honkfx.show{opacity:1;animation:shake .5s}
-@keyframes shake{0%,100%{transform:none}20%{transform:translate(-8px,3px) rotate(-3deg)}40%{transform:translate(8px,-3px) rotate(3deg)}60%{transform:translate(-6px,2px)}80%{transform:translate(6px,-2px)}}
-.chip{display:inline-flex;gap:4px;align-items:center;background:var(--card2);border-radius:20px;padding:5px 10px;margin:3px;font-size:13px}
-.chip.on{background:#5a2232;color:#ffc4cf}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-9px,3px) rotate(-4deg) scale(1.05)}40%{transform:translate(9px,-3px) rotate(4deg)}60%{transform:translate(-6px,2px) scale(1.08)}80%{transform:translate(6px,-2px)}}
+.flash{animation:flash .5s}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(255,93,115,.9) inset}100%{box-shadow:0 0 0 30px rgba(255,93,115,0) inset}}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper b{min-width:34px;text-align:center;font-size:20px}
+.stepper button{width:36px;height:36px;border-radius:11px;background:var(--card2);font-weight:900;font-size:18px}
+.empty{color:var(--dim);font-size:13px;text-align:center;padding:8px 0}
 </style>
 </head>
 <body>
@@ -159,181 +208,198 @@ nav.tabs button.on{color:var(--gold)}
   <div class="wrap">
     <div class="hero">
       <div class="avatar">🪿</div>
-      <div>
+      <div style="min-width:0">
         <div class="nm" id="hName">—</div>
         <div class="sub" id="hSub">—</div>
       </div>
       <button class="honkbtn" id="honkBtn">ГА-ГА!</button>
     </div>
-    <div class="hpbar">
-      <div class="hpnum" id="hpNum">0<small>/0</small></div>
-      <div>
+    <div class="hpcard" id="hpCard">
+      <button class="hpnum" id="hpNum">0</button>
+      <div style="min-width:0">
         <div class="meter"><i id="hpFill"></i><b id="tmpFill"></b></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:3px" id="hpInfo"></div>
+        <div class="hpsub" id="hpInfo"></div>
       </div>
       <div class="hpbtns"><button class="dmg" id="bDmg">−</button><button class="heal" id="bHeal">+</button></div>
     </div>
     <div class="stats">
       <div class="stat"><b id="sAC">0</b><span>КД</span></div>
       <button class="stat" id="sInit"><b id="sInitV">+0</b><span>Инициатива 🎲</span></button>
-      <div class="stat"><b id="sSpd">25</b><span>Ходьба / 🪽30</span></div>
+      <div class="stat"><b id="sSpd">25</b><span id="sSpdL">Скорость</span></div>
       <div class="stat"><b id="sPB">+0</b><span>Мастерство</span></div>
+    </div>
+    <div class="cstrip" id="cstrip">
+      <span class="rd" id="cRound">Раунд 1</span>
+      <div class="econ" id="cEcon"></div>
+      <button class="nx" id="cNext">Раунд ▶</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-<!-- БОЙ -->
 <section class="page on" id="p-fight">
+  <div class="card" id="combatCard"></div>
+
   <div class="card" id="deathCard" style="display:none">
-    <h2>☠️ Спасброски от смерти</h2>
+    <h2><span class="ic">☠️</span>Спасброски от смерти</h2>
     <div class="row"><span class="grow">Успехи</span><div class="pips" id="dsS"></div></div>
-    <div class="row" style="margin-top:6px"><span class="grow">Провалы</span><div class="pips" id="dsF"></div></div>
-    <div class="row" style="margin-top:10px"><button class="btn gold grow" id="bDeath">Бросить спасбросок от смерти</button></div>
+    <div class="row" style="margin-top:8px"><span class="grow">Провалы</span><div class="pips" id="dsF"></div></div>
+    <button class="btn gold wide" style="margin-top:12px" id="bDeath">Бросить спасбросок от смерти</button>
   </div>
 
   <div class="card">
-    <h2>⚔️ Атаки</h2>
+    <h2><span class="ic">⏳</span>Активные эффекты</h2>
+    <div id="effList"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic">⚔️</span>Атаки <small id="atkNote"></small></h2>
     <div id="attacks"></div>
-    <div class="note" id="extraAtk"></div>
   </div>
 
   <div class="card">
-    <h2>🎲 Кубики Игрока <small id="drNote"></small></h2>
-    <div class="grid2" id="diceGrid"></div>
-    <div class="row" style="margin-top:8px">
+    <h2><span class="ic">🎲</span>Кубики Игрока <small id="drNote"></small></h2>
+    <div class="dice" id="diceGrid"></div>
+    <div class="row" style="margin-top:10px">
       <button class="btn purple grow" id="bReroll">🔁 Переброс эффекта</button>
       <div class="pips" id="rerollPips"></div>
     </div>
-    <div class="note">Атака кубиком: дальнобойная атака заклинанием (Мастерство + Хар), дистанция 20/60 фт. Сам кубик урона не наносит, всё делает эффект. Активен только один D4 или D6 и только один D8 или D10: новый кубик того же типа гасит старый.</div>
   </div>
 
   <div class="card">
-    <h2>🍀 Удача</h2>
-    <div class="row"><b class="grow">Монеты судьбы</b><button class="btn sm gold" id="bCoin">Потратить → преим.</button></div>
-    <div class="row" style="margin-top:6px"><div class="pips grow" id="coinsMine"></div></div>
-    <div class="row" style="margin-top:6px"><small class="grow">У мастера: <b id="coinsDmN">0</b></small><button class="btn sm purple" id="bCoinDm">Мастер потратил (помеха мне)</button></div>
-    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
-    <div class="row"><b class="grow">Искушение судьбы</b><div class="pips" id="temptPips"></div></div>
-    <div class="row" style="margin-top:6px"><button class="btn green grow" id="bTemptA">Взять преимущество</button><button class="btn red grow" id="bTemptD">Дать помеху</button></div>
-    <div id="temptPend" class="note"></div>
-    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
-    <div class="row"><b class="grow">Ставка (Gamble)</b><div class="pips" id="gamblePips"></div></div>
-    <button class="btn gold" style="width:100%;margin-top:6px" id="bGamble">🎰 Сделать ставку на бросок</button>
-    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
-    <div class="row"><b class="grow">Тотем удачи <small id="totemDie"></small></b></div>
-    <div class="grid2" style="margin-top:6px">
-      <div class="die"><div class="big" id="omenG">0</div><div class="eff">Добрые знамения</div>
-        <div class="row" style="margin-top:6px"><button class="btn sm grow" data-omen="g+">+1</button><button class="btn sm green grow" data-omen="g-">Дать бонус</button></div></div>
-      <div class="die"><div class="big" id="omenI">0</div><div class="eff">Дурные знамения</div>
-        <div class="row" style="margin-top:6px"><button class="btn sm grow" data-omen="i+">+1</button><button class="btn sm red grow" data-omen="i-">Дать штраф</button></div></div>
+    <h2><span class="ic">🍀</span>Удача</h2>
+    <div class="row"><b class="grow">Монеты судьбы</b><small class="muted">у мастера: <b id="coinsDmN">0</b></small></div>
+    <div class="pips" id="coinsMine" style="margin:8px 0"></div>
+    <div class="grid2">
+      <button class="btn gold sm" id="bCoin">🪙 Потратить → преим.</button>
+      <button class="btn purple sm" id="bCoinDm">😈 Мастер потратил</button>
     </div>
-    <div class="note">Знамения копятся сами, когда в приложении выпадает натуральная 20 или 1. Кнопкой «+1» добавляешь криты и провалы других существ в 30 фт от тотема.</div>
+    <hr class="sep">
+    <div class="row"><b class="grow">Искушение судьбы</b><div class="pips" id="temptPips"></div></div>
+    <div class="grid2" style="margin-top:8px"><button class="btn green sm" id="bTemptA">⬆ Взять преимущество</button><button class="btn red sm" id="bTemptD">⬇ Дать помеху</button></div>
+    <div id="temptPend" class="note"></div>
+    <hr class="sep">
+    <div class="row"><b class="grow">Ставка</b><div class="pips" id="gamblePips"></div></div>
+    <button class="btn gold wide" style="margin-top:8px" id="bGamble">🎰 Сделать ставку</button>
+    <div class="note">Быстрее так: <b>зажми навык или спасбросок</b> на вкладке «Персонаж», и там будет ставка, монета и искушение именно для этого броска.</div>
+    <hr class="sep">
+    <div class="row"><b class="grow">Тотем удачи <small class="muted" id="totemDie"></small></b></div>
+    <div class="grid2" style="margin-top:8px">
+      <div class="die d6" style="padding:8px"><div class="shape" id="omenG">0</div><div class="t">Добрые знамения</div>
+        <div class="row" style="margin-top:6px"><button class="btn sm ghost grow" data-omen="g+">+1</button><button class="btn sm green grow" data-omen="g-">Бонус</button></div></div>
+      <div class="die d10" style="padding:8px"><div class="shape" id="omenI">0</div><div class="t">Дурные знамения</div>
+        <div class="row" style="margin-top:6px"><button class="btn sm ghost grow" data-omen="i+">+1</button><button class="btn sm red grow" data-omen="i-">Штраф</button></div></div>
+    </div>
+    <div class="note">Твои натуральные 20 и 1 засчитываются сами. «+1» — криты и провалы других существ в 30 фт от тотема.</div>
   </div>
 
   <div class="card">
-    <h2>🪿 Гусиное</h2>
-    <div class="row"><button class="btn gold grow" id="bHonk2">Агрессивный гогот (бонусное)</button></div>
-    <div class="row" style="margin-top:8px"><button class="btn blue grow" id="bWing">Удар крылом (реакция)</button><div class="pips" id="wingPips"></div></div>
-    <div class="note">Гогот: существо в 30 фт проходит спасбросок Мудрости (СЛ <b class="honkDC">?</b>). Провалило — до начала твоего следующего хода атакует с помехой всех, кроме тебя.<br>Удар крылом: когда тебя атакуют в ближнем бою и промахиваются, реакцией сбиваешь атакующего с ног. 1 раз за длинный отдых.</div>
+    <h2><span class="ic">🪿</span>Гусиное</h2>
+    <div class="grid2">
+      <button class="btn gold" id="bHonk2">📢 Гогот<br><small>бонусное</small></button>
+      <button class="btn blue" id="bWing">💨 Удар крылом<br><small>реакция · <span id="wingLeft"></span></small></button>
+    </div>
+    <div class="note">Гогот: существо в 30 фт проходит спасбросок Мудрости (СЛ <b class="honkDC">?</b>). Провал: до начала твоего хода атакует с помехой всех, кроме тебя.<br>Удар крылом: враг промахнулся по тебе рукопашной атакой, и ты сбиваешь его с ног. 1 раз за длинный отдых.</div>
   </div>
 
   <div class="card">
-    <h2>🩹 Состояния</h2>
+    <h2><span class="ic">🩹</span>Состояния</h2>
     <div id="conds"></div>
-    <div class="row" style="margin-top:8px"><span class="grow">Концентрация: <b id="concName">—</b></span><button class="btn sm" id="bConcEnd">Снять</button></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="ic">🏕️</span>Отдых</h2>
+    <div class="grid2">
+      <button class="btn blue" id="bShort">☕ Короткий</button>
+      <button class="btn green" id="bLong">😴 Длинный</button>
+    </div>
   </div>
 </section>
 
-<!-- ПЕРСОНАЖ -->
 <section class="page" id="p-char">
   <div class="card">
-    <h2>Характеристики <small>(нажми — проверка)</small></h2>
+    <h2><span class="ic">💪</span>Характеристики <small>нажми — проверка, зажми — меню</small></h2>
     <div class="grid3" id="abils"></div>
   </div>
   <div class="card">
-    <h2>Спасброски</h2>
+    <h2><span class="ic">🛡️</span>Спасброски <small>зажми — меню</small></h2>
     <div class="list" id="saves"></div>
   </div>
   <div class="card">
-    <h2>Навыки</h2>
+    <h2><span class="ic">🎯</span>Навыки <small>зажми — ставка / монета</small></h2>
     <div class="list" id="skills"></div>
-    <div class="note">Пассивная Внимательность: <b id="passive">10</b>. «Острое зрение»: преимущество на Внимательность, если она основана на зрении.</div>
+    <div class="note">Пассивная Внимательность: <b id="passive">10</b>. Острое зрение: преимущество на Внимательность, основанную на зрении.</div>
   </div>
   <div class="card">
-    <h2>Владения и языки</h2>
-    <div id="profs" style="font-size:14px;color:#d6cfe6"></div>
+    <h2><span class="ic">📘</span>Владения и языки</h2>
+    <div id="profs" style="font-size:14px;color:#d9d2e8"></div>
   </div>
 </section>
 
-<!-- ЗАКЛИНАНИЯ -->
 <section class="page" id="p-spells">
   <div class="card">
-    <h2>✨ Ячейки <small id="spellStats"></small></h2>
+    <h2><span class="ic">✨</span>Ячейки <small id="spellStats"></small></h2>
     <div id="slots"></div>
+    <div class="note">Нажми на ячейку, чтобы отметить или вернуть её вручную.</div>
   </div>
   <div class="card">
-    <h2>Подготовлено <small id="prepCount"></small></h2>
+    <h2><span class="ic">📖</span>Готовы к касту <small id="prepCount"></small></h2>
     <div id="spellsPrep"></div>
   </div>
   <div class="card">
-    <h2>Книга заклинаний <small>(☆ = подготовить)</small></h2>
+    <h2><span class="ic">📚</span>Список заклинаний <small>☆ — подготовить</small></h2>
     <div id="spellsAll"></div>
-    <div class="note">⚠️ В тексте класса Gambler есть таблица ячеек, но нет списка заклинаний. В приложении взят список заклинаний Барда (Харизма, обман, контроль). Это моя трактовка, согласуй её с мастером. Игровые заклинания Dice Roller взяты из текста подкласса.</div>
+    <div class="note">В тексте класса Gambler есть таблица ячеек, но нет списка заклинаний. Здесь взят список Барда, это трактовка, согласуй её с мастером. Игровые заклинания Dice Roller взяты из текста подкласса.</div>
   </div>
 </section>
 
-<!-- УМЕНИЯ -->
 <section class="page" id="p-feat">
   <div class="card">
-    <h2>📜 Умения</h2>
+    <h2><span class="ic">📜</span>Умения</h2>
     <div id="feats"></div>
   </div>
   <div class="card">
-    <h2>🎲 Таблицы кубиков Dice Roller</h2>
+    <h2><span class="ic">🎲</span>Таблицы кубиков</h2>
     <div id="diceTables"></div>
   </div>
 </section>
 
-<!-- ВЕЩИ -->
 <section class="page" id="p-inv">
   <div class="card">
-    <h2>💰 Деньги</h2>
-    <div class="grid3" id="money"></div>
+    <h2><span class="ic">💰</span>Деньги</h2>
+    <div class="grid2" id="money" style="grid-template-columns:repeat(4,1fr)"></div>
   </div>
   <div class="card">
-    <h2>🎒 Снаряжение</h2>
+    <h2><span class="ic">🎒</span>Снаряжение</h2>
     <textarea id="inv"></textarea>
   </div>
   <div class="card">
-    <h2>📝 Заметки и отыгрыш</h2>
-    <textarea id="notes" style="min-height:180px"></textarea>
+    <h2><span class="ic">📝</span>Заметки и отыгрыш</h2>
+    <textarea id="notes" style="min-height:200px"></textarea>
   </div>
 </section>
 
-<!-- ПРОКАЧКА/НАСТРОЙКИ -->
 <section class="page" id="p-lvl">
   <div class="card">
-    <h2>⬆️ Прокачка</h2>
-    <div class="row"><span class="grow">Уровень Gambler</span><button class="btn sm" id="lvMinus">−</button><b style="font-size:22px;min-width:34px;text-align:center" id="lvNum">11</b><button class="btn sm gold" id="lvPlus">+</button></div>
-    <div class="note">При смене уровня автоматически пересчитываются хиты, бонус мастерства, ячейки, кубики, монеты и умения. Характеристики меняй ниже вручную.</div>
+    <h2><span class="ic">⬆️</span>Прокачка</h2>
+    <div class="row"><span class="grow">Уровень Gambler</span>
+      <div class="stepper"><button id="lvMinus">−</button><b id="lvNum">11</b><button id="lvPlus" style="background:var(--gold);color:#241a02">+</button></div></div>
+    <div class="note">При смене уровня всё пересчитывается само: хиты, мастерство, ячейки, кубики, монеты, умения.</div>
     <h3 style="margin-top:14px">Характеристики</h3>
     <div class="grid3" id="abilEdit"></div>
-    <div class="row wrapr" style="margin-top:10px">
-      <label class="row" style="gap:6px"><input type="checkbox" id="optTough" style="width:auto"> Черта «Крепкий» (Tough)</label>
-    </div>
-    <div class="row" style="margin-top:8px"><span class="grow">Доспех</span>
+    <label class="row" style="margin-top:12px"><input type="checkbox" id="optTough" style="width:auto"> Черта «Крепкий» (+2 хита за уровень)</label>
+    <div class="row" style="margin-top:10px"><span class="grow">Доспех</span>
       <select id="armorSel" style="width:auto">
         <option value="none">Без доспеха (10)</option>
-        <option value="padded">Стёганый (11, помеха Скрытности)</option>
+        <option value="padded">Стёганый (11)</option>
         <option value="leather">Кожаный (11)</option>
         <option value="studded">Проклёпанная кожа (12)</option>
       </select></div>
-    <button class="btn gold" style="width:100%;margin-top:12px" id="bWager">🎰 Ставка на рост (d12 вместо УХ)</button>
+    <button class="btn gold wide" style="margin-top:12px" id="bWager">🎰 Ставка на рост (d12)</button>
   </div>
   <div class="card">
-    <h2>🧾 Персонаж</h2>
+    <h2><span class="ic">🧾</span>Персонаж</h2>
     <div class="kv">
       <span>Имя</span><input id="cName">
       <span>Предыстория</span><input id="cBg">
@@ -341,29 +407,31 @@ nav.tabs button.on{color:var(--gold)}
     </div>
   </div>
   <div class="card">
-    <h2>📜 Журнал бросков</h2>
+    <h2><span class="ic">📜</span>Журнал бросков</h2>
     <div class="log" id="log"></div>
   </div>
   <div class="card">
-    <h2>⚙️ Настройки</h2>
+    <h2><span class="ic">⚙️</span>Настройки</h2>
     <label class="row"><input type="checkbox" id="optSound" style="width:auto"> Звуки</label>
-    <label class="row" style="margin-top:6px"><input type="checkbox" id="optVib" style="width:auto"> Вибрация</label>
-    <div class="grid2" style="margin-top:10px">
+    <label class="row" style="margin-top:8px"><input type="checkbox" id="optVib" style="width:auto"> Вибрация</label>
+    <label class="row" style="margin-top:8px"><input type="checkbox" id="optAnim" style="width:auto"> Анимация бросков</label>
+    <label class="row" style="margin-top:8px" id="keepRow"><input type="checkbox" id="optKeep" style="width:auto"> Не гасить экран во время игры</label>
+    <div class="grid2" style="margin-top:12px">
       <button class="btn" id="bExport">💾 Сохранить копию</button>
       <button class="btn" id="bImport">📂 Загрузить копию</button>
     </div>
-    <button class="btn red" style="width:100%;margin-top:8px" id="bReset">Сбросить персонажа к исходному</button>
-    <input type="file" id="fileIn" accept=".json,application/json" style="display:none">
-    <div class="note">Источники: раса <b>Goose / Waterfowl</b> (PharesBueller, World Anvil), класс <b>Gambler</b> и подкласс <b>Dice Roller</b> (phbz.org). Это хоумбрю, баланс не проверялся официально.</div>
+    <button class="btn red wide" style="margin-top:8px" id="bReset">Сбросить персонажа</button>
+    <input type="file" id="fileIn" accept=".json,application/json,text/plain,*/*" style="display:none">
+    <div class="note">Источники: раса <b>Goose / Waterfowl</b> (PharesBueller, World Anvil), класс <b>Gambler</b> и подкласс <b>Dice Roller</b> (phbz.org). Это хоумбрю, баланс официально не проверялся.</div>
   </div>
 </section>
 </main>
 
 <div class="rollmode">
-  <button data-m="dis" class="dis">Помеха</button>
-  <button data-m="nor" class="nor on">Обычно</button>
-  <button data-m="adv" class="adv">Преим.</button>
   <span class="flag" id="modeFlag"></span>
+  <button data-m="dis" class="dis">⬇ Помеха</button>
+  <button data-m="nor" class="nor on">Обычно</button>
+  <button data-m="adv" class="adv">⬆ Преим.</button>
 </div>
 
 <nav class="tabs">
@@ -372,7 +440,7 @@ nav.tabs button.on{color:var(--gold)}
   <button data-p="spells"><i>✨</i>Магия</button>
   <button data-p="feat"><i>📜</i>Умения</button>
   <button data-p="inv"><i>🎒</i>Вещи</button>
-  <button data-p="lvl"><i>⬆️</i>Ещё</button>
+  <button data-p="lvl"><i>⚙️</i>Ещё</button>
 </nav>
 
 <div id="toast"></div>
@@ -381,694 +449,576 @@ nav.tabs button.on{color:var(--gold)}
 
 <script>
 'use strict';
-/* ============================================================
-   ДАННЫЕ ПРАВИЛ (из источников; трактовки помечены)
-   ============================================================ */
-const AB = ['str','dex','con','int','wis','cha'];
-const AB_RU = {str:'Сила',dex:'Ловкость',con:'Телосложение',int:'Интеллект',wis:'Мудрость',cha:'Харизма'};
-const AB_GEN = {str:'Силы',dex:'Ловкости',con:'Телосложения',int:'Интеллекта',wis:'Мудрости',cha:'Харизмы'};
-const AB_SH = {str:'СИЛ',dex:'ЛОВ',con:'ТЕЛ',int:'ИНТ',wis:'МДР',cha:'ХАР'};
-const SKILLS = [
-  ['acro','Акробатика','dex'],['anim','Уход за животными','wis'],['arc','Магия','int'],['ath','Атлетика','str'],
-  ['dec','Обман','cha'],['his','История','int'],['ins','Проницательность','wis'],['inti','Запугивание','cha'],
-  ['inv','Анализ','int'],['med','Медицина','wis'],['nat','Природа','int'],['perc','Внимательность','wis'],
-  ['perf','Выступление','cha'],['pers','Убеждение','cha'],['rel','Религия','int'],['soh','Ловкость рук','dex'],
-  ['ste','Скрытность','dex'],['sur','Выживание','wis']
+/* ======================= ПРАВИЛА ======================= */
+const AB=['str','dex','con','int','wis','cha'];
+const AB_RU={str:'Сила',dex:'Ловкость',con:'Телосложение',int:'Интеллект',wis:'Мудрость',cha:'Харизма'};
+const AB_GEN={str:'Силы',dex:'Ловкости',con:'Телосложения',int:'Интеллекта',wis:'Мудрости',cha:'Харизмы'};
+const AB_SH={str:'СИЛ',dex:'ЛОВ',con:'ТЕЛ',int:'ИНТ',wis:'МДР',cha:'ХАР'};
+const SKILLS=[['acro','Акробатика','dex'],['anim','Уход за животными','wis'],['arc','Магия','int'],['ath','Атлетика','str'],['dec','Обман','cha'],['his','История','int'],['ins','Проницательность','wis'],['inti','Запугивание','cha'],['inv','Анализ','int'],['med','Медицина','wis'],['nat','Природа','int'],['perc','Внимательность','wis'],['perf','Выступление','cha'],['pers','Убеждение','cha'],['rel','Религия','int'],['soh','Ловкость рук','dex'],['ste','Скрытность','dex'],['sur','Выживание','wis']];
+const SLOTS={1:[2,2,0,0,0,0],2:[2,3,0,0,0,0],3:[2,4,2,0,0,0],4:[2,4,3,0,0,0],5:[2,4,3,2,0,0],6:[2,4,3,3,0,0],7:[2,4,3,3,1,0],8:[2,4,3,3,2,0],9:[2,4,3,3,3,1],10:[3,4,3,3,3,2],11:[3,4,3,3,3,2]};
+const ARMOR={none:10,padded:11,leather:11,studded:12};
+const FEATURES=[
+ {lv:0,src:'Раса',n:'Гусь (Waterfowl → Goose)',t:'+2 Ловкость, +1 Телосложение. Средний размер. Скорость 25 фт, плавание 30 фт, полёт 30 фт (только без средних и тяжёлых доспехов). Языки: Общий, Птичий.'},
+ {lv:0,src:'Раса',n:'Острое зрение',t:'Преимущество на проверки Внимательности, основанные на зрении.'},
+ {lv:0,src:'Раса',n:'Когти',t:'Безоружные удары наносят 1d4 рубящего урона.'},
+ {lv:0,src:'Раса',n:'Удар крылом',t:'1 раз за длинный отдых: реакцией сбиваешь с ног существо в 5 фт, которое промахнулось по тебе рукопашной атакой.'},
+ {lv:0,src:'Раса',n:'Агрессивный гогот',t:'Бонусное действие: дразнишь существо в 30 фт. Спасбросок Мудрости (СЛ 8 + мод. Хар + мастерство). Провал: до твоего следующего хода у него помеха на атаки по всем, кроме тебя.'},
+ {lv:1,src:'Gambler',n:'Заклинания',t:'Полукастер на Харизме. СЛ = 8 + мастерство + Хар. Атака = мастерство + Хар. Подготовка: Хар + ½ уровня (мин. 1). На каждое заклинание нужна 1 минута азартных игр за каждый его уровень.'},
+ {lv:1,src:'Gambler',n:'Искушение судьбы',t:'При броске d20 получаешь на него преимущество или накладываешь помеху. Следующий бросок того же типа получает обратный эффект. Хар раз (мин. 1) за длинный отдых, всё сбрасывается в конце дня.'},
+ {lv:1,src:'Gambler',n:'Шулер',t:'Экспертиза в Ловкости рук. Автоматически выигрываешь азартные игры против жертвы без владения Внимательностью.'},
+ {lv:2,src:'Gambler',n:'Монеты судьбы',t:'1 монета за каждый уровень. Без действия трать монету: преимущество на любой бросок d20, монета уходит мастеру. Мастер может потратить монету, чтобы дать тебе помеху, и монета возвращается. В бою 1 раз за раунд, вне боя 1 раз в час.'},
+ {lv:2,src:'Gambler',n:'Покерфейс',t:'Экспертиза в Обмане.'},
+ {lv:3,src:'Gambler',n:'Любимая игра: Dice Roller',t:'Подкласс. Умения на 3, 7, 15 и 20 уровнях.'},
+ {lv:3,src:'Gambler',n:'Тотем удачи',t:'Крит существа в 30 фт от тотема даёт Доброе знамение, критический провал — Дурное. Свободным действием трать знамение: бонус или штраф к броску d20 существа в 30 фт. Кубик d4, с 9 ур. d6. Максимум знамений: Хар.'},
+ {lv:3,src:'Dice Roller',n:'Игровые заклинания',t:'Всегда подготовлены: 3 ур. Поиск фамильяра, Невидимый слуга; 5 ур. Поиск скакуна, Стая фамильяров; 9 ур. Призыв феи, Призыв теневого отродья.'},
+ {lv:3,src:'Dice Roller',n:'Идеальный бросок',t:'Вне боя управляешь результатом любого броска (своего или существа в 30 фт) без действия. Заметить можно Внимательностью против твоей СЛ заклинаний.'},
+ {lv:3,src:'Dice Roller',n:'Базовые кубики (D4 / D6)',t:'Атака кубиком на 20/60 фт с эффектом D4 (местность) или D6 (поддержка). Новый кубик того же вида гасит старый. Эффект длится Хар минут, у каждого Хар использований за длинный отдых.'},
+ {lv:4,src:'Gambler',n:'УХ или Ставка на рост',t:'+2 к одной или +1 к двум характеристикам. Либо d12: 1–3 +1 к одной; 4–6 одна черта; 7–8 +2/+1+1; 9–10 три языка или два навыка; 11 три очка на выбор; 12 две черты.'},
+ {lv:5,src:'Gambler',n:'Дополнительная атака',t:'Действием «Атака» атакуешь дважды.'},
+ {lv:6,src:'Gambler',n:'Ставка',t:'Перед броском d20 угадай: больше 10 или 10 и меньше. Угадал — автоматический успех (если задача тебе по силам), не угадал — провал. Нельзя ставить два раза подряд на один навык. Хар раз за длинный отдых.'},
+ {lv:6,src:'Gambler',n:'Быстро смыться',t:'Рывок, Отход или Уклонение бонусным действием.'},
+ {lv:7,src:'Dice Roller',n:'Большие кубики (D8 / D10)',t:'Атака кубиком на 20/60 фт с эффектом D8 (дьявольский) или D10 (опустошение). У каждого Хар использований за длинный отдых.'},
+ {lv:7,src:'Dice Roller',n:'Переброс',t:'Бонусным действием перебрасываешь эффект своего кубика. Хар раз за длинный отдых.'},
+ {lv:8,src:'Gambler',n:'УХ или Ставка на рост',t:'Как на 4 уровне.'},
+ {lv:9,src:'Gambler',n:'Большой тотем удачи',t:'Кубик тотема d6.'},
+ {lv:9,src:'Gambler',n:'Ученик Харизмы',t:'Максимум Харизмы 21.'},
+ {lv:10,src:'Gambler',n:'Улучшенные шансы',t:'Ставка: ≥12 или <12.'},
+ {lv:10,src:'Gambler',n:'Мастер на все руки',t:'Три языка, два навыка или черта. Взята черта «Крепкий».'},
+ {lv:11,src:'Gambler',n:'Меня не проведёшь',t:'Преимущество на распознавание иллюзий и на спасброски от очарования.'},
+ {lv:11,src:'Gambler',n:'Спринтер',t:'Рывок утраивает скорость.'},
 ];
-// Слоты полукастера Gambler (таблица класса): [кантрипы, 1,2,3,4,5]
-const SLOTS = {1:[2,2,0,0,0,0],2:[2,3,0,0,0,0],3:[2,4,2,0,0,0],4:[2,4,3,0,0,0],5:[2,4,3,2,0,0],6:[2,4,3,3,0,0],
-  7:[2,4,3,3,1,0],8:[2,4,3,3,2,0],9:[2,4,3,3,3,1],10:[3,4,3,3,3,2],11:[3,4,3,3,3,2]};
-const ARMOR = {none:10,padded:11,leather:11,studded:12};
-
-const FEATURES = [
-  {lv:0,src:'Раса',n:'Гусь (Waterfowl → Goose)',t:'+2 Ловкость, +1 Телосложение. Средний размер. Скорость 25 фт, плавание 30 фт, полёт 30 фт (только без средних и тяжёлых доспехов). Языки: Общий, Птичий.'},
-  {lv:0,src:'Раса',n:'Острое зрение',t:'Преимущество на проверки Внимательности, основанные на зрении.'},
-  {lv:0,src:'Раса',n:'Когти',t:'Безоружные удары наносят 1d4 рубящего урона.'},
-  {lv:0,src:'Раса',n:'Удар крылом',t:'1 раз за длинный отдых: реакцией сбиваешь с ног существо в 5 фт, которое промахнулось по тебе рукопашной атакой.'},
-  {lv:0,src:'Раса',n:'Агрессивный гогот',t:'Бонусное действие: дразнишь существо в 30 фт. Спасбросок Мудрости (СЛ 8 + мод. Хар + мастерство). Провал: до твоего следующего хода у него помеха на атаки по всем, кроме тебя.'},
-  {lv:1,src:'Gambler',n:'Заклинания',t:'Полукастер на Харизме. СЛ = 8 + мастерство + Хар. Атака = мастерство + Хар. Подготовка: Хар + ½ уровня (мин. 1). Чтобы подготовить заклинание, нужна 1 минута на каждый уровень заклинания азартных игр.'},
-  {lv:1,src:'Gambler',n:'Искушение судьбы',t:'Когда совершаешь бросок d20, можешь получить на него преимущество или наложить помеху. Следующий бросок того же типа получает обратный эффект. Использований: Хар (мин. 1) за длинный отдых, всё сбрасывается в конце дня.'},
-  {lv:1,src:'Gambler',n:'Шулер',t:'Экспертиза в Ловкости рук. Автоматически выигрываешь азартные игры против жертвы без владения Внимательностью.'},
-  {lv:2,src:'Gambler',n:'Монеты судьбы',t:'1 монета за каждый уровень Gambler. Без действия трать монету: преимущество на любой бросок d20, монета уходит мастеру. Мастер может потратить монету, чтобы дать тебе помеху, и тогда она возвращается к тебе. В бою 1 раз за раунд, вне боя 1 раз в час.'},
-  {lv:2,src:'Gambler',n:'Покерфейс',t:'Экспертиза в Обмане.'},
-  {lv:3,src:'Gambler',n:'Любимая игра: Dice Roller',t:'Подкласс. Умения на 3, 7, 15 и 20 уровнях.'},
-  {lv:3,src:'Gambler',n:'Тотем удачи',t:'Когда существо в 30 фт от тотема критически проваливает бросок d20, тотем получает Дурное знамение, при критическом успехе — Доброе. Свободным действием трать знамение: существо в 30 фт получает бонус (Доброе) или штраф (Дурное) к броску d20. Бонус d4, на 9 ур. d6. Максимум знамений: Хар (мин. 1).'},
-  {lv:3,src:'Dice Roller',n:'Игровые заклинания',t:'Всегда подготовлены и не занимают места: 3 ур. Поиск фамильяра, Невидимый слуга; 5 ур. Поиск скакуна, Стая фамильяров; 9 ур. Призыв феи, Призыв теневого отродья; 13 ур. Потайной сундук Леомунда, Верный пёс Морденкайнена; 17 ур. Оживление предметов, Рука Бигби.'},
-  {lv:3,src:'Dice Roller',n:'Идеальный бросок',t:'Вне боя управляешь результатом любого броска (своего или существа в 30 фт) без действия. Заметить это можно только Внимательностью против твоей СЛ заклинаний.'},
-  {lv:3,src:'Dice Roller',n:'Базовые кубики (D4 / D6)',t:'Атака кубиком на 20/60 фт с эффектом D4 (местность) или D6 (поддержка). Активен только один D4 и один D6. Эффекты длятся Хар минут, у каждого Хар использований за длинный отдых.'},
-  {lv:4,src:'Gambler',n:'Увеличение характеристик / Ставка на рост',t:'+2 к одной или +1 к двум характеристикам. Либо ставка d12: 1–3 +1 к одной; 4–6 одна черта; 7–8 +2/+1+1; 9–10 три языка или два навыка; 11 три очка на выбор; 12 ДВЕ черты.'},
-  {lv:5,src:'Gambler',n:'Дополнительная атака',t:'Действием Атака атакуешь дважды.'},
-  {lv:6,src:'Gambler',n:'Ставка (Gamble)',t:'Перед броском d20 угадай: выпадет больше 10 или 10 и меньше. Угадал — автоматический успех независимо от СЛ (если задача тебе по силам). Не угадал — провал. Нельзя ставить два раза подряд на один и тот же навык. Использований: Хар (мин. 1) за длинный отдых.'},
-  {lv:6,src:'Gambler',n:'Быстро смыться',t:'Рывок, Отход или Уклонение бонусным действием.'},
-  {lv:7,src:'Dice Roller',n:'Большие кубики (D8 / D10)',t:'Атака кубиком на 20/60 фт с эффектом D8 (дьявольский) или D10 (опустошение). Активен только один D8 и один D10. У каждого Хар использований за длинный отдых.'},
-  {lv:7,src:'Dice Roller',n:'Переброс',t:'Бонусным действием перебрасываешь эффект одного своего кубика и берёшь новый результат. Хар раз за длинный отдых.'},
-  {lv:8,src:'Gambler',n:'Увеличение характеристик / Ставка на рост',t:'Как на 4 уровне.'},
-  {lv:9,src:'Gambler',n:'Большой тотем удачи',t:'Кубик тотема становится d6 (d8 на 14, d10 на 18).'},
-  {lv:9,src:'Gambler',n:'Ученик Харизмы',t:'Максимум Харизмы 21.'},
-  {lv:10,src:'Gambler',n:'Улучшенные шансы',t:'Ставка теперь: ≥12 или <12.'},
-  {lv:10,src:'Gambler',n:'Мастер на все руки',t:'Три языка, два навыка или одна черта. В этой сборке взята черта «Крепкий» (+2 хита за уровень).'},
-  {lv:11,src:'Gambler',n:'Меня не проведёшь',t:'Преимущество на распознавание иллюзий и на спасброски от очарования.'},
-  {lv:11,src:'Gambler',n:'Спринтер',t:'Действие Рывок утраивает скорость.'},
+const D4=['Труднопроходимая местность.','Пружинящая земля: выбранные существа получают +20 фт скорости.','Колючки: 1d4 урона за каждые 5 фт движения по области.','Спасбросок Ловкости, иначе сбит с ног и получает 1d6 дробящего.'];
+const D6=['Временные хиты = уровень + Хар.','Владение всеми спасбросками.','Сопротивление немагическому дробящему, колющему и рубящему урону.','Высота прыжков утраивается.','Невидимость, пока не нанесёшь или не получишь урон.','Скорость лазания и плавания равна скорости ходьбы.'];
+const D8=['Штраф 1d8 к следующей атаке или спасброску.','Спасбросок Мудрости, иначе испуган.','Спасбросок Харизмы, иначе очарован.','Спасбросок Интеллекта, иначе ошеломлён до конца следующего хода.','Спасбросок Телосложения, иначе отравлен.','Спасбросок Силы, иначе опутан призрачными щупальцами (повтор каждый ход).','Спасбросок Ловкости, иначе ослеплён до начала следующего хода.','Скорость уменьшена вдвое.'];
+const D8SAVE=[null,'wis','cha','int','con','str','dex',null];
+const D10=[
+ {d:'кислотой',t:'КД цели −1d4.',x:'1d4',xl:'КД цели ниже на'},
+ {d:'холодом',t:'Скорость цели 0 до конца её следующего хода.',tr:1,tn:'Цель: скорость 0'},
+ {d:'огнём',t:'Провал спасброска Ловкости: ещё +1d8 огнём.',x:'1d8',xl:'доп. огонь при провале',sv:'dex'},
+ {d:'силовым полем',t:'Провал спасброска Силы: отброшена на 20 фт.',sv:'str'},
+ {d:'электричеством',t:'+1d6 электричеством в начале её следующего хода.',x:'1d6',xl:'в начале её хода'},
+ {d:'некротической энергией',t:'Провал спасброска Телосложения: помеха на следующую атаку.',sv:'con'},
+ {d:'ядом',t:'Провал спасброска Телосложения: отравлена на 1 минуту.',sv:'con',tr:10,tn:'Цель отравлена'},
+ {d:'психической энергией',t:'Провал спасброска Интеллекта: −1d10 к следующей атаке или спасброску.',x:'1d10',xl:'штраф',sv:'int'},
+ {d:'излучением',t:'+2d6 против нежити и исчадий.',x:'2d6',xl:'против нежити и исчадий'},
+ {d:'звуком',t:'Провал спасброска Телосложения: оглушена на 1 минуту.',sv:'con',tr:10,tn:'Цель оглушена'}
 ];
-
-const D4 = ['Труднопроходимая местность.','Пружинящая земля: выбранные существа получают +20 фт скорости.','Колючки: 1d4 урона за каждые 5 фт движения по области.','Спасбросок Ловкости, иначе сбит с ног и получает 1d6 дробящего.'];
-const D6 = ['Временные хиты = уровень Gambler + Хар.','Владение всеми спасбросками.','Сопротивление немагическому дробящему, колющему и рубящему урону.','Высота прыжков утраивается.','Невидимость, пока не нанесёшь или не получишь урон.','Скорость лазания и плавания равна скорости ходьбы.'];
-const D8 = ['Штраф 1d8 к следующей атаке или спасброску.','Спасбросок Мудрости, иначе испуган.','Спасбросок Харизмы, иначе очарован.','Спасбросок Интеллекта, иначе ошеломлён до конца следующего хода.','Спасбросок Телосложения, иначе отравлен.','Спасбросок Силы, иначе опутан призрачными щупальцами (повтор каждый ход).','Спасбросок Ловкости, иначе ослеплён до начала следующего хода.','Скорость уменьшена вдвое.'];
-const D10 = [
-  {d:'кислотой',t:'КД цели −1d4.',x:'1d4',xl:'снижение КД'},
-  {d:'холодом',t:'Скорость 0 до конца её следующего хода.'},
-  {d:'огнём',t:'Провал спасброска Ловкости: ещё +1d8 огнём.',x:'1d8',xl:'доп. огонь при провале'},
-  {d:'силовым полем',t:'Провал спасброска Силы: отброшена на 20 фт.'},
-  {d:'электричеством',t:'+1d6 электричеством в начале её следующего хода.',x:'1d6',xl:'в начале её хода'},
-  {d:'некротической энергией',t:'Провал спасброска Телосложения: помеха на следующую атаку.'},
-  {d:'ядом',t:'Провал спасброска Телосложения: отравлена на 1 минуту.'},
-  {d:'психической энергией',t:'Провал спасброска Интеллекта: −1d10 к следующей атаке или спасброску.',x:'1d10',xl:'штраф'},
-  {d:'излучением',t:'+2d6 против нежити и исчадий.',x:'2d6',xl:'против нежити/исчадий'},
-  {d:'звуком',t:'Провал спасброска Телосложения: оглушена на 1 минуту.'}
+const DIE={d4:{n:'Местность',lv:3,tbl:D4,dur:true},d6:{n:'Поддержка',lv:3,tbl:D6,dur:true,self:true},d8:{n:'Дьявольский',lv:7,tbl:D8,dur:true},d10:{n:'Опустошение',lv:7,tbl:D10}};
+const WAGER=['+1 к одной характеристике','+1 к одной характеристике','+1 к одной характеристике','Одна черта','Одна черта','Одна черта','+2 к одной или +1 к двум','+2 к одной или +1 к двум','Три языка или два навыка','Три языка или два навыка','Три очка на любые до трёх характеристик','ДЖЕКПОТ: ДВЕ черты!'];
+const SPELLS=[
+ {id:'vm',lv:0,n:'Злая насмешка',ct:'action',t:'60 фт. Спасбросок Мудрости, провал: психический урон и помеха на следующую атаку. 1d4 (2d4 с 5 ур., 3d4 с 11 ур.).',save:'wis',cantrip:1,dt:'психический'},
+ {id:'mh',lv:0,n:'Волшебная рука',ct:'action',t:'30 фт, 1 минута. Призрачная рука двигает предметы до 10 фунтов.'},
+ {id:'mi',lv:0,n:'Малая иллюзия',ct:'action',t:'30 фт, 1 минута. Звук или образ предмета размером до 5-футового куба.'},
+ {id:'pr',lv:0,n:'Фокусы',ct:'action',t:'10 фт. Мелкие магические трюки: искры, запах, чистка, подогрев, метка.'},
+ {id:'fr',lv:0,n:'Дружба',ct:'action',t:'Концентрация до 1 минуты. Преимущество на проверки Харизмы против одного существа.',conc:10},
+ {id:'hw',lv:1,n:'Лечащее слово',ct:'bonus',t:'60 фт. Существо восстанавливает 1d4 + Хар хитов. +1d4 за уровень ячейки выше 1.',heal:'1d4'},
+ {id:'cw',lv:1,n:'Лечение ран',ct:'action',t:'Касание. 1d8 + Хар хитов. +1d8 за уровень ячейки выше 1.',heal:'1d8'},
+ {id:'thl',lv:1,n:'Жуткий смех Таши',ct:'action',t:'30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: цель падает от смеха, недееспособна. Повтор в конце её хода и при уроне (с преимуществом). Инт 4 и ниже не подвержены.',conc:10,save:'wis'},
+ {id:'ff',lv:1,n:'Огонь фей',ct:'action',t:'60 фт, куб 20 фт, концентрация до 1 минуты. Спасбросок Ловкости, провал: подсвечены, атаки по ним с преимуществом.',conc:10,save:'dex'},
+ {id:'tw',lv:1,n:'Волна грома',ct:'action',t:'Куб 15 фт от тебя. Спасбросок Телосложения: 2d8 звуком и отброс на 10 фт, при успехе половина. +1d8 за уровень ячейки выше 1.',save:'con',dmg:'2d8',up:'1d8',dt:'звук'},
+ {id:'bane',lv:1,n:'Порча',ct:'action',t:'30 фт, до 3 существ, концентрация до 1 минуты. Спасбросок Харизмы, провал: −1d4 к атакам и спасброскам.',conc:10,save:'cha'},
+ {id:'ds',lv:1,n:'Маскировка',ct:'action',t:'На себя, 1 час. Иллюзорно меняешь внешность.'},
+ {id:'ff1',lv:1,n:'Поиск фамильяра',ct:'long',ritual:1,t:'1 час (ритуал +10 мин). Дух-фамильяр в облике зверя.',game:3},
+ {id:'us',lv:1,n:'Невидимый слуга',ct:'action',ritual:1,t:'1 час. Невидимая сила выполняет простые поручения.',game:3},
+ {id:'hp',lv:2,n:'Удержание личности',ct:'action',t:'60 фт, концентрация до 1 минуты. Гуманоид проходит спасбросок Мудрости, провал: парализован. Повтор в конце его хода. +1 цель за уровень ячейки выше 2.',conc:10,save:'wis'},
+ {id:'sh',lv:2,n:'Дребезги',ct:'action',t:'60 фт, радиус 10 фт. Спасбросок Телосложения: 3d8 звуком, при успехе половина. +1d8 за уровень ячейки выше 2.',save:'con',dmg:'3d8',up:'1d8',dt:'звук'},
+ {id:'hm',lv:2,n:'Раскалённый металл',ct:'bonus',t:'60 фт, концентрация до 1 минуты. Металл раскаляется: 2d8 огнём, повтор бонусным действием. +1d8 за уровень ячейки выше 2.',conc:10,dmg:'2d8',up:'1d8',dt:'огонь'},
+ {id:'inv',lv:2,n:'Невидимость',ct:'action',t:'Касание, концентрация до 1 часа. Цель невидима, пока не атакует или не колдует.',conc:600},
+ {id:'fs',lv:2,n:'Поиск скакуна',ct:'long',t:'10 минут. Верный скакун (боевой конь, пони и т. п.).',game:5},
+ {id:'fof',lv:2,n:'Стая фамильяров',ct:'long',t:'1 минута, концентрация до 1 часа. До 3 фамильяров (+1 за уровень ячейки выше 2).',conc:600,game:5},
+ {id:'hyp',lv:3,n:'Гипнотический узор',ct:'action',t:'120 фт, куб 30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: очарованы, недееспособны, скорость 0.',conc:10,save:'wis'},
+ {id:'fear',lv:3,n:'Ужас',ct:'action',t:'Конус 30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: бросают оружие, испуганы, бегут прочь.',conc:10,save:'wis'},
+ {id:'mhw',lv:3,n:'Множественное лечащее слово',ct:'bonus',t:'60 фт, до 6 существ по 1d4 + Хар. +1d4 за уровень ячейки выше 3.',heal:'1d4'},
+ {id:'dm',lv:3,n:'Рассеивание магии',ct:'action',t:'120 фт. Заканчивает заклинания 3 уровня и ниже. Для более высоких — проверка Хар против СЛ 10 + уровень заклинания.'},
+ {id:'sf',lv:3,n:'Призыв феи',ct:'action',t:'Концентрация до 1 часа. Дух феи (статблок в Tasha\'s Cauldron of Everything).',conc:600,game:9},
+ {id:'ssp',lv:3,n:'Призыв теневого отродья',ct:'action',t:'Концентрация до 1 часа. Теневой дух (статблок в Tasha\'s Cauldron of Everything).',conc:600,game:9},
+ {id:'poly',lv:4,n:'Превращение',ct:'action',t:'60 фт, концентрация до 1 часа. Спасбросок Мудрости: превращение в зверя с ПО не выше уровня цели.',conc:600,save:'wis'},
+ {id:'dd',lv:4,n:'Переносящая дверь',ct:'action',t:'Телепорт на 500 фт, можно взять одно согласное существо.'},
+ {id:'ginv',lv:4,n:'Высшая невидимость',ct:'action',t:'Касание, концентрация до 1 минуты. Невидимость не спадает при атаках.',conc:10},
+ {id:'syn',lv:5,n:'Синаптический разряд',ct:'action',t:'120 фт, радиус 20 фт. Спасбросок Интеллекта: 8d6 психическим, при успехе половина. Провал: 1 минуту −1d6 к атакам, проверкам и спасброскам концентрации.',save:'int',dmg:'8d6',dt:'психический'},
+ {id:'hmon',lv:5,n:'Удержание чудовища',ct:'action',t:'90 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: парализовано. +1 цель за уровень ячейки выше 5.',conc:10,save:'wis'},
+ {id:'ao',lv:5,n:'Оживление предметов',ct:'action',t:'120 фт, концентрация до 1 минуты. До 10 мелких предметов сражаются за тебя.',conc:10},
 ];
-const DIE_INFO = {
-  d4:{n:'D4 Местность',lv:3,grp:'basic',tbl:D4,c:'blue'},
-  d6:{n:'D6 Поддержка',lv:3,grp:'basic',tbl:D6,c:'green'},
-  d8:{n:'D8 Дьявольский',lv:7,grp:'greater',tbl:D8,c:'purple'},
-  d10:{n:'D10 Опустошение',lv:7,grp:'greater',tbl:D10,c:'red'}
-};
-const WAGER = ['+1 к одной характеристике','+1 к одной характеристике','+1 к одной характеристике','Одна черта','Одна черта','Одна черта','+2 к одной или +1 к двум','+2 к одной или +1 к двум','Три языка или два навыка','Три языка или два навыка','Три очка на любые до трёх характеристик','ДЖЕКПОТ: ДВЕ черты!'];
+const DEFAULT_PREP=['vm','mh','mi','hw','thl','ff','sh','hp','hyp','mhw','poly','syn'];
+const CONDS=['Ослеплён','Очарован','Оглушён','Испуган','Схвачен','Недееспособен','Невидим','Парализован','Окаменел','Отравлен','Лежит','Опутан','Ошеломлён','Без сознания','Истощение'];
+const CT_RU={action:'действие',bonus:'бонусное',reaction:'реакция',long:'долгий каст'};
+const ECON_RU={action:'Действие',bonus:'Бонусное действие',reaction:'Реакция'};
 
-/* Заклинания. dmg: формула; up: прибавка за уровень ячейки; heal:true; conc:true; save:'wis' */
-const SPELLS = [
-  {id:'vm',lv:0,n:'Злая насмешка',t:'Действие, 60 фт. Цель проходит спасбросок Мудрости, провал: психический урон и помеха на следующую атаку. Урон 1d4 (2d4 с 5 ур., 3d4 с 11 ур.).',save:'wis',cantrip:'d4',dt:'психический'},
-  {id:'mh',lv:0,n:'Волшебная рука',t:'Действие, 30 фт, 1 минута. Призрачная рука двигает предметы до 10 фунтов.'},
-  {id:'mi',lv:0,n:'Малая иллюзия',t:'Действие, 30 фт, 1 минута. Звук или образ предмета размером до 5-футового куба.'},
-  {id:'pr',lv:0,n:'Фокусы',t:'Действие, 10 фт. Мелкие магические трюки: искры, запах, чистка, подогрев, метка.'},
-  {id:'fr',lv:0,n:'Дружба',t:'Действие, концентрация до 1 минуты. Преимущество на проверки Харизмы против одного существа. Потом оно понимает, что на него влияли.',conc:true},
-  {id:'hw',lv:1,n:'Лечащее слово',t:'Бонусное действие, 60 фт. Существо восстанавливает 1d4 + Хар хитов. +1d4 за каждый уровень ячейки выше 1.',heal:'1d4',up:'1d4',mod:true},
-  {id:'cw',lv:1,n:'Лечение ран',t:'Действие, касание. 1d8 + Хар хитов. +1d8 за каждый уровень ячейки выше 1.',heal:'1d8',up:'1d8',mod:true},
-  {id:'thl',lv:1,n:'Жуткий смех Таши',t:'Действие, 30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: цель падает от смеха, недееспособна. Повторяет спасбросок в конце хода и при получении урона (с преимуществом). Существа с Инт 4 и ниже не подвержены.',conc:true,save:'wis'},
-  {id:'ff',lv:1,n:'Огонь фей',t:'Действие, 60 фт, куб 20 фт, концентрация до 1 минуты. Спасбросок Ловкости, провал: подсвечены, атаки по ним с преимуществом, невидимость не работает.',conc:true,save:'dex'},
-  {id:'tw',lv:1,n:'Волна грома',t:'Действие, куб 15 фт от тебя. Спасбросок Телосложения: 2d8 звуком и отброс на 10 фт, при успехе половина урона и без отброса. +1d8 за уровень ячейки выше 1.',save:'con',dmg:'2d8',up:'1d8',dt:'звук'},
-  {id:'bane',lv:1,n:'Порча',t:'Действие, 30 фт, до 3 существ, концентрация до 1 минуты. Спасбросок Харизмы, провал: −1d4 к атакам и спасброскам. +1 цель за уровень ячейки выше 1.',conc:true,save:'cha'},
-  {id:'ds',lv:1,n:'Маскировка',t:'Действие, на себя, 1 час. Иллюзорно меняешь внешность (гусь в шляпе и с усами).'},
-  {id:'ff1',lv:1,n:'Поиск фамильяра (ритуал)',t:'1 час. Призываешь дух-фамильяр в облике зверя. Он может передавать твоё касательное заклинание.',game:3},
-  {id:'us',lv:1,n:'Невидимый слуга (ритуал)',t:'Действие, 1 час. Невидимая сила выполняет простые поручения.',game:3},
-  {id:'hp',lv:2,n:'Удержание личности',t:'Действие, 60 фт, концентрация до 1 минуты. Гуманоид проходит спасбросок Мудрости, провал: парализован. Повтор в конце каждого его хода. +1 цель за уровень ячейки выше 2.',conc:true,save:'wis'},
-  {id:'sh',lv:2,n:'Дребезги',t:'Действие, 60 фт, сфера радиусом 10 фт. Спасбросок Телосложения: 3d8 звуком, при успехе половина. +1d8 за уровень ячейки выше 2.',save:'con',dmg:'3d8',up:'1d8',dt:'звук'},
-  {id:'hm',lv:2,n:'Раскалённый металл',t:'Бонусное действие, 60 фт, концентрация до 1 минуты. Металлический предмет раскаляется: 2d8 огнём держащему. Повтор бонусным действием в следующих ходах. +1d8 за уровень ячейки выше 2.',conc:true,dmg:'2d8',up:'1d8',dt:'огонь'},
-  {id:'inv',lv:2,n:'Невидимость',t:'Действие, касание, концентрация до 1 часа. Цель невидима, пока не атакует или не сотворит заклинание. +1 цель за уровень ячейки выше 2.',conc:true},
-  {id:'fs',lv:2,n:'Поиск скакуна',t:'10 минут. Призываешь верного скакуна (боевой конь, пони и т. п.). Гусь верхом на коне.',game:5},
-  {id:'fof',lv:2,n:'Стая фамильяров',t:'1 минута, концентрация до 1 часа. Призываешь до 3 фамильяров (+1 за уровень ячейки выше 2).',conc:true,game:5},
-  {id:'hyp',lv:3,n:'Гипнотический узор',t:'Действие, 120 фт, куб 30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: очарованы, недееспособны, скорость 0. Эффект кончается при уроне или если кто-то встряхнёт цель.',conc:true,save:'wis'},
-  {id:'fear',lv:3,n:'Ужас',t:'Действие, конус 30 фт, концентрация до 1 минуты. Спасбросок Мудрости, провал: бросают оружие, испуганы и бегут Рывком прочь.',conc:true,save:'wis'},
-  {id:'mhw',lv:3,n:'Множественное лечащее слово',t:'Бонусное действие, 60 фт. До 6 существ восстанавливают по 1d4 + Хар хитов. +1d4 за уровень ячейки выше 3.',heal:'1d4',up:'1d4',mod:true},
-  {id:'dm',lv:3,n:'Рассеивание магии',t:'Действие, 120 фт. Заканчивает заклинания 3 уровня и ниже на цели. Для заклинаний выше — проверка Хар против СЛ 10 + уровень заклинания.'},
-  {id:'sf',lv:3,n:'Призыв феи',t:'Действие, концентрация до 1 часа. Призывает духа феи (статблок в Tasha\'s Cauldron of Everything).',conc:true,game:9},
-  {id:'ssp',lv:3,n:'Призыв теневого отродья',t:'Действие, концентрация до 1 часа. Призывает теневой дух (статблок в Tasha\'s Cauldron of Everything).',conc:true,game:9},
-  {id:'poly',lv:4,n:'Превращение',t:'Действие, 60 фт, концентрация до 1 часа. Спасбросок Мудрости (если цель против): превращается в зверя с ПО не выше её уровня. Превращаешь дракона в гуся!',conc:true,save:'wis'},
-  {id:'dd',lv:4,n:'Переносящая дверь',t:'Действие. Телепорт на 500 фт, можно взять с собой одно согласное существо.'},
-  {id:'ginv',lv:4,n:'Высшая невидимость',t:'Действие, касание, концентрация до 1 минуты. Невидимость не спадает при атаках и заклинаниях.',conc:true},
-  {id:'syn',lv:5,n:'Синаптический разряд',t:'Действие, 120 фт, сфера радиусом 20 фт. Спасбросок Интеллекта: 8d6 психическим, при успехе половина. Провал: 1 минуту −1d6 к атакам, проверкам и спасброскам концентрации (повтор в конце хода).',save:'int',dmg:'8d6',dt:'психический'},
-  {id:'hmon',lv:5,n:'Удержание чудовища',t:'Действие, 90 фт, концентрация до 1 минуты. Любое существо проходит спасбросок Мудрости, провал: парализовано. +1 цель за уровень ячейки выше 5.',conc:true,save:'wis'},
-  {id:'ao',lv:5,n:'Оживление предметов',t:'Действие, 120 фт, концентрация до 1 минуты. Оживляешь до 10 мелких предметов, которые сражаются за тебя (стулья, кружки, кубики!).',conc:true},
-];
-const DEFAULT_PREP = ['vm','mh','mi','hw','thl','ff','sh','hp','hyp','mhw','poly','syn'];
-const CONDS = ['Ослеплён','Очарован','Оглушён','Испуган','Схвачен','Недееспособен','Невидим','Парализован','Окаменел','Отравлен','Лежит','Опутан','Ошеломлён','Без сознания','Истощение'];
-
-/* ============================================================
-   СОСТОЯНИЕ
-   ============================================================ */
-const KEY = 'goose-gambler-v1';
-function fresh(){
-  return {
-    name:'Гоготун «Ва-Банк»', bg:'Артист', al:'Хаотично-добрый',
-    level:11, ab:{str:8,dex:18,con:15,int:8,wis:10,cha:18},
-    tough:true, armor:'leather',
-    prof:['soh','dec','perc','acro','perf'], exp:['soh','dec'],
-    hp:null, temp:0, hdUsed:0,
-    slotsUsed:[0,0,0,0,0],
-    used:{tempt:0,gamble:0,d4:0,d6:0,d8:0,d10:0,reroll:0,wing:0},
-    coins:null, coinsDm:0,
-    omen:{g:0,i:0},
-    pend:{attack:null,check:null,save:null},
-    oneShot:null, lastGamble:null,
-    active:{basic:null,greater:null},
-    death:{s:0,f:0}, conds:[], conc:null,
-    prepared:DEFAULT_PREP.slice(),
-    money:{pp:0,gp:150,sp:20,cp:7},
-    inv:'Кожаный доспех\nЛёгкий арбалет + 20 болтов\n2 кинжала\n10 дротиков\nНабор артиста\nНабор игральных костей (счастливый)\nКолода карт (крапленая)\nДеловой костюм (сшит под гусиную шею)',
-    notes:'Отыгрыш:\n• На любую ситуацию: «Ставлю 10 золотых, что всё будет нормально».\n• Гогочет, когда нервничает. Гогочет, когда рад. Просто гогочет.\n• Монеты судьбы называет «чаевыми мастеру».\n',
-    log:[], mode:'nor', sound:true, vib:true
-  };
-}
+/* ======================= СОСТОЯНИЕ ======================= */
+const KEY='goose-gambler-v1';
+function fresh(){return{
+ name:'Гоготун «Ва-Банк»',bg:'Артист',al:'Хаотично-добрый',level:11,
+ ab:{str:8,dex:18,con:15,int:8,wis:10,cha:18},tough:true,armor:'leather',
+ prof:['soh','dec','perc','acro','perf'],exp:['soh','dec'],
+ hp:null,temp:0,hdUsed:0,slotsUsed:[0,0,0,0,0],
+ used:{tempt:0,gamble:0,d4:0,d6:0,d8:0,d10:0,reroll:0,wing:0},
+ coins:null,coinsDm:0,omen:{g:0,i:0},
+ pend:{attack:null,check:null,save:null},oneShot:null,lastGamble:null,
+ active:{},effects:[],combat:null,
+ death:{s:0,f:0},conds:[],conc:null,prepared:DEFAULT_PREP.slice(),
+ money:{pp:0,gp:150,sp:20,cp:7},
+ inv:'Кожаный доспех\nЛёгкий арбалет + 20 болтов\n2 кинжала\n10 дротиков\nНабор артиста, лютня, набор для грима\nСчастливые игральные кости\nКрапленая колода карт\nДеловой костюм (сшит под гусиную шею)',
+ notes:'Отыгрыш:\n• На любую ситуацию: «Ставлю 10 золотых, что всё будет нормально».\n• Гогочет, когда нервничает. Гогочет, когда рад. Просто гогочет.\n• Монеты судьбы называет «чаевыми мастеру».\n',
+ log:[],mode:'nor',sound:true,vib:true,anim:true,keep:false};}
 let S;
-try{ S = JSON.parse(localStorage.getItem(KEY)) || fresh(); }catch(e){ S = fresh(); }
-S = Object.assign(fresh(), S);
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+try{S=JSON.parse(localStorage.getItem(KEY))||fresh();}catch(e){S=fresh();}
+S=Object.assign(fresh(),S);
+if(!S.active||S.active.basic!==undefined||S.active.greater!==undefined)S.active={};
+if(!Array.isArray(S.effects))S.effects=[];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
-/* ============================================================
-   ПРОИЗВОДНЫЕ
-   ============================================================ */
-const mod = v => Math.floor((v-10)/2);
-const sg = n => (n>=0?'+':'')+n;
-const M = a => mod(S.ab[a]);
-const PB = () => Math.ceil(S.level/4)+1;
-const CHA = () => Math.max(1, M('cha'));
-const maxHP = () => { const c=M('con'); return 6+c + (S.level-1)*(4+c) + (S.tough?2*S.level:0); };
-const AC = () => ARMOR[S.armor] + M('dex');
-const spellDC = () => 8+PB()+M('cha');
-const spellAtk = () => PB()+M('cha');
-const totemDie = () => S.level>=9?'d6':'d4';
-const gambleTh = () => S.level>=10?12:11; // ≥12 / <12  или  >10 (≥11) / ≤10
-const prepMax = () => Math.max(1, M('cha')+Math.floor(S.level/2));
-const lim = { tempt:CHA, gamble:CHA, d4:CHA, d6:CHA, d8:CHA, d10:CHA, reroll:CHA, wing:()=>1 };
-const left = k => Math.max(0, lim[k]() - S.used[k]);
-if(S.hp==null) S.hp = maxHP();
-if(S.coins==null) S.coins = S.level;
+/* ======================= ПРОИЗВОДНЫЕ ======================= */
+const mod=v=>Math.floor((v-10)/2),sg=n=>(n>=0?'+':'')+n,M=a=>mod(S.ab[a]);
+const PB=()=>Math.ceil(S.level/4)+1,CHA=()=>Math.max(1,M('cha'));
+const maxHP=()=>{const c=M('con');return 6+c+(S.level-1)*(4+c)+(S.tough?2*S.level:0);};
+const AC=()=>ARMOR[S.armor]+M('dex');
+const DC=()=>8+PB()+M('cha'),SATK=()=>PB()+M('cha');
+const totemDie=()=>S.level>=9?'d6':'d4';
+const gTh=()=>S.level>=10?12:11;
+const prepMax=()=>Math.max(1,M('cha')+Math.floor(S.level/2));
+const LIM={tempt:CHA,gamble:CHA,d4:CHA,d6:CHA,d8:CHA,d10:CHA,reroll:CHA,wing:()=>1};
+const left=k=>Math.max(0,LIM[k]()-S.used[k]);
+const d6is=r=>!!(S.active.d6&&S.active.d6.r===r);
+const saveBonus=a=>M(a)+((['dex','cha'].includes(a)||d6is(2))?PB():0);
+const skillBonus=id=>{const s=SKILLS.find(x=>x[0]===id),e=S.exp.includes(id),p=e||S.prof.includes(id);return M(s[2])+(e?2*PB():p?PB():0);};
+const cantripDice=()=>(S.level>=11?3:S.level>=5?2:1)+'d4';
+if(S.hp==null)S.hp=maxHP();
+if(S.coins==null)S.coins=S.level;
 
-/* ============================================================
-   КУБИКИ, ЗВУК, ВИБРАЦИЯ
-   ============================================================ */
-const R = n => 1+Math.floor(Math.random()*n);
-function rollF(f){ // "2d8+3"
-  let total=0, parts=[];
-  f.replace(/\s/g,'').replace(/-/g,'+-').split('+').filter(Boolean).forEach(p=>{
-    const m=p.match(/^(-?)(\d*)d(\d+)$/);
-    if(m){ const k=+(m[2]||1), s=+m[3], sgn=m[1]?-1:1; const rs=[]; for(let i=0;i<k;i++) rs.push(R(s)); const sum=rs.reduce((a,b)=>a+b,0)*sgn; total+=sum; parts.push(`[${rs.join(',')}]`); }
-    else { total+=+p; if(+p) parts.push(p); }
-  });
-  return {total, txt:parts.join(' + ')};
-}
-let AC_=null;
-function ctx(){ if(!AC_){ try{ AC_=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return AC_; }
-function honkSound(){
-  if(!S.sound) return; const c=ctx(); if(!c) return;
-  [0,0.28,0.56].forEach((t0,i)=>{
-    const o=c.createOscillator(), o2=c.createOscillator(), g=c.createGain(), f=c.createBiquadFilter();
-    o.type='sawtooth'; o2.type='square'; f.type='bandpass'; f.frequency.value=900; f.Q.value=2;
-    const t=c.currentTime+t0, base=i===2?520:440;
-    o.frequency.setValueAtTime(base,t); o.frequency.exponentialRampToValueAtTime(base*0.62,t+0.22);
-    o2.frequency.setValueAtTime(base*1.01,t); o2.frequency.exponentialRampToValueAtTime(base*0.6,t+0.22);
-    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.24);
-    o.connect(f); o2.connect(f); f.connect(g); g.connect(c.destination); o.start(t); o2.start(t); o.stop(t+0.26); o2.stop(t+0.26);
-  });
-}
-function clack(){
-  if(!S.sound) return; const c=ctx(); if(!c) return;
-  for(let i=0;i<3;i++){
-    const t=c.currentTime+i*0.06+Math.random()*0.03, len=0.04;
-    const b=c.createBuffer(1, c.sampleRate*len, c.sampleRate), d=b.getChannelData(0);
-    for(let j=0;j<d.length;j++) d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,3);
-    const s=c.createBufferSource(), g=c.createGain(), f=c.createBiquadFilter(); f.type='highpass'; f.frequency.value=1800;
-    s.buffer=b; g.gain.value=0.5; s.connect(f); f.connect(g); g.connect(c.destination); s.start(t);
-  }
-}
-function jingle(good){
-  if(!S.sound) return; const c=ctx(); if(!c) return;
-  const notes = good?[523,659,784,1047]:[392,330,262,196];
-  notes.forEach((fr,i)=>{ const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+i*0.09; o.type='triangle'; o.frequency.value=fr;
-    g.gain.setValueAtTime(0.25,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.2); o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+0.22); });
-}
-const vib = p => { if(S.vib && navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} };
+/* ======================= КУБИКИ / ЗВУК / ANDROID ======================= */
+const NATIVE=typeof window.Android!=='undefined';
+const R=n=>1+Math.floor(Math.random()*n);
+function rollF(f){let total=0;const parts=[];f=String(f).replace(/\s/g,'').replace(/-/g,'+-');
+ f.split('+').filter(Boolean).forEach(p=>{const m=p.match(/^(-?)(\d*)d(\d+)$/);
+  if(m){const k=+(m[2]||1),s=+m[3],sgn=m[1]?-1:1,rs=[];for(let i=0;i<k;i++)rs.push(R(s));total+=rs.reduce((a,b)=>a+b,0)*sgn;parts.push(`[${rs.join(',')}]`);}
+  else if(+p){total+=+p;parts.push(p);}});
+ return{total,txt:parts.join(' + ')};}
+const dbl=f=>f.replace(/(\d*)d(\d+)/g,(m,k,s)=>`${(+(k||1))*2}d${s}`);
+let AX=null;const ctx=()=>{if(!AX){try{AX=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AX&&AX.state==='suspended')AX.resume();return AX;};
+function honkSound(){if(!S.sound)return;const c=ctx();if(!c)return;
+ [0,.27,.54].forEach((t0,i)=>{const o=c.createOscillator(),o2=c.createOscillator(),g=c.createGain(),f=c.createBiquadFilter();
+  o.type='sawtooth';o2.type='square';f.type='bandpass';f.frequency.value=950;f.Q.value=2.2;
+  const t=c.currentTime+t0,b=i===2?540:450;
+  o.frequency.setValueAtTime(b,t);o.frequency.exponentialRampToValueAtTime(b*.6,t+.22);
+  o2.frequency.setValueAtTime(b*1.012,t);o2.frequency.exponentialRampToValueAtTime(b*.58,t+.22);
+  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.4,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.24);
+  o.connect(f);o2.connect(f);f.connect(g);g.connect(c.destination);o.start(t);o2.start(t);o.stop(t+.26);o2.stop(t+.26);});}
+function clack(){if(!S.sound)return;const c=ctx();if(!c)return;
+ for(let i=0;i<4;i++){const t=c.currentTime+i*.055+Math.random()*.03,len=.035;const b=c.createBuffer(1,Math.floor(c.sampleRate*len),c.sampleRate),d=b.getChannelData(0);
+  for(let j=0;j<d.length;j++)d[j]=(Math.random()*2-1)*Math.pow(1-j/d.length,3);
+  const s=c.createBufferSource(),g=c.createGain(),f=c.createBiquadFilter();f.type='highpass';f.frequency.value=1700+Math.random()*800;
+  s.buffer=b;g.gain.value=.45;s.connect(f);f.connect(g);g.connect(c.destination);s.start(t);}}
+function jingle(good){if(!S.sound)return;const c=ctx();if(!c)return;
+ (good?[523,659,784,1047]:[392,330,262,196]).forEach((fr,i)=>{const o=c.createOscillator(),g=c.createGain(),t=c.currentTime+i*.085;o.type='triangle';o.frequency.value=fr;
+  g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+.22);});}
+function vib(p){if(!S.vib)return;const arr=Array.isArray(p)?p:[p];
+ try{if(NATIVE&&Android.vibrate)Android.vibrate(JSON.stringify(arr));else if(navigator.vibrate)navigator.vibrate(arr);}catch(e){}}
 
-/* ============================================================
-   UI-помощники
-   ============================================================ */
-const $ = s => document.querySelector(s);
-const h = (tag, attrs={}, ...kids) => { const e=document.createElement(tag); for(const k in attrs){ if(k==='on') for(const ev in attrs.on) e.addEventListener(ev, attrs.on[ev]); else if(k==='html') e.innerHTML=attrs[k]; else if(attrs[k]!=null && attrs[k]!==false) e.setAttribute(k, attrs[k]); } kids.flat().forEach(k=>e.append(k)); return e; };
-let toastT;
-function toast({title='', value='', body='', extra='', cls='', actions=[]}){
-  const t=$('#toast'); t.className=''; t.innerHTML='';
-  t.append(h('div',{class:'t'},title), h('div',{class:'v'},String(value)));
-  if(body) t.append(h('div',{class:'b',html:body}));
-  if(extra) t.append(h('div',{class:'x',html:extra}));
-  if(actions.length){ const a=h('div',{class:'acts'}); actions.forEach(([l,fn,c])=>a.append(h('button',{class:'btn sm '+(c||'gold'),on:{click:e=>{e.stopPropagation(); fn();}}},l))); t.append(a); }
-  t.classList.add('show'); if(cls) t.classList.add(cls);
-  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'), actions.length?7000:3200);
-}
-$('#toast').addEventListener('click',()=>$('#toast').classList.remove('show'));
-function addLog(s){ S.log.unshift({t:new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}), s}); S.log=S.log.slice(0,80); save(); renderLog(); }
-function modal(title, build){
-  const b=$('#mbox'); b.innerHTML=''; b.append(h('h2',{},title, h('button',{on:{click:closeModal}},'✕'))); build(b); $('#modal').classList.add('show');
-}
-function closeModal(){ $('#modal').classList.remove('show'); }
-$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+/* ======================= UI-ПОМОЩНИКИ ======================= */
+const $=s=>document.querySelector(s);
+const h=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const k in attrs){const v=attrs[k];
+ if(k==='on')for(const ev in v)e.addEventListener(ev,v[ev]);else if(k==='html')e.innerHTML=v;else if(v!=null&&v!==false)e.setAttribute(k,v===true?'':v);}
+ kids.flat().forEach(k=>{if(k!=null&&k!==false&&k!=='')e.append(k);});return e;};
+let toastT,rollT;
+function toast({title='',value='',body='',extra='',cls='',actions=[],multi=null,roll=false,ms}){
+ const t=$('#toast');t.className='';t.innerHTML='';clearInterval(rollT);
+ const v=h('div',{class:'v'},String(value));t.append(h('div',{class:'t'},title),v);
+ if(multi){const m=h('div',{class:'multi'});multi.forEach(([a,b])=>m.append(h('div',{html:`<span>${a}</span><b>${b}</b>`})));t.append(m);}
+ if(body)t.append(h('div',{class:'b',html:body}));
+ if(extra)t.append(h('div',{class:'x',html:extra}));
+ if(actions.length){const a=h('div',{class:'acts'});actions.forEach(([l,fn,c])=>a.append(h('button',{class:'btn sm '+(c||'gold'),on:{click:e=>{e.stopPropagation();fn();}}},l)));t.append(a);}
+ t.append(h('div',{class:'hint'},'нажми, чтобы закрыть'));
+ t.classList.add('show');if(cls)t.classList.add(cls);
+ if(roll&&S.anim&&typeof value==='number'){v.classList.add('rolling');let n=0;rollT=setInterval(()=>{v.textContent=R(Math.max(20,value+5));if(++n>7){clearInterval(rollT);v.textContent=value;v.classList.remove('rolling');}},45);}
+ clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms||(actions.length?9000:3600));}
+const hideToast=()=>$('#toast').classList.remove('show');
+$('#toast').addEventListener('click',hideToast);
+function addLog(s){S.log.unshift({t:new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}),s});S.log=S.log.slice(0,100);renderLog();}
+function modal(title,build){const b=$('#mbox');b.innerHTML='';b.append(h('div',{class:'grab'}),h('h2',{},title,h('button',{class:'x',on:{click:closeModal}},'✕')));build(b);$('#modal').classList.add('show');}
+function closeModal(){$('#modal').classList.remove('show');}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+function ask(title,text,yes,yesLabel='Да'){modal(title,b=>{b.append(h('p',{class:'muted'},text),h('div',{class:'grid2'},h('button',{class:'btn ghost',on:{click:closeModal}},'Отмена'),h('button',{class:'btn gold',on:{click:()=>{closeModal();yes();}}},yesLabel)));});}
+function onHold(el,fn){let t,held=false,sx=0,sy=0;
+ el.addEventListener('pointerdown',e=>{held=false;sx=e.clientX;sy=e.clientY;t=setTimeout(()=>{held=true;vib(25);fn();},450);});
+ el.addEventListener('pointermove',e=>{if(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)clearTimeout(t);});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>el.addEventListener(ev,()=>clearTimeout(t)));
+ el.addEventListener('click',e=>{if(held){e.stopImmediatePropagation();e.preventDefault();held=false;}},true);
+ el.addEventListener('contextmenu',e=>e.preventDefault());}
 
-/* ============================================================
-   ДВИЖОК БРОСКА d20
-   type: 'attack' | 'check' | 'save' | 'raw'
-   ============================================================ */
-function setMode(m){ S.mode=m; document.querySelectorAll('.rollmode button').forEach(b=>b.classList.toggle('on', b.dataset.m===m)); save(); }
+/* ======================= БОЙ ======================= */
+function spend(kind,what){
+ if(!S.combat)return;
+ if(S.combat.used[kind])toast({title:'Внимание',value:'⚠️',body:`${ECON_RU[kind]} в этом раунде уже потрачено (${S.combat.used[kind]}).<br>Отмечено ещё раз: ${what}.`,cls:'fail',ms:2600});
+ S.combat.used[kind]=what;renderCombat();}
+function addEffect(name,rounds,key){if(key)S.effects=S.effects.filter(e=>e.key!==key);S.effects.push({id:Date.now()+Math.random(),name,left:rounds,key});}
+function dropEffectSide(e){if(e.key&&e.key.startsWith('die:'))delete S.active[e.key.slice(4)];if(e.key==='conc')S.conc=null;if(e.key==='die:d6'&&e.inv)S.conds=S.conds.filter(c=>c!=='Невидим');}
+function removeEffect(id){const e=S.effects.find(x=>x.id===id);if(!e)return;S.effects=S.effects.filter(x=>x.id!==id);dropEffectSide(e);renderAll();save();}
+const fmtLeft=r=>r>=10?Math.floor(r/10)+' мин'+(r%10?` ${r%10} р.`:''):r+' р.';
+function startCombat(){const r=core('Инициатива',M('dex'),'check');
+ S.combat={round:1,init:r.total,used:{action:null,bonus:null,reaction:null},coinRound:false,ac:(S.lastAC||15)};
+ addLog(`⚔️ Бой начат, инициатива ${r.total}`);showRoll('Инициатива — бой!',r,{extra:'Раунд 1'});renderAll();save();}
+function nextRound(){if(!S.combat)return;
+ S.combat.round++;S.combat.used={action:null,bonus:null,reaction:null};S.combat.coinRound=false;
+ const expired=[];S.effects.forEach(e=>{e.left--;if(e.left<=0)expired.push(e);});
+ expired.forEach(e=>{S.effects=S.effects.filter(x=>x.id!==e.id);dropEffectSide(e);});
+ addLog(`Раунд ${S.combat.round}`);vib(20);
+ if(expired.length){jingle(false);toast({title:'Раунд '+S.combat.round,value:'⌛',body:'Закончилось:<br>'+expired.map(e=>'• '+e.name).join('<br>')});}
+ else toast({title:'Новый раунд',value:S.combat.round,body:'Действие, бонусное действие и реакция снова доступны.',ms:1300});
+ renderAll();save();}
+function endCombat(){ask('Закончить бой?','Таймеры эффектов на минуты сохранятся.',()=>{addLog('🏳️ Бой окончен');S.combat=null;renderAll();save();},'Закончить');}
+$('#cNext').addEventListener('click',nextRound);
+function renderCombat(){const c=$('#combatCard');c.innerHTML='';const st=$('#cstrip');
+ if(!S.combat){st.classList.remove('on');
+  c.append(h('h2',{},h('span',{class:'ic'},'🗡️'),'Бой'),h('button',{class:'btn gold wide',style:'padding:14px',on:{click:startCombat}},'⚔️ Начать бой (бросить инициативу)'),
+   h('div',{class:'note'},'В бою считаются раунды, отмечаются действие, бонусное действие и реакция, идут таймеры эффектов, а попадания по КД цели определяются сами.'));return;}
+ st.classList.add('on');$('#cRound').textContent='Р'+S.combat.round;
+ const ec=$('#cEcon');ec.innerHTML='';[['action','Действ.'],['bonus','Бонус'],['reaction','Реакц.']].forEach(([k,n])=>ec.append(h('span',{class:S.combat.used[k]?'used':''},n)));
+ c.append(h('h2',{},h('span',{class:'ic'},'🗡️'),'Бой · раунд '+S.combat.round,h('small',{},'иниц. '+S.combat.init)),
+  h('div',{class:'row'},h('span',{class:'grow'},'КД цели',h('br'),h('small',{class:'muted'},'попадания считаются сами')),
+   h('div',{class:'stepper'},h('button',{on:{click:()=>{S.combat.ac=Math.max(1,S.combat.ac-1);S.lastAC=S.combat.ac;renderCombat();renderAttacks();save();}}},'−'),h('b',{},S.combat.ac),h('button',{on:{click:()=>{S.combat.ac++;S.lastAC=S.combat.ac;renderCombat();renderAttacks();save();}}},'+'))),
+  h('div',{class:'row wrapr',style:'margin-top:10px;gap:6px'},
+   ...[['action','Действие'],['bonus','Бонусное'],['reaction','Реакция']].map(([k,n])=>h('button',{class:'btn sm '+(S.combat.used[k]?'ghost':'green'),on:{click:()=>{S.combat.used[k]=S.combat.used[k]?null:'вручную';renderCombat();save();}}},(S.combat.used[k]?'✓ ':'')+n)),
+   h('span',{class:'tag '+(S.combat.coinRound?'red':'on')},S.combat.coinRound?'🪙 уже':'🪙 можно')),
+  h('div',{class:'grid2',style:'margin-top:10px'},h('button',{class:'btn gold',on:{click:nextRound}},'▶ Следующий раунд'),h('button',{class:'btn ghost',on:{click:endCombat}},'🏳️ Закончить')));}
+function renderEffects(){const l=$('#effList');l.innerHTML='';
+ const all=S.effects.slice();if(S.conc&&!all.find(e=>e.key==='conc'))all.unshift({id:'c',name:'🧠 '+S.conc,left:null,key:'conc'});
+ if(!all.length){l.append(h('div',{class:'empty'},'Нет активных эффектов'));return;}
+ all.forEach(e=>l.append(h('div',{class:'eff-item'},h('span',{class:'n'},e.name),e.left!=null?h('span',{class:'left'},fmtLeft(e.left)):'',
+  h('button',{on:{click:()=>{if(e.id==='c'){S.conc=null;renderAll();save();}else removeEffect(e.id);}}},'✕'))));}
+
+/* ======================= ДВИЖОК d20 ======================= */
+function setMode(m){S.mode=m;document.querySelectorAll('.rollmode button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));save();}
 document.querySelectorAll('.rollmode button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
-function modeFlag(){
-  const f=[]; if(S.oneShot) f.push((S.oneShot.m==='adv'?'⬆ преим.':'⬇ помеха')+' на след. бросок');
-  for(const k in S.pend) if(S.pend[k]) f.push(`${k==='attack'?'атака':k==='check'?'проверка':'спасбросок'}: ${S.pend[k]==='adv'?'преим.':'помеха'}`);
-  $('#modeFlag').textContent=f.join(' · ');
-  $('#temptPend').innerHTML = f.length?('Ждут применения: '+f.join(', ')):'Нет отложенных эффектов.';
-}
-function d20(label, bonus, type='check', opts={}){
-  let adv = 0; const why=[];
-  if(S.mode==='adv'){adv++;why.push('режим')} if(S.mode==='dis'){adv--;why.push('режим')}
-  if(opts.adv){adv++;why.push(opts.adv)}
-  if(S.oneShot){ adv += S.oneShot.m==='adv'?1:-1; why.push(S.oneShot.src);
-    if(S.oneShot.src==='Искушение судьбы' && type!=='raw'){ S.pend[type] = S.oneShot.m==='adv'?'dis':'adv'; }
-    S.oneShot=null; }
-  else if(S.pend[type]){ adv += S.pend[type]==='adv'?1:-1; why.push('Искушение (обратный эффект)'); S.pend[type]=null; }
-  const a=R(20), b=R(20); let n=a, shown=`${a}`;
-  if(adv>0){ n=Math.max(a,b); shown=`${a} | ${b} ⬆`; } else if(adv<0){ n=Math.min(a,b); shown=`${a} | ${b} ⬇`; }
-  const total = n+bonus;
-  const crit = n===20, fail = n===1;
-  clack(); vib(crit?[40,40,120]:fail?[200]:30);
-  if(S.level>=3 && (crit||fail)){
-    const key=crit?'g':'i', mx=CHA();
-    if(S.omen[key]<mx){ S.omen[key]++; }
-  }
-  if(S.mode!=='nor') setMode('nor');
-  const ac = type==='attack' && crit ? ' — КРИТ!' : '';
-  addLog(`${label}: ${total} (к20: ${shown}${sg(bonus)})${crit?' 💥 НАТ 20':''}${fail?' 💩 НАТ 1':''}`);
-  const extra = (crit?'НАТУРАЛЬНАЯ 20! ':'')+(fail?'Натуральная 1… ':'')+(crit&&S.level>=3?'<br>+1 доброе знамение':'')+(fail&&S.level>=3?'<br>+1 дурное знамение':'');
-  toast({title:label, value:total, body:`к20: ${shown} ${sg(bonus)}${why.length?'<br><small>'+why.join(', ')+'</small>':''}`, extra, cls:crit?'crit':fail?'fail':'', actions: opts.after? opts.after(crit, total, n):[]});
-  modeFlag(); renderFight(); save();
-  return {total, n, crit};
-}
+function modeFlag(){const f=[];if(S.oneShot)f.push((S.oneShot.m==='adv'?'⬆ преим.':'⬇ помеха')+' на след. бросок');
+ for(const k in S.pend)if(S.pend[k])f.push(`${k==='attack'?'атака':k==='check'?'проверка':'спас'}: ${S.pend[k]==='adv'?'⬆':'⬇'}`);
+ $('#modeFlag').textContent=f.join(' · ');$('#temptPend').textContent=f.length?('Ждут применения: '+f.join(', ')):'Нет отложенных эффектов.';}
+function core(label,bonus,type='check',o={}){
+ let adv=0;const why=[];
+ if(S.mode==='adv'){adv++;why.push('режим ⬆');}if(S.mode==='dis'){adv--;why.push('режим ⬇');}
+ if(o.adv){adv++;why.push(o.adv);}
+ if(S.oneShot){adv+=S.oneShot.m==='adv'?1:-1;why.push(S.oneShot.src);
+  if(S.oneShot.src==='Искушение судьбы'&&type!=='raw')S.pend[type]=S.oneShot.m==='adv'?'dis':'adv';S.oneShot=null;}
+ else if(S.pend[type]){adv+=S.pend[type]==='adv'?1:-1;why.push('Искушение: обратный эффект');S.pend[type]=null;}
+ const a=R(20),b=R(20);let n=a,shown=`${a}`;
+ if(adv>0){n=Math.max(a,b);shown=`${a} | ${b} ⬆`;}else if(adv<0){n=Math.min(a,b);shown=`${a} | ${b} ⬇`;}
+ const total=n+bonus,crit=n===20,fail=n===1;
+ if(S.level>=3&&(crit||fail)){const k=crit?'g':'i';if(S.omen[k]<CHA())S.omen[k]++;}
+ if(!o.keepMode&&S.mode!=='nor')setMode('nor');
+ addLog(`${label}: ${total} (к20 ${shown}${sg(bonus)})${crit?' 💥20':''}${fail?' 💩1':''}`);
+ return{total,n,crit,fail,shown,bonus,why};}
+function showRoll(label,r,o={}){clack();vib(r.crit?[40,40,140]:r.fail?[220]:30);if(r.crit)setTimeout(()=>jingle(true),200);if(r.fail)setTimeout(()=>jingle(false),200);
+ const ex=(r.crit?'НАТУРАЛЬНАЯ 20! ':'')+(r.fail?'Натуральная 1… ':'')+((r.crit||r.fail)&&S.level>=3?`<br><small>${r.crit?'+1 доброе':'+1 дурное'} знамение</small>`:'');
+ toast({title:label,value:r.total,roll:true,body:`к20: ${r.shown} ${sg(r.bonus)}${r.why.length?'<br><small>'+r.why.join(', ')+'</small>':''}`,extra:(o.extra?o.extra+'<br>':'')+ex,cls:r.crit?'crit':r.fail?'fail':'',actions:o.actions||[]});
+ modeFlag();renderLuck();save();}
+function d20(label,bonus,type='check',o={}){const r=core(label,bonus,type,o);showRoll(label,r,o);return r;}
 
-/* ============================================================
-   РЕНДЕР
-   ============================================================ */
+/* ======================= ШАПКА ======================= */
 function renderHeader(){
-  $('#hName').textContent = S.name;
-  $('#hSub').textContent = `Гусь · Gambler (Dice Roller) ${S.level} ур.`;
-  const mx=maxHP(); S.hp=Math.min(S.hp,mx);
-  $('#hpNum').innerHTML = `${S.hp}<small>/${mx}${S.temp?` +${S.temp}`:''}</small>`;
-  $('#hpFill').style.width = Math.max(0,S.hp/mx*100)+'%';
-  $('#hpFill').style.background = S.hp/mx>0.5?'var(--green)':S.hp/mx>0.25?'var(--gold)':'var(--red)';
-  $('#tmpFill').style.width = Math.min(100,S.temp/mx*100)+'%';
-  $('#hpInfo').textContent = `Кости хитов: ${S.level-S.hdUsed}/${S.level} к6 · нажми на число, чтобы ввести хиты`;
-  $('#sAC').textContent = AC(); $('#sInitV').textContent = sg(M('dex')); $('#sPB').textContent = sg(PB());
-  document.querySelectorAll('.honkDC').forEach(e=>e.textContent=spellDC());
-}
-function pips(el, total, usedN, onTap){
-  el.innerHTML=''; for(let i=0;i<total;i++){ const p=h('div',{class:'pip'+(i<usedN?' used':'')}); if(onTap) p.addEventListener('click',()=>onTap(i)); el.append(p); }
-}
-function renderAttacks(){
-  const dx=M('dex'), st=M('str'), pb=PB();
-  const atks = [
-    {n:'Кинжал',s:'1d4+'+dx,b:pb+dx,dt:'колющий',note:'Фехтовальное, лёгкое, метательное 20/60'},
-    {n:'Лёгкий арбалет',s:'1d8+'+dx,b:pb+dx,dt:'колющий',note:'80/320, перезарядка'},
-    {n:'Дротик',s:'1d4+'+dx,b:pb+dx,dt:'колющий',note:'Метательное 20/60, фехтовальное'},
-    {n:'Когти гуся',s:'1d4'+(st>=0?'+':'')+st,b:pb+st,dt:'рубящий',note:'Безоружный удар (Сила). Да, гусь слабоват.'},
-    {n:'Злая насмешка',s:(S.level>=11?'3d4':S.level>=5?'2d4':'1d4'),b:null,dt:'психический',note:`Спасбросок Мудрости, СЛ ${spellDC()}`,save:true}
-  ];
-  const box=$('#attacks'); box.innerHTML='';
-  atks.forEach(a=>{
-    const dmgBtn = h('button',{class:'btn sm red',on:{click:()=>dmgRoll(a.n,a.s,a.dt,false)}},'Урон');
-    const hitBtn = a.save ? h('button',{class:'btn sm purple',on:{click:()=>{ toast({title:a.n, value:'СЛ '+spellDC(), body:'Цель проходит спасбросок Мудрости. Провал: урон и помеха на следующую атаку.'}); addLog(a.n+': СЛ '+spellDC()); }}},'СЛ '+spellDC())
-      : h('button',{class:'btn sm gold',on:{click:()=>d20(a.n+' — атака', a.b, 'attack',{after:(crit)=>[['Урон'+(crit?' x2':''),()=>dmgRoll(a.n,a.s,a.dt,crit),'red']]})}},sg(a.b));
-    box.append(h('div',{class:'attack'}, h('div',{}, h('span',{class:'nm'},a.n), h('small',{class:'muted'}, `${a.s} ${a.dt} · ${a.note}`)), hitBtn, dmgBtn));
-  });
-  $('#extraAtk').textContent = S.level>=5 ? 'Дополнительная атака: действием «Атака» бьёшь дважды. «Быстро смыться»: Рывок, Отход или Уклонение бонусным действием.' : '';
-}
-function dmgRoll(n, f, dt, crit){
-  let ff=f; if(crit) ff = f.replace(/(\d*)d(\d+)/, (m,k,s)=>`${(+(k||1))*2}d${s}`);
-  const r=rollF(ff); clack(); vib(30);
-  addLog(`${n} — урон: ${r.total} ${dt}${crit?' (крит)':''}`);
-  toast({title:`${n} — урон${crit?' (КРИТ)':''}`, value:Math.max(0,r.total), body:`${ff}: ${r.txt}<br>${dt}`});
-}
-function renderDice(){
-  const g=$('#diceGrid'); g.innerHTML='';
-  $('#drNote').textContent = `атака ${sg(spellAtk())}, СЛ ${spellDC()}`;
-  Object.entries(DIE_INFO).forEach(([k,d])=>{
-    const locked = S.level<d.lv;
-    const act = S.active[d.grp] && S.active[d.grp].k===k ? S.active[d.grp] : null;
-    const card = h('div',{class:'die'+(act?' active':'')+(locked?' locked':'')},
-      h('div',{class:'big'}, k.toUpperCase()),
-      h('div',{style:'font-size:12px;font-weight:700'}, d.n),
-      h('div',{class:'eff'}, act? ('Активен: '+act.r+'. '+(act.text||'')).slice(0,90) : (locked?`с ${d.lv} уровня`:'')),
-      h('div',{class:'pips',style:'justify-content:center;margin:6px 0'}),
-      h('button',{class:'btn sm '+d.c,style:'width:100%',on:{click:()=>useDie(k)}}, locked?'Закрыт':'Бросить кубик'));
-    pips(card.querySelector('.pips'), CHA(), S.used[k]);
-    g.append(card);
-  });
-  pips($('#rerollPips'), CHA(), S.used.reroll);
-  $('#bReroll').disabled = S.level<7 || left('reroll')<=0;
-}
-function useDie(k){
-  const d=DIE_INFO[k];
-  if(S.level<d.lv) return;
-  if(left(k)<=0){ toast({title:d.n, value:'0', body:'Использования закончились до длинного отдыха.', cls:'fail'}); return; }
-  d20(`${d.n} — атака кубиком`, spellAtk(), 'attack', {after:(crit,total,n)=>[
-    ['Попал! Эффект', ()=>dieEffect(k), 'gold'],
-    ['Промах', ()=>{ addLog(d.n+': промах'); toast({title:d.n, value:'Мимо', body:'Кубик укатился под стол. Использование не потрачено.'}); }, 'red']
-  ]});
-}
-function dieEffect(k, isReroll){
-  const d=DIE_INFO[k], n=d.tbl.length, r=R(n);
-  if(!isReroll) S.used[k]++;
-  let text, val=r, extraRoll='';
-  if(k==='d10'){
-    const e=D10[r-1]; const dm=rollF('1d10');
-    let ex=''; if(e.x){ const xr=rollF(e.x); ex=`<br>${e.xl}: <b>${xr.total}</b> ${xr.txt}`; }
-    text=`1d10 урона ${e.d}: ${dm.total}. ${e.t}`; extraRoll=`Урон: <b>${dm.total}</b> ${e.d} ${dm.txt}${ex}`;
-  } else if(k==='d6' && r===1){
-    const th=S.level+M('cha'); S.temp=Math.max(S.temp,th); text=D6[0]+` (${th}, уже начислено)`;
-  } else if(k==='d4' && (r===3||r===4)){
-    const x=rollF(r===3?'1d4':'1d6'); text=d.tbl[r-1]; extraRoll=`Урон (пример броска): ${x.total} ${x.txt}<br>СЛ ${spellDC()}`;
-  } else if(k==='d8'){
-    text=d.tbl[r-1]; extraRoll=`СЛ ${spellDC()}`+(r===1?`<br>Штраф: ${R(8)}`:'');
-  } else text=d.tbl[r-1];
-  const grp=d.grp; S.active[grp]={k, r, text};
-  const dur = (k==='d4'||k==='d6'||k==='d8')? `<br><small>Длится ${CHA()} мин.</small>`:'';
-  addLog(`${d.n}${isReroll?' (переброс)':''}: выпало ${r} — ${text}`);
-  jingle(true); vib([20,30,20,30,60]);
-  toast({title:`${d.n}: выпало`, value:val, body:text+dur, extra:extraRoll, actions: S.level>=7 && left('reroll')>0 ? [['🔁 Переброс (бонусное)',()=>{S.used.reroll++; dieEffect(k,true);},'purple']]:[]});
-  renderFight(); renderHeader(); save();
-}
-$('#bReroll').addEventListener('click',()=>{
-  const act = S.active.greater || S.active.basic;
-  if(!act){ toast({title:'Переброс', value:'—', body:'Нет активного кубика.'}); return; }
-  modal('Какой кубик перебросить?', b=>{
-    const o=h('div',{class:'opts'});
-    ['basic','greater'].forEach(g=>{ const a=S.active[g]; if(a) o.append(h('button',{class:'btn purple',on:{click:()=>{closeModal(); S.used.reroll++; dieEffect(a.k,true);}}}, `${DIE_INFO[a.k].n} (сейчас ${a.r})`)); });
-    b.append(o);
-  });
-});
+ $('#hName').textContent=S.name;$('#hSub').textContent=`Гусь · Gambler (Dice Roller) · ${S.level} ур.`;
+ const mx=maxHP();S.hp=Math.min(S.hp,mx);
+ $('#hpNum').innerHTML=`${S.hp}<small>/${mx}</small>${S.temp?`<span class="tmp">+${S.temp} врем.</span>`:''}`;
+ const pr=S.hp/mx;$('#hpFill').style.width=Math.max(0,pr*100)+'%';$('#hpFill').style.background=pr>.5?'var(--green)':pr>.25?'var(--gold)':'var(--red)';
+ $('#tmpFill').style.width=Math.min(100,S.temp/mx*100)+'%';
+ const info=[`Кости ${S.level-S.hdUsed}/${S.level}к6`];if(d6is(3))info.push('🛡 сопр. физ.');if(S.conc)info.push('🧠 '+S.conc);if(S.conds.length)info.push('⚠ '+S.conds.join(', '));
+ $('#hpInfo').textContent=info.join(' · ');
+ $('#sAC').textContent=AC();$('#sInitV').textContent=sg(M('dex'));$('#sPB').textContent=sg(PB());
+ $('#sSpdL').textContent=d6is(6)?'🪽30 🏊25 🧗25':'ходьба · 🪽30';
+ document.querySelectorAll('.honkDC').forEach(e=>e.textContent=DC());}
+function pips(el,total,usedN,onTap){el.innerHTML='';for(let i=0;i<total;i++){const p=h('div',{class:'pip'+(i<usedN?' used':'')});if(onTap)p.addEventListener('click',e=>{e.stopPropagation();onTap(i);});el.append(p);}}
 
-function renderLuck(){
-  const cm=$('#coinsMine'); cm.innerHTML='';
-  for(let i=0;i<S.coins;i++) cm.append(h('div',{class:'coin'}));
-  if(!S.coins) cm.append(h('small',{class:'muted'},'Нет монет — все у мастера 😬'));
-  $('#coinsDmN').textContent=S.coinsDm;
-  $('#bCoin').disabled = S.level<2 || S.coins<=0;
-  $('#bCoinDm').disabled = S.coinsDm<=0;
-  pips($('#temptPips'), CHA(), S.used.tempt);
-  $('#bTemptA').disabled = $('#bTemptD').disabled = left('tempt')<=0;
-  pips($('#gamblePips'), CHA(), S.used.gamble);
-  $('#bGamble').disabled = S.level<6 || left('gamble')<=0;
-  $('#bGamble').textContent = S.level<6 ? '🎰 Ставка — с 6 уровня' : `🎰 Сделать ставку (${S.level>=10?'≥12 или <12':'>10 или ≤10'})`;
-  $('#omenG').textContent=S.omen.g; $('#omenI').textContent=S.omen.i;
-  $('#totemDie').textContent = S.level>=3 ? `(кубик ${totemDie()}, максимум ${CHA()})` : '(с 3 уровня)';
-  pips($('#wingPips'),1,S.used.wing);
-  $('#bWing').disabled = left('wing')<=0;
-  modeFlag();
-}
-$('#bCoin').addEventListener('click',()=>{
-  if(S.coins<=0) return; S.coins--; S.coinsDm++; S.oneShot={m:'adv',src:'Монета судьбы'};
-  addLog('Монета судьбы → мастеру. Следующий бросок с преимуществом.'); jingle(true); vib(40);
-  toast({title:'Монета судьбы', value:'🪙', body:'Следующий бросок d20 будет с преимуществом. Монета ушла мастеру.'}); renderLuck(); save();
-});
-$('#bCoinDm').addEventListener('click',()=>{
-  if(S.coinsDm<=0) return; S.coinsDm--; S.coins++; S.oneShot={m:'dis',src:'Монета мастера'};
-  addLog('Мастер потратил монету: следующий бросок с помехой, монета вернулась.'); jingle(false);
-  toast({title:'Мастер мстит', value:'😈', body:'Следующий бросок d20 с помехой. Монета вернулась к тебе.', cls:'fail'}); renderLuck(); save();
-});
-function tempt(m){
-  if(left('tempt')<=0) return; S.used.tempt++; S.oneShot={m, src:'Искушение судьбы'};
-  addLog(`Искушение судьбы: ${m==='adv'?'преимущество':'помеха'} на следующий бросок.`); vib(40);
-  toast({title:'Искушение судьбы', value:m==='adv'?'⬆':'⬇', body:`Следующий бросок d20: ${m==='adv'?'преимущество':'помеха'}.<br>Следующий бросок <b>того же типа</b> получит обратный эффект, приложение применит его само.`}); renderLuck(); save();
-}
-$('#bTemptA').addEventListener('click',()=>tempt('adv'));
-$('#bTemptD').addEventListener('click',()=>tempt('dis'));
-$('#bGamble').addEventListener('click',()=>{
-  modal('🎰 Ставка', b=>{
-    const sel=h('select',{}, h('option',{value:'attack'},'Атака'), h('option',{value:'save'},'Спасбросок'), ...SKILLS.map(s=>h('option',{value:s[0]},'Навык: '+s[1])), ...AB.map(a=>h('option',{value:'ab_'+a},'Проверка: '+AB_RU[a])));
-    const th=gambleTh();
-    b.append(h('p',{class:'muted'},`Угадай натуральный к20. Угадал — автоматический успех, не угадал — провал. Осталось: ${left('gamble')}.`), sel);
-    if(S.lastGamble) b.append(h('div',{class:'note'},'Прошлая ставка была на: '+(sel.querySelector(`[value="${S.lastGamble}"]`)||{}).textContent+'. На то же самое подряд ставить нельзя.'));
-    const go = hi => {
-      if(sel.value===S.lastGamble && sel.value!=='attack' && sel.value!=='save'){ toast({title:'Ставка',value:'✋',body:'Нельзя ставить два раза подряд на один навык.',cls:'fail'}); return; }
-      closeModal(); S.used.gamble++; S.lastGamble=sel.value;
-      const n=R(20); const win = hi ? n>=th : n<th; clack();
-      setTimeout(()=>{ jingle(win); vib(win?[50,50,150]:[300]); }, 150);
-      const lbl=sel.options[sel.selectedIndex].text;
-      addLog(`Ставка на «${lbl}»: ${hi?'≥'+th:'<'+th}, выпало ${n} → ${win?'АВТОУСПЕХ':'ПРОВАЛ'}`);
-      toast({title:`Ставка: ${hi?'≥'+th:'<'+th}`, value:n, body:lbl, extra: win?'🎉 УГАДАЛ! Автоматический успех!':'💀 Не угадал. Автоматический провал.', cls:win?'crit':'fail'});
-      renderLuck(); save();
-    };
-    b.append(h('div',{class:'grid2',style:'margin-top:10px'},
-      h('button',{class:'btn green',on:{click:()=>go(true)}}, `Больше (${th} и выше)`),
-      h('button',{class:'btn red',on:{click:()=>go(false)}}, `Меньше (${th-1} и ниже)`)));
-  });
-});
-document.querySelectorAll('[data-omen]').forEach(b=>b.addEventListener('click',()=>{
-  if(S.level<3) return;
-  const [k,op]=[b.dataset.omen[0], b.dataset.omen[1]];
-  if(op==='+'){ S.omen[k]=Math.min(CHA(), S.omen[k]+1); }
-  else { if(S.omen[k]<=0) return; S.omen[k]--; const r=rollF('1'+totemDie());
-    addLog(`Тотем: ${k==='g'?'доброе':'дурное'} знамение → ${k==='g'?'+':'−'}${r.total}`); jingle(k==='g');
-    toast({title:k==='g'?'Доброе знамение':'Дурное знамение', value:(k==='g'?'+':'−')+r.total, body:`${totemDie()} к броску d20 существа в 30 фт от тотема`}); }
-  renderLuck(); save();
-}));
+/* ======================= АТАКИ ======================= */
+function weapons(){const dx=M('dex'),st=M('str'),pb=PB();return[
+ {n:'Кинжал',f:'1d4+'+dx,b:pb+dx,dt:'колющий',info:'фехт., лёгкое, метат. 20/60'},
+ {n:'Лёгкий арбалет',f:'1d8+'+dx,b:pb+dx,dt:'колющий',info:'80/320, перезарядка'},
+ {n:'Дротик',f:'1d4+'+dx,b:pb+dx,dt:'колющий',info:'метательное 20/60'},
+ {n:'Когти гуся',f:'1d4'+(st>=0?'+':'')+st,b:pb+st,dt:'рубящий',info:'безоружный (Сила)'}];}
+function renderAttacks(){const box=$('#attacks');box.innerHTML='';const multi=S.level>=5;
+ $('#atkNote').textContent=S.combat?`по КД ${S.combat.ac}`:'';
+ weapons().forEach(w=>box.append(h('div',{class:'weapon'},h('div',{},h('div',{class:'nm'},w.n),h('div',{class:'info'},`${sg(w.b)} · ${w.f} ${w.dt} · ${w.info}`)),
+  h('div',{class:'acts'},h('button',{class:'btn sm gold',on:{click:()=>attack(w,1)}},'Атака'),multi?h('button',{class:'btn sm red',on:{click:()=>attack(w,2)}},'×2'):''))));
+ const vm=SPELLS.find(s=>s.id==='vm');
+ box.append(h('div',{class:'weapon'},h('div',{},h('div',{class:'nm'},'Злая насмешка'),h('div',{class:'info'},`СЛ ${DC()} Мдр · ${cantripDice()} психический + помеха`)),
+  h('div',{class:'acts'},h('button',{class:'btn sm purple',on:{click:()=>finishCast(vm,0)}},'Каст'))));
+ if(multi)box.append(h('div',{class:'note'},'«×2» — действие «Атака» с Дополнительной атакой: оба броска и урон сразу. «Быстро смыться»: Рывок, Отход или Уклонение бонусным действием.'));}
+function attack(w,count){spend('action',w.n);
+ const res=[];let sum=0;const ac=S.combat?S.combat.ac:null;
+ for(let i=0;i<count;i++){const r=core(`${w.n}${count>1?' #'+(i+1):''}`,w.b,'attack',{keepMode:i<count-1});
+  const hit=ac==null?null:(r.crit||(!r.fail&&r.total>=ac));let dmg=null;
+  if(hit!==false){dmg=Math.max(0,rollF(r.crit?dbl(w.f):w.f).total);if(hit)sum+=dmg;}res.push({r,hit,dmg});}
+ invisBreak('ты атаковал');clack();vib(res.some(x=>x.r.crit)?[40,40,140]:40);
+ const rows=res.map((x,i)=>[`${count>1?(i+1)+') ':''}${x.r.shown} ${sg(w.b)} = <b>${x.r.total}</b>${x.r.crit?' 💥':''}${x.r.fail?' 💩':''}`,x.hit===null?`урон ${x.dmg}`:x.hit?`✔ ${x.dmg}`:'✖']);
+ const crit=res.some(x=>x.r.crit&&x.hit!==false);
+ if(ac!=null){const anyHit=res.some(x=>x.hit);addLog(`${w.n}: ${res.map(x=>x.hit?'✔'+x.dmg:'✖').join(' ')} = ${sum}`);
+  toast({title:`${w.n}${count>1?' ×2':''} · КД ${ac}`,value:anyHit?sum:'Мимо',multi:rows,body:anyHit?`${w.dt} урон${crit?' (КРИТ!)':''}`:'',cls:crit?'crit':anyHit?'':'fail',roll:anyHit});}
+ else{addLog(`${w.n}: ${res.map(x=>x.r.total+'→'+x.dmg).join(', ')}`);
+  toast({title:`${w.n}${count>1?' ×2':''}`,value:res.map(x=>x.r.total).join(' / '),multi:rows,body:'Справа урон на случай попадания.<br><small>Начни бой и задай КД цели, тогда попадания посчитаются сами.</small>',cls:crit?'crit':''});}
+ modeFlag();renderLuck();save();}
 
-function honk(){
-  honkSound(); vib([80,40,80,40,160]);
-  const fx=$('#honkfx'); fx.classList.remove('show'); void fx.offsetWidth; fx.classList.add('show'); setTimeout(()=>fx.classList.remove('show'),700);
-  addLog('ГА-ГА-ГА! Агрессивный гогот, СЛ '+spellDC());
-  setTimeout(()=>toast({title:'Агрессивный гогот (бонусное)', value:'СЛ '+spellDC(), body:'Существо в 30 фт: спасбросок Мудрости. Провал: до начала твоего следующего хода атакует с помехой всех, кроме тебя.'}),650);
-}
-$('#honkBtn').addEventListener('click',honk); $('#bHonk2').addEventListener('click',honk);
-$('#bWing').addEventListener('click',()=>{ if(left('wing')<=0) return; S.used.wing++; addLog('Удар крылом! Атакующий сбит с ног.'); vib([60,30,60]); honkSound();
-  toast({title:'Удар крылом (реакция)', value:'💨', body:'Промахнувшийся враг в 5 фт сбит с ног.'}); renderLuck(); save(); });
+/* ======================= КУБИКИ DICE ROLLER ======================= */
+function renderDice(){const g=$('#diceGrid');g.innerHTML='';$('#drNote').textContent=`атака ${sg(SATK())} · СЛ ${DC()}`;
+ Object.entries(DIE).forEach(([k,d])=>{const locked=S.level<d.lv,act=S.active[k];
+  const card=h('div',{class:`die ${k}${act?' active':''}${locked?' locked':''}`},h('div',{class:'shape'},k.toUpperCase()),h('div',{class:'t'},d.n),
+   h('div',{class:'eff'},locked?`откроется на ${d.lv} ур.`:act?`▶ ${act.r}: ${act.text}`:(d.self?'на себя, без атаки':'атака 20/60 фт')),h('div',{class:'pips'}),
+   h('button',{class:'btn sm wide '+({d4:'blue',d6:'green',d8:'purple',d10:'red'})[k],on:{click:()=>useDie(k)}},locked?'🔒':left(k)?'Бросить':'Пусто'));
+  pips(card.querySelector('.pips'),CHA(),S.used[k]);g.append(card);});
+ pips($('#rerollPips'),CHA(),S.used.reroll);$('#bReroll').disabled=S.level<7||left('reroll')<=0;}
+function useDie(k){const d=DIE[k];if(S.level<d.lv)return;
+ if(left(k)<=0){toast({title:'Кубик '+k.toUpperCase(),value:'0',body:'Использования закончились до длинного отдыха.',cls:'fail'});return;}
+ spend('action','кубик '+k.toUpperCase());
+ if(d.self){dieEffect(k);return;}
+ const r=core(`Кубик ${k.toUpperCase()} — атака`,SATK(),'attack');
+ if(S.combat){const hit=r.crit||(!r.fail&&r.total>=S.combat.ac);
+  if(hit){showRoll(`Кубик ${k.toUpperCase()} · КД ${S.combat.ac}`,r,{extra:'✔ Попал! Бросаю эффект…'});setTimeout(()=>dieEffect(k),1000);}
+  else showRoll(`Кубик ${k.toUpperCase()} · КД ${S.combat.ac}`,r,{extra:'✖ Мимо. Кубик укатился под стол, использование не потрачено.'});}
+ else showRoll(`Кубик ${k.toUpperCase()} — атака`,r,{actions:[['✔ Попал → эффект',()=>dieEffect(k),'gold'],['✖ Мимо',()=>{hideToast();addLog('Кубик '+k.toUpperCase()+': мимо');},'ghost']]});}
+function dieEffect(k,isReroll){const d=DIE[k],r=R(d.tbl.length);if(!isReroll)S.used[k]++;
+ let text,extra='';
+ if(k==='d10'){const e=D10[r-1],dm=rollF('1d10');text=`1d10 урона ${e.d}. ${e.t}`;extra=`💥 Урон: <b>${dm.total}</b> ${e.d}`;
+  if(e.x){const xr=rollF(e.x);extra+=`<br>${e.xl}: <b>${xr.total}</b>`;}
+  if(e.sv)extra+=`<br>Спасбросок ${AB_GEN[e.sv]}: СЛ ${DC()}`;
+  if(e.tr)addEffect('🎯 '+e.tn,e.tr,'tgt10_'+r);}
+ else if(k==='d8'){text=d.tbl[r-1];if(D8SAVE[r-1])extra=`Спасбросок ${AB_GEN[D8SAVE[r-1]]}: СЛ ${DC()}`;if(r===1)extra=`Штраф: −${R(8)}`;}
+ else if(k==='d4'){text=d.tbl[r-1];if(r===4)extra=`Спасбросок Ловкости: СЛ ${DC()} · урон ${rollF('1d6').total}`;if(r===3)extra='1d4 за каждые 5 фт';}
+ else{text=d.tbl[r-1];
+  if(r===1){const th=S.level+M('cha');S.temp=Math.max(S.temp,th);extra=`+${th} временных хитов (уже начислено)`;}
+  if(r===2)extra='Спасброски на вкладке «Персонаж» уже считаются с мастерством';
+  if(r===3)extra='Урон немагическим оружием в окне хитов будет делиться пополам';
+  if(r===5){if(!S.conds.includes('Невидим'))S.conds.push('Невидим');extra='Отмечено «Невидим», снимется само при уроне или атаке';}
+  if(r===6)extra='Скорость лазания и плавания показана в шапке';}
+ if(k==='d6'&&S.active.d6&&S.active.d6.r===5&&r!==5)S.conds=S.conds.filter(c=>c!=='Невидим');
+ if(d.dur){S.active[k]={r,text};addEffect(`${k.toUpperCase()}: ${text}`,CHA()*10,'die:'+k);if(k==='d6'&&r===5)S.effects[S.effects.length-1].inv=true;}
+ addLog(`Кубик ${k.toUpperCase()}${isReroll?' (переброс)':''}: ${r} — ${text}`);jingle(true);vib([20,30,20,30,70]);
+ const acts=[];if(S.level>=7&&left('reroll')>0)acts.push(['🔁 Переброс (бонусное)',()=>{S.used.reroll++;spend('bonus','переброс');dieEffect(k,true);},'purple']);
+ toast({title:`${k.toUpperCase()} ${d.n}: выпало`,value:r,roll:true,body:text+(d.dur?`<br><small>Длится ${CHA()} мин. — таймер запущен</small>`:''),extra,actions:acts});
+ renderAll();save();}
+function invisBreak(why){if(S.conds.includes('Невидим')&&d6is(5)){S.conds=S.conds.filter(c=>c!=='Невидим');delete S.active.d6;S.effects=S.effects.filter(e=>e.key!=='die:d6');addLog('Невидимость D6 спала: '+why);}}
+$('#bReroll').addEventListener('click',()=>{modal('🔁 Какой кубик перебросить?',b=>{const o=h('div',{class:'opts'});
+ Object.keys(S.active).forEach(k=>o.append(h('button',{class:'btn purple',on:{click:()=>{closeModal();S.used.reroll++;spend('bonus','переброс');dieEffect(k,true);}}},`${k.toUpperCase()} ${DIE[k].n} (сейчас ${S.active[k].r})`)));
+ if(S.level>=7&&S.used.d10>0)o.append(h('button',{class:'btn red',on:{click:()=>{closeModal();S.used.reroll++;spend('bonus','переброс');dieEffect('d10',true);}}},'D10 Опустошение (последний бросок)'));
+ if(!o.children.length)o.append(h('div',{class:'empty'},'Нечего перебрасывать'));b.append(o);});});
 
-function renderConds(){
-  const c=$('#conds'); c.innerHTML='';
-  CONDS.forEach(n=>c.append(h('span',{class:'chip'+(S.conds.includes(n)?' on':''),on:{click:()=>{ S.conds = S.conds.includes(n)?S.conds.filter(x=>x!==n):[...S.conds,n]; renderConds(); save(); }}},n)));
-  $('#concName').textContent=S.conc||'—';
-}
-$('#bConcEnd').addEventListener('click',()=>{ S.conc=null; renderConds(); save(); });
+/* ======================= УДАЧА ======================= */
+function renderLuck(){const cm=$('#coinsMine');cm.innerHTML='';for(let i=0;i<S.coins;i++)cm.append(h('div',{class:'coin'}));
+ if(!S.coins)cm.append(h('small',{class:'muted'},'Все монеты у мастера 😬'));
+ $('#coinsDmN').textContent=S.coinsDm;$('#bCoin').disabled=S.level<2||S.coins<=0||!!(S.combat&&S.combat.coinRound);$('#bCoinDm').disabled=S.coinsDm<=0;
+ pips($('#temptPips'),CHA(),S.used.tempt);$('#bTemptA').disabled=$('#bTemptD').disabled=left('tempt')<=0;
+ pips($('#gamblePips'),CHA(),S.used.gamble);$('#bGamble').disabled=S.level<6||left('gamble')<=0;
+ $('#bGamble').textContent=S.level<6?'🎰 Ставка — с 6 уровня':`🎰 Сделать ставку (${gTh()}+ или ниже)`;
+ $('#omenG').textContent=S.omen.g;$('#omenI').textContent=S.omen.i;$('#totemDie').textContent=S.level>=3?`(${totemDie()}, макс. ${CHA()})`:'(с 3 уровня)';
+ $('#wingLeft').textContent=left('wing')?'есть':'потрачен';$('#bWing').disabled=left('wing')<=0;modeFlag();}
+function useCoin(){if(S.coins<=0||S.level<2)return false;
+ if(S.combat&&S.combat.coinRound){toast({title:'Монета судьбы',value:'✋',body:'В бою только 1 монета за раунд.',cls:'fail'});return false;}
+ S.coins--;S.coinsDm++;if(S.combat)S.combat.coinRound=true;S.oneShot={m:'adv',src:'Монета судьбы'};addLog('🪙 Монета → мастеру: преимущество');jingle(true);vib(40);return true;}
+$('#bCoin').addEventListener('click',()=>{if(useCoin()){toast({title:'Монета судьбы',value:'🪙',body:'Следующий бросок d20 с преимуществом. Монета ушла мастеру.'});renderAll();save();}});
+$('#bCoinDm').addEventListener('click',()=>{if(S.coinsDm<=0)return;S.coinsDm--;S.coins++;S.oneShot={m:'dis',src:'Монета мастера'};
+ addLog('😈 Мастер потратил монету: помеха');jingle(false);toast({title:'Мастер мстит',value:'😈',body:'Следующий бросок d20 с помехой. Монета вернулась к тебе.',cls:'fail'});renderAll();save();});
+function tempt(m){if(left('tempt')<=0)return false;S.used.tempt++;S.oneShot={m,src:'Искушение судьбы'};addLog(`Искушение судьбы: ${m==='adv'?'⬆':'⬇'}`);vib(40);return true;}
+$('#bTemptA').addEventListener('click',()=>{if(tempt('adv')){toast({title:'Искушение судьбы',value:'⬆',body:'Следующий бросок d20 с преимуществом.<br>Следующий бросок <b>того же типа</b> получит помеху автоматически.'});renderAll();save();}});
+$('#bTemptD').addEventListener('click',()=>{if(tempt('dis')){toast({title:'Искушение судьбы',value:'⬇',body:'Следующий бросок d20 с помехой.<br>Следующий бросок того же типа получит преимущество автоматически.'});renderAll();save();}});
+function gamble(key,label){
+ if(S.level<6||left('gamble')<=0){toast({title:'Ставка',value:'✋',body:S.level<6?'Ставка доступна с 6 уровня.':'Ставки закончились до длинного отдыха.',cls:'fail'});return;}
+ if(key===S.lastGamble&&key!=='attack'&&key!=='save'){toast({title:'Ставка',value:'✋',body:'Нельзя ставить два раза подряд на один и тот же навык.',cls:'fail'});return;}
+ const th=gTh();
+ modal('🎰 Ставка: '+label,b=>{b.append(h('p',{class:'muted'},`Угадай натуральный к20. Угадал — автоматический успех, не угадал — провал. Осталось ставок: ${left('gamble')}.`));
+  const go=hi=>{closeModal();S.used.gamble++;S.lastGamble=key;const n=R(20),win=hi?n>=th:n<th;clack();setTimeout(()=>{jingle(win);vib(win?[50,50,160]:[320]);},180);
+   addLog(`🎰 Ставка «${label}» ${hi?th+'+':'<'+th}: ${n} → ${win?'АВТОУСПЕХ':'ПРОВАЛ'}`);
+   toast({title:`Ставка «${label}»: ${hi?th+' и выше':'ниже '+th}`,value:n,roll:true,extra:win?'🎉 УГАДАЛ! Автоматический успех!':'💀 Не угадал. Автоматический провал.',cls:win?'crit':'fail'});renderLuck();save();};
+  b.append(h('div',{class:'grid2'},h('button',{class:'btn green',style:'padding:18px',on:{click:()=>go(true)}},`⬆ ${th} и выше`),h('button',{class:'btn red',style:'padding:18px',on:{click:()=>go(false)}},`⬇ ${th-1} и ниже`)));});}
+$('#bGamble').addEventListener('click',()=>{modal('🎰 На что ставим?',b=>{const o=h('div',{class:'opts'});
+ o.append(h('div',{class:'grid2'},h('button',{class:'btn',on:{click:()=>{closeModal();gamble('attack','Атака');}}},'⚔️ Атака'),h('button',{class:'btn',on:{click:()=>{closeModal();gamble('save','Спасбросок');}}},'🛡️ Спасбросок')));
+ const sel=h('select',{},...SKILLS.map(s=>h('option',{value:s[0]},s[1])),...AB.map(a=>h('option',{value:'ab_'+a},'Проверка: '+AB_RU[a])));
+ o.append(h('div',{class:'row'},sel,h('button',{class:'btn gold',on:{click:()=>{closeModal();gamble(sel.value,sel.options[sel.selectedIndex].text);}}},'Ставка')));b.append(o);});});
+document.querySelectorAll('[data-omen]').forEach(b=>b.addEventListener('click',()=>{if(S.level<3)return;const k=b.dataset.omen[0],op=b.dataset.omen[1];
+ if(op==='+')S.omen[k]=Math.min(CHA(),S.omen[k]+1);
+ else{if(S.omen[k]<=0)return;S.omen[k]--;const r=rollF('1'+totemDie());addLog(`Тотем: ${k==='g'?'+':'−'}${r.total}`);jingle(k==='g');
+  toast({title:k==='g'?'Доброе знамение':'Дурное знамение',value:(k==='g'?'+':'−')+r.total,body:`${totemDie()} к броску d20 существа в 30 фт от тотема`,cls:k==='g'?'crit':'fail'});}
+ renderLuck();save();}));
+function rollMenu(label,bonus,type,key){modal(label+' '+sg(bonus),b=>{const o=h('div',{class:'opts'});
+ o.append(h('button',{class:'btn gold',style:'padding:15px',on:{click:()=>{closeModal();d20(label,bonus,type);}}},'🎲 Бросить'));
+ o.append(h('button',{class:'btn green',disabled:S.coins<=0||S.level<2,on:{click:()=>{closeModal();if(useCoin())d20(label,bonus,type);}}},`🪙 Монета судьбы + бросок (${S.coins})`));
+ o.append(h('div',{class:'grid2'},h('button',{class:'btn teal',disabled:!left('tempt'),on:{click:()=>{closeModal();if(tempt('adv'))d20(label,bonus,type);}}},'⬆ Искушение'),h('button',{class:'btn red',disabled:!left('tempt'),on:{click:()=>{closeModal();if(tempt('dis'))d20(label,bonus,type);}}},'⬇ Искушение')));
+ o.append(h('button',{class:'btn purple',disabled:S.level<6||!left('gamble'),on:{click:()=>{closeModal();gamble(key,label);}}},`🎰 Ставка вместо броска (${left('gamble')})`));
+ if(S.level>=3)o.append(h('button',{class:'btn ghost',on:{click:()=>{closeModal();perfectRoll(label);}}},'🎯 Идеальный бросок (вне боя)'));b.append(o);});}
+function perfectRoll(label){modal('🎯 Идеальный бросок',b=>{b.append(h('p',{class:'muted'},`Вне боя выбираешь результат броска «${label}». Заметить подкрутку можно Внимательностью против СЛ ${DC()}.`));
+ const g=h('div',{class:'grid3'});[20,18,15,10,5,1].forEach(n=>g.append(h('button',{class:'btn',on:{click:()=>{closeModal();addLog(`🎯 Идеальный бросок «${label}»: ${n}`);
+  toast({title:'Идеальный бросок: '+label,value:n,body:`Кубик «случайно» лёг на ${n}.<br><small>Внимательность против СЛ ${DC()}, чтобы заметить.</small>`,cls:n===20?'crit':''});}}},String(n))));b.append(g);});}
 
-function renderDeath(){
-  $('#deathCard').style.display = S.hp<=0 ? 'block':'none';
-  pips($('#dsS'),3,0); pips($('#dsF'),3,0);
-  [...$('#dsS').children].forEach((p,i)=>p.classList.toggle('used', i>=S.death.s));
-  [...$('#dsF').children].forEach((p,i)=>{ p.classList.toggle('used', i>=S.death.f); if(i<S.death.f) p.style.background='var(--red)'; });
-}
-$('#bDeath').addEventListener('click',()=>{
-  const n=R(20); clack();
-  if(n===20){ S.hp=1; S.death={s:0,f:0}; addLog('Спасбросок от смерти: 20! Гусь восстал с 1 хитом!'); jingle(true); toast({title:'Спасбросок от смерти',value:20,extra:'ГУСЬ ВОССТАЛ! 1 хит.',cls:'crit'}); }
-  else if(n===1){ S.death.f=Math.min(3,S.death.f+2); addLog('Спасбросок от смерти: 1 (два провала)'); toast({title:'Спасбросок от смерти',value:1,extra:'Два провала',cls:'fail'}); }
-  else if(n>=10){ S.death.s++; addLog('Спасбросок от смерти: '+n+' (успех)'); toast({title:'Спасбросок от смерти',value:n,extra:'Успех'}); }
-  else { S.death.f++; addLog('Спасбросок от смерти: '+n+' (провал)'); toast({title:'Спасбросок от смерти',value:n,extra:'Провал',cls:'fail'}); }
-  if(S.death.s>=3){ S.death={s:0,f:0}; toast({title:'Стабилизирован',value:'😮‍💨',body:'Гусь без сознания, но стабилен.'}); }
-  if(S.death.f>=3){ toast({title:'Смерть',value:'🪦',body:'Гусь отправился в великий пруд на небесах… (или мастер передумает)',cls:'fail'}); }
-  renderAll(); save();
-});
+/* ======================= ГУСИНОЕ ======================= */
+function honk(){spend('bonus','гогот');honkSound();vib([80,40,80,40,170]);
+ const fx=$('#honkfx');fx.classList.remove('show');void fx.offsetWidth;fx.classList.add('show');setTimeout(()=>fx.classList.remove('show'),700);
+ addLog('📢 ГА-ГА-ГА! Гогот, СЛ '+DC());
+ setTimeout(()=>toast({title:'Агрессивный гогот (бонусное)',value:'СЛ '+DC(),body:'Цель в 30 фт: спасбросок Мудрости.<br>Провал: до начала твоего хода атакует с помехой всех, кроме тебя.'}),620);save();}
+$('#honkBtn').addEventListener('click',honk);$('#bHonk2').addEventListener('click',honk);
+$('#bWing').addEventListener('click',()=>{if(left('wing')<=0)return;S.used.wing++;spend('reaction','удар крылом');addLog('💨 Удар крылом');vib([60,30,60]);honkSound();
+ toast({title:'Удар крылом (реакция)',value:'💨',body:'Промахнувшийся враг в 5 фт сбит с ног.'});renderLuck();save();});
+function renderConds(){const c=$('#conds');c.innerHTML='';
+ CONDS.forEach(n=>c.append(h('span',{class:'chip'+(S.conds.includes(n)?' on':''),on:{click:()=>{S.conds=S.conds.includes(n)?S.conds.filter(x=>x!==n):[...S.conds,n];renderConds();renderHeader();save();}}},n)));}
+function renderDeath(){$('#deathCard').style.display=S.hp<=0?'block':'none';pips($('#dsS'),3,0);pips($('#dsF'),3,0);
+ [...$('#dsS').children].forEach((p,i)=>p.classList.toggle('used',i>=S.death.s));[...$('#dsF').children].forEach((p,i)=>{p.classList.toggle('used',i>=S.death.f);p.classList.toggle('red',i<S.death.f);});}
+$('#bDeath').addEventListener('click',()=>{const n=R(20);clack();
+ if(n===20){S.hp=1;S.death={s:0,f:0};S.conds=S.conds.filter(c=>c!=='Без сознания');addLog('☠️ 20! Гусь восстал');jingle(true);toast({title:'Спасбросок от смерти',value:20,extra:'ГУСЬ ВОССТАЛ! 1 хит.',cls:'crit'});}
+ else if(n===1){S.death.f=Math.min(3,S.death.f+2);addLog('☠️ 1: два провала');toast({title:'Спасбросок от смерти',value:1,extra:'Два провала',cls:'fail'});}
+ else if(n>=10){S.death.s++;addLog('☠️ '+n+': успех');toast({title:'Спасбросок от смерти',value:n,extra:'Успех'});}
+ else{S.death.f++;addLog('☠️ '+n+': провал');toast({title:'Спасбросок от смерти',value:n,extra:'Провал',cls:'fail'});}
+ if(S.death.s>=3){S.death={s:0,f:0};setTimeout(()=>toast({title:'Стабилизирован',value:'😮‍💨',body:'Гусь без сознания, но стабилен.'}),1300);}
+ if(S.death.f>=3)setTimeout(()=>toast({title:'Смерть',value:'🪦',body:'Гусь отправился в великий пруд на небесах… если мастер не передумает.',cls:'fail'}),1300);
+ renderAll();save();});
+function renderFight(){renderCombat();renderEffects();renderAttacks();renderDice();renderLuck();renderConds();renderDeath();}
 
-function renderFight(){ renderAttacks(); renderDice(); renderLuck(); renderConds(); renderDeath(); }
+/* ======================= ПЕРСОНАЖ ======================= */
+function renderChar(){const ab=$('#abils');ab.innerHTML='';
+ AB.forEach(a=>{const el=h('button',{class:'abil',on:{click:()=>d20('Проверка: '+AB_RU[a],M(a),'check')}},h('div',{class:'n'},AB_SH[a]),h('div',{class:'m'},sg(M(a))),h('div',{class:'s'},S.ab[a]));
+  onHold(el,()=>rollMenu('Проверка: '+AB_RU[a],M(a),'check','ab_'+a));ab.append(el);});
+ const sv=$('#saves');sv.innerHTML='';
+ AB.forEach(a=>{const p=['dex','cha'].includes(a),tmp=!p&&d6is(2),v=saveBonus(a);
+  const el=h('div',{on:{click:()=>d20('Спасбросок '+AB_GEN[a],v,'save')}},h('span',{class:'dot'+(p||tmp?' p':'')}),h('span',{class:'grow'},AB_RU[a],tmp?h('span',{class:'tag on'},'D6'):''),h('span',{class:'v'},sg(v)));
+  onHold(el,()=>rollMenu('Спасбросок '+AB_GEN[a],v,'save','save'));sv.append(el);});
+ const sk=$('#skills');sk.innerHTML='';
+ SKILLS.forEach(([id,n,a])=>{const e=S.exp.includes(id),p=e||S.prof.includes(id),v=skillBonus(id);
+  const el=h('div',{on:{click:()=>d20(n,v,'check')}},h('span',{class:'dot'+(e?' e':p?' p':'')}),h('span',{class:'grow'},n+' ',h('small',{class:'muted'},AB_SH[a])),h('span',{class:'v'},sg(v)));
+  onHold(el,()=>rollMenu(n,v,'check',id));sk.append(el);});
+ $('#passive').textContent=10+skillBonus('perc');
+ $('#profs').innerHTML='<b>Доспехи:</b> лёгкие.<br><b>Оружие:</b> кинжалы, ручные топорики, серпы, лёгкие арбалеты, дротики, пращи, короткие луки.<br><b>Инструменты:</b> все игровые наборы, набор для грима, лютня.<br><b>Спасброски:</b> Ловкость, Харизма.<br><b>Языки:</b> Общий, Птичий.<br><span class="muted">Белая точка — владение, золотая — экспертиза.</span>';}
 
-/* ---------- Персонаж ---------- */
-function renderChar(){
-  const ab=$('#abils'); ab.innerHTML='';
-  AB.forEach(a=>ab.append(h('button',{class:'abil',on:{click:()=>d20('Проверка: '+AB_RU[a], M(a),'check')}}, h('div',{class:'n'},AB_SH[a]), h('div',{class:'m'},sg(M(a))), h('div',{class:'s'},S.ab[a]))));
-  const sv=$('#saves'); sv.innerHTML='';
-  const saveProf=['dex','cha'];
-  AB.forEach(a=>{ const p=saveProf.includes(a); const v=M(a)+(p?PB():0);
-    sv.append(h('div',{on:{click:()=>d20('Спасбросок: '+AB_RU[a], v, 'save')}}, h('span',{class:'dot'+(p?' p':'')}), h('span',{class:'grow'},AB_RU[a]), h('span',{class:'v'},sg(v)))); });
-  const sk=$('#skills'); sk.innerHTML='';
-  SKILLS.forEach(([id,n,a])=>{ const e=S.exp.includes(id), p=e||S.prof.includes(id); const v=M(a)+(e?2*PB():p?PB():0);
-    sk.append(h('div',{on:{click:()=>d20(n, v, 'check')}}, h('span',{class:'dot'+(e?' e':p?' p':'')}), h('span',{class:'grow'},n+' ', h('small',{class:'muted'},AB_SH[a])), h('span',{class:'v'},sg(v)))); });
-  const pv = 10 + M('wis') + (S.prof.includes('perc')||S.exp.includes('perc')?PB():0);
-  $('#passive').textContent = pv;
-  $('#profs').innerHTML = `<b>Доспехи:</b> лёгкие.<br><b>Оружие:</b> кинжалы, ручные топорики, серпы, лёгкие арбалеты, дротики, пращи, короткие луки.<br><b>Инструменты:</b> все игровые наборы.<br><b>Спасброски:</b> Ловкость, Харизма.<br><b>Языки:</b> Общий, Птичий.<br><b>Скорость:</b> 25 фт, полёт 30 фт (не в средних и тяжёлых доспехах), плавание 30 фт.<br><small class="muted">Навыки: класс (Ловкость рук, Обман, Внимательность) + предыстория Артист (Акробатика, Выступление). Экспертиза: Ловкость рук, Обман.</small>`;
-}
+/* ======================= МАГИЯ ======================= */
+const slotsFor=()=>SLOTS[S.level];
+const maxSpellLv=()=>{const s=slotsFor();let m=0;for(let i=1;i<=5;i++)if(s[i]>0)m=i;return m;};
+function renderSpells(){const s=slotsFor();$('#spellStats').textContent=`СЛ ${DC()} · атака ${sg(SATK())} · заговоров ${s[0]}`;
+ const box=$('#slots');box.innerHTML='';
+ for(let i=1;i<=5;i++){if(!s[i])continue;const row=h('div',{class:'slotrow'},h('b',{},i+' ур.'),h('div',{class:'pips grow'}),h('small',{class:'muted'},`${s[i]-S.slotsUsed[i-1]}/${s[i]}`));
+  pips(row.querySelector('.pips'),s[i],S.slotsUsed[i-1],idx=>{S.slotsUsed[i-1]=idx<S.slotsUsed[i-1]?idx:idx+1;renderSpells();save();});box.append(row);}
+ if(!maxSpellLv())box.append(h('div',{class:'empty'},'Ячеек нет'));
+ const game=SPELLS.filter(sp=>sp.game&&sp.game<=S.level),prep=SPELLS.filter(sp=>!sp.game&&S.prepared.includes(sp.id)&&(sp.lv===0||sp.lv<=maxSpellLv()));
+ $('#prepCount').textContent=`${prep.filter(p=>p.lv>0).length}/${prepMax()} + заговоры + игровые`;
+ const pB=$('#spellsPrep');pB.innerHTML='';let lastLv=-1;
+ [...prep,...game].sort((a,b)=>a.lv-b.lv).forEach(sp=>{if(sp.lv!==lastLv){lastLv=sp.lv;pB.append(h('div',{class:'tag gold',style:'margin-top:10px'},sp.lv?sp.lv+' уровень':'Заговоры'));}pB.append(spellRow(sp,true));});
+ const aB=$('#spellsAll');aB.innerHTML='';SPELLS.filter(sp=>!sp.game).forEach(sp=>aB.append(spellRow(sp,false)));}
+function spellRow(sp,castable){const isP=S.prepared.includes(sp.id);
+ const star=sp.game?h('span',{class:'btn sm'},'🎲'):h('button',{class:'btn sm',on:{click:e=>{e.stopPropagation();
+  if(isP)S.prepared=S.prepared.filter(x=>x!==sp.id);
+  else{if(sp.lv>0&&SPELLS.filter(x=>!x.game&&x.lv>0&&S.prepared.includes(x.id)).length>=prepMax()){toast({title:'Подготовка',value:'✋',body:`Максимум ${prepMax()} подготовленных. Сначала убери другое.`,cls:'fail'});return;}
+   if(sp.lv===0&&SPELLS.filter(x=>x.lv===0&&S.prepared.includes(x.id)).length>=slotsFor()[0]){toast({title:'Заговоры',value:'✋',body:`Известно максимум ${slotsFor()[0]} заговора.`,cls:'fail'});return;}
+   S.prepared.push(sp.id);}renderSpells();save();}}},isP?'★':'☆');
+ const tags=[h('span',{class:'tag gold'},sp.lv?sp.lv+' ур.':'заговор'),h('span',{class:'tag'},CT_RU[sp.ct])];
+ if(sp.conc)tags.push(h('span',{class:'tag'},'концентрация'));if(sp.save)tags.push(h('span',{class:'tag'},`спас ${AB_SH[sp.save]} ${DC()}`));
+ if(sp.dmg||sp.cantrip)tags.push(h('span',{class:'tag red'},sp.cantrip?cantripDice():sp.dmg));if(sp.heal)tags.push(h('span',{class:'tag on'},sp.heal+'+'+M('cha')));
+ if(sp.game)tags.push(h('span',{class:'tag on'},'игровое'));
+ const row=h('div',{class:'spell'},h('div',{class:'top'},star,h('span',{class:'nm'},sp.n),castable?h('button',{class:'btn sm gold',on:{click:e=>{e.stopPropagation();cast(sp);}}},'Каст'):''),h('div',{},tags),h('div',{class:'d'},sp.t));
+ row.addEventListener('click',()=>row.classList.toggle('open'));return row;}
+function cast(sp){if(sp.lv===0){finishCast(sp,0);return;}const s=slotsFor();
+ modal('✨ '+sp.n,b=>{b.append(h('p',{class:'muted'},sp.t));const o=h('div',{class:'opts'});
+  for(let i=sp.lv;i<=5;i++){if(!s[i])continue;const free=s[i]-S.slotsUsed[i-1];
+   o.append(h('button',{class:'btn '+(free>0?'gold':''),disabled:free<=0,on:{click:()=>{closeModal();S.slotsUsed[i-1]++;finishCast(sp,i);}}},`Ячейка ${i} ур. · свободно ${free}${i>sp.lv&&(sp.dmg||sp.heal)?' · усиление':''}`));}
+  if(sp.ritual)o.append(h('button',{class:'btn blue',on:{click:()=>{closeModal();finishCast(sp,'ritual');}}},'Ритуалом (+10 минут, без ячейки)'));b.append(o);});}
+function finishCast(sp,lvl){const up=typeof lvl==='number'&&lvl>sp.lv?lvl-sp.lv:0;
+ if(sp.ct==='action'||sp.ct==='bonus')spend(sp.ct,sp.n);
+ let body=`<small>${lvl==='ritual'?'Ритуал':lvl?'Ячейка '+lvl+' ур.':'Заговор'} · ${CT_RU[sp.ct]}</small>`,value='✨',extra='',roll=false;
+ if(sp.conc){if(S.conc&&S.conc!==sp.n)body+=`<br>Концентрация на «${S.conc}» сброшена.`;S.conc=sp.n;addEffect('🧠 '+sp.n,sp.conc,'conc');}
+ if(sp.save)extra=`Спасбросок ${AB_GEN[sp.save]}: СЛ ${DC()}`;
+ if(sp.cantrip){const r=rollF(cantripDice());value=r.total;roll=true;body+=`<br>${cantripDice()}: ${r.txt} ${sp.dt}`;}
+ if(sp.dmg){let f=sp.dmg;if(up&&sp.up)f=(+sp.dmg.split('d')[0]+(+sp.up.split('d')[0])*up)+'d'+sp.dmg.split('d')[1];
+  const r=rollF(f);value=r.total;roll=true;body+=`<br>${f}: ${r.txt} (${sp.dt})<br><small>При успешном спасброске: ${Math.floor(r.total/2)}</small>`;}
+ if(sp.heal){const f=(1+up)+'d'+sp.heal.split('d')[1]+'+'+M('cha');const r=rollF(f);value=r.total;roll=true;body+=`<br>Лечение ${f}: ${r.txt}`;}
+ if(sp.dmg||sp.cantrip)invisBreak('ты колдовал урон');
+ addLog(`✨ ${sp.n}${typeof lvl==='number'&&lvl?' ('+lvl+' ур.)':''}${typeof value==='number'?': '+value:''}`);jingle(true);vib(40);
+ const acts=[];if(sp.heal)acts.push(['💚 Вылечить себя на '+value,()=>{hideToast();applyHeal(value);},'green']);
+ toast({title:sp.n,value,body,extra,roll,actions:acts});renderAll();save();}
 
-/* ---------- Заклинания ---------- */
-function slotsFor(){ return SLOTS[S.level]; }
-function maxSpellLv(){ const s=slotsFor(); let m=0; for(let i=1;i<=5;i++) if(s[i]>0) m=i; return m; }
-function renderSpells(){
-  const s=slotsFor();
-  $('#spellStats').textContent = `СЛ ${spellDC()} · атака ${sg(spellAtk())} · заговоров ${s[0]}`;
-  const box=$('#slots'); box.innerHTML='';
-  for(let i=1;i<=5;i++){ if(!s[i]) continue;
-    const row=h('div',{class:'slotrow'}, h('b',{},i+' ур.'), h('div',{class:'pips grow'}));
-    pips(row.querySelector('.pips'), s[i], S.slotsUsed[i-1], idx=>{ S.slotsUsed[i-1] = idx<S.slotsUsed[i-1] ? idx : idx+1; renderSpells(); save(); });
-    box.append(row); }
-  if(!maxSpellLv()) box.append(h('small',{class:'muted'},'Ячеек нет'));
-  const game = SPELLS.filter(sp=>sp.game && sp.game<=S.level && S.level>=3);
-  const prep = SPELLS.filter(sp=>!sp.game && S.prepared.includes(sp.id) && (sp.lv===0 || sp.lv<=maxSpellLv()));
-  const nonCantrip = prep.filter(p=>p.lv>0).length;
-  $('#prepCount').textContent = `${nonCantrip}/${prepMax()} + заговоры + игровые`;
-  const pBox=$('#spellsPrep'); pBox.innerHTML='';
-  [...prep, ...game].sort((a,b)=>a.lv-b.lv).forEach(sp=>pBox.append(spellRow(sp,true)));
-  const aBox=$('#spellsAll'); aBox.innerHTML='';
-  SPELLS.filter(sp=>!sp.game).forEach(sp=>aBox.append(spellRow(sp,false)));
-}
-function spellRow(sp, castable){
-  const isP = S.prepared.includes(sp.id);
-  const star = h('button',{class:'btn sm',on:{click:e=>{ e.stopPropagation();
-      if(isP) S.prepared=S.prepared.filter(x=>x!==sp.id);
-      else { if(sp.lv>0 && SPELLS.filter(x=>!x.game&&x.lv>0&&S.prepared.includes(x.id)).length>=prepMax()){ toast({title:'Подготовка',value:'✋',body:`Максимум ${prepMax()} подготовленных заклинаний.`,cls:'fail'}); return; }
-        if(sp.lv===0 && SPELLS.filter(x=>x.lv===0&&S.prepared.includes(x.id)).length>=slotsFor()[0]){ toast({title:'Заговоры',value:'✋',body:`На этом уровне известно ${slotsFor()[0]} заговора.`,cls:'fail'}); return; }
-        S.prepared.push(sp.id); }
-      renderSpells(); save(); }}}, sp.game?'🎲':isP?'★':'☆');
-  const tags = [];
-  tags.push(h('span',{class:'tag gold'}, sp.lv?sp.lv+' ур.':'заговор'));
-  if(sp.conc) tags.push(h('span',{class:'tag'},'конц.'));
-  if(sp.save) tags.push(h('span',{class:'tag'},'спас '+AB_SH[sp.save]+' '+spellDC()));
-  if(sp.game) tags.push(h('span',{class:'tag on'},'игровое'));
-  const castBtn = castable ? h('button',{class:'btn sm gold',on:{click:e=>{e.stopPropagation(); cast(sp);}}},'Каст') : '';
-  const row=h('div',{class:'spell'}, h('div',{class:'top'}, sp.game?h('span',{class:'btn sm'},'🎲'):star, h('span',{class:'nm'},sp.n), castBtn), h('div',{}, tags), h('div',{class:'d'},sp.t));
-  row.addEventListener('click',()=>row.classList.toggle('open'));
-  return row;
-}
-function cast(sp){
-  if(sp.lv===0){ finishCast(sp,0); return; }
-  const s=slotsFor(); const opts=[];
-  for(let i=sp.lv;i<=5;i++) if(s[i]) opts.push(i);
-  modal('Каст: '+sp.n, b=>{
-    b.append(h('p',{class:'muted'},sp.t));
-    const o=h('div',{class:'opts'});
-    opts.forEach(i=>{ const free=s[i]-S.slotsUsed[i-1];
-      o.append(h('button',{class:'btn '+(free>0?'gold':''),disabled:free<=0?'':null,on:{click:()=>{ if(free<=0) return; closeModal(); S.slotsUsed[i-1]++; finishCast(sp,i); }}}, `Ячейка ${i} ур. (свободно ${free})`)); });
-    if(sp.id==='ff1'||sp.id==='us') o.append(h('button',{class:'btn blue',on:{click:()=>{closeModal(); finishCast(sp,'ritual');}}},'Как ритуал (+10 минут, без ячейки)'));
-    b.append(o);
-  });
-}
-function finishCast(sp, lvl){
-  const up = typeof lvl==='number' && lvl>sp.lv ? lvl-sp.lv : 0;
-  let body=`<small>${lvl==='ritual'?'Ритуал':lvl?'Ячейка '+lvl+' ур.':'Заговор'}</small>`, value='✨', extra='';
-  if(sp.conc){ if(S.conc) body+=`<br>Концентрация на «${S.conc}» сброшена.`; S.conc=sp.n; }
-  if(sp.save) extra=`Спасбросок ${AB_GEN[sp.save]}: СЛ ${spellDC()}`;
-  if(sp.cantrip){ const k=S.level>=11?3:S.level>=5?2:1; const r=rollF(k+'d4'); value=r.total; body+=`<br>${k}d4: ${r.txt} ${sp.dt}`; }
-  if(sp.dmg){ let f=sp.dmg; if(up&&sp.up){ const base=+sp.dmg.split('d')[0], add=+sp.up.split('d')[0]*up; f=(base+add)+'d'+sp.dmg.split('d')[1]; } const r=rollF(f); value=r.total; body+=`<br>${f}: ${r.txt} (${sp.dt})<br><small>При успешном спасброске половина: ${Math.floor(r.total/2)}</small>`; }
-  if(sp.heal){ let f=sp.heal; if(up){ const add=+sp.up.split('d')[0]*up; f=(1+add)+'d'+sp.heal.split('d')[1]; } f+='+'+M('cha'); const r=rollF(f); value=r.total; body+=`<br>Лечение ${f}: ${r.txt}`; }
-  addLog(`Заклинание «${sp.n}»${typeof lvl==='number'&&lvl?' ('+lvl+' ур.)':''}${typeof value==='number'?': '+value:''}`);
-  jingle(true); vib(40);
-  toast({title:sp.n, value, body, extra});
-  renderSpells(); renderConds(); save();
-}
-
-/* ---------- Умения ---------- */
-function renderFeats(){
-  const f=$('#feats'); f.innerHTML='';
-  FEATURES.forEach(x=>f.append(h('div',{class:'feat'+(x.lv>S.level?' locked':'')}, h('div',{class:'lv'}, (x.lv?x.lv+' уровень · ':'')+x.src+(x.lv>S.level?' · 🔒':'')), h('h3',{},x.n), h('p',{},x.t))));
-  const t=$('#diceTables'); t.innerHTML='';
-  const tbl=(name, arr, fmt)=>{ t.append(h('h3',{style:'margin-top:10px'},name)); const l=h('div',{class:'list'}); arr.forEach((e,i)=>l.append(h('div',{}, h('b',{style:'min-width:22px'},i+1), h('span',{class:'grow',style:'font-size:14px'}, fmt?fmt(e):e)))); t.append(l); };
-  tbl('D4 Местность (область диаметром 30 фт)', D4); tbl('D6 Поддержка (на себя)', D6); tbl('D8 Дьявольский', D8); tbl('D10 Опустошение', D10, e=>`1d10 ${e.d}. ${e.t}`);
-  t.append(h('div',{class:'note'},'Неясности в тексте подкласса: атака кубиком названа «дальнобойной рукопашной», а характеристика для неё не указана. Здесь это дальнобойная атака заклинанием (мастерство + Хар). Это трактовка, согласуй её с мастером.'));
-}
-
-/* ---------- Вещи ---------- */
-function renderInv(){
-  const m=$('#money'); m.innerHTML='';
-  [['pp','ПМ'],['gp','ЗМ'],['sp','СМ'],['cp','ММ']].forEach(([k,n])=>{
-    const i=h('input',{type:'number',inputmode:'numeric',value:S.money[k]}); i.addEventListener('change',()=>{S.money[k]=+i.value||0; save();});
-    m.append(h('div',{}, h('small',{class:'muted'},n), i)); });
-  $('#inv').value=S.inv; $('#notes').value=S.notes;
-}
-$('#inv').addEventListener('input',e=>{S.inv=e.target.value; save();});
-$('#notes').addEventListener('input',e=>{S.notes=e.target.value; save();});
-
-/* ---------- Прокачка ---------- */
-function renderLvl(){
-  $('#lvNum').textContent=S.level;
-  const ae=$('#abilEdit'); ae.innerHTML='';
-  AB.forEach(a=>{ const i=h('input',{type:'number',inputmode:'numeric',value:S.ab[a],min:1,max:30});
-    i.addEventListener('change',()=>{ S.ab[a]=Math.max(1,Math.min(30,+i.value||10)); renderAll(); save(); });
-    ae.append(h('div',{}, h('small',{class:'muted'},AB_RU[a]), i)); });
-  $('#optTough').checked=S.tough; $('#armorSel').value=S.armor;
-  $('#cName').value=S.name; $('#cBg').value=S.bg; $('#cAl').value=S.al;
-  $('#optSound').checked=S.sound; $('#optVib').checked=S.vib;
-}
-function renderLog(){ const l=$('#log'); l.innerHTML=''; S.log.slice(0,40).forEach(e=>l.append(h('div',{}, h('time',{},e.t), e.s))); if(!S.log.length) l.append(h('small',{class:'muted'},'Пока пусто')); }
-function setLevel(n){
-  n=Math.max(1,Math.min(11,n)); if(n===S.level) return;
-  const oldMax=maxHP(); const up=n>S.level; S.level=n;
-  const newMax=maxHP(); S.hp=Math.max(0,Math.min(newMax, S.hp+(newMax-oldMax)));
-  S.coins=Math.max(0, n - S.coinsDm);
-  S.slotsUsed=S.slotsUsed.map((u,i)=>Math.min(u, SLOTS[n][i+1]));
-  if(up){ jingle(true); vib([50,50,50,50,200]);
-    const nf=FEATURES.filter(f=>f.lv===n).map(f=>f.n).join(', ');
-    toast({title:'Новый уровень!', value:n, body:nf||'Больше хитов и мощи', extra:(n===4||n===8)?'Время для УХ или 🎰 Ставки на рост!':''}); }
-  addLog('Уровень → '+n); renderAll(); save();
-}
-$('#lvMinus').addEventListener('click',()=>setLevel(S.level-1));
-$('#lvPlus').addEventListener('click',()=>setLevel(S.level+1));
-$('#optTough').addEventListener('change',e=>{S.tough=e.target.checked; renderAll(); save();});
-$('#armorSel').addEventListener('change',e=>{S.armor=e.target.value; renderAll(); save();});
-$('#cName').addEventListener('input',e=>{S.name=e.target.value; renderHeader(); save();});
-$('#cBg').addEventListener('input',e=>{S.bg=e.target.value; save();});
-$('#cAl').addEventListener('input',e=>{S.al=e.target.value; save();});
-$('#optSound').addEventListener('change',e=>{S.sound=e.target.checked; save();});
-$('#optVib').addEventListener('change',e=>{S.vib=e.target.checked; save();});
-$('#bWager').addEventListener('click',()=>{ const r=R(12); clack(); setTimeout(()=>jingle(r>=7),150); addLog('Ставка на рост: '+r+' — '+WAGER[r-1]);
-  toast({title:'Ставка на рост (d12)', value:r, body:WAGER[r-1], cls:r===12?'crit':r<=3?'fail':''}); });
-$('#bExport').addEventListener('click',()=>{
-  const blob=new Blob([JSON.stringify(S,null,1)],{type:'application/json'}); const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download='gus-igrok-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); });
+/* ======================= УМЕНИЯ / ВЕЩИ / ПРОКАЧКА ======================= */
+function renderFeats(){const f=$('#feats');f.innerHTML='';
+ FEATURES.forEach(x=>f.append(h('div',{class:'feat'+(x.lv>S.level?' locked':'')},h('div',{class:'lv'},(x.lv?x.lv+' уровень · ':'')+x.src+(x.lv>S.level?' · 🔒':'')),h('h3',{},x.n),h('p',{},x.t))));
+ const t=$('#diceTables');t.innerHTML='';
+ const tbl=(name,arr,fmt)=>{t.append(h('h3',{style:'margin-top:12px'},name));const l=h('div',{class:'list'});arr.forEach((e,i)=>l.append(h('div',{},h('b',{style:'min-width:22px;color:var(--gold)'},i+1),h('span',{class:'grow',style:'font-size:14px'},fmt?fmt(e):e))));t.append(l);};
+ tbl('D4 Местность (диаметр 30 фт)',D4);tbl('D6 Поддержка (на себя)',D6);tbl('D8 Дьявольский',D8);tbl('D10 Опустошение',D10,e=>`1d10 ${e.d}. ${e.t}`);
+ t.append(h('div',{class:'note'},'Трактовки, которые нужно согласовать с мастером: атака кубиком — это атака заклинанием (мастерство + Хар), характеристика в тексте не указана; кубик D6 бодрит тебя, поэтому бросок атаки для него не нужен.'));}
+function renderInv(){const m=$('#money');m.innerHTML='';
+ [['pp','ПМ'],['gp','ЗМ'],['sp','СМ'],['cp','ММ']].forEach(([k,n])=>{const i=h('input',{type:'number',inputmode:'numeric',value:S.money[k]});i.addEventListener('change',()=>{S.money[k]=+i.value||0;save();});m.append(h('div',{},h('small',{class:'muted'},n),i));});
+ $('#inv').value=S.inv;$('#notes').value=S.notes;}
+$('#inv').addEventListener('input',e=>{S.inv=e.target.value;save();});$('#notes').addEventListener('input',e=>{S.notes=e.target.value;save();});
+function renderLvl(){$('#lvNum').textContent=S.level;const ae=$('#abilEdit');ae.innerHTML='';
+ AB.forEach(a=>{const i=h('input',{type:'number',inputmode:'numeric',value:S.ab[a],min:1,max:30});i.addEventListener('change',()=>{S.ab[a]=Math.max(1,Math.min(30,+i.value||10));renderAll();save();});ae.append(h('div',{},h('small',{class:'muted'},AB_RU[a]),i));});
+ $('#optTough').checked=S.tough;$('#armorSel').value=S.armor;$('#cName').value=S.name;$('#cBg').value=S.bg;$('#cAl').value=S.al;
+ $('#optSound').checked=S.sound;$('#optVib').checked=S.vib;$('#optAnim').checked=S.anim;$('#optKeep').checked=S.keep;$('#keepRow').style.display=NATIVE?'flex':'none';}
+function renderLog(){const l=$('#log');l.innerHTML='';S.log.slice(0,50).forEach(e=>l.append(h('div',{},h('time',{},e.t),e.s)));if(!S.log.length)l.append(h('div',{class:'empty'},'Пока пусто'));}
+function setLevel(n){n=Math.max(1,Math.min(11,n));if(n===S.level)return;
+ const oldMax=maxHP(),up=n>S.level;S.level=n;const nm=maxHP();S.hp=Math.max(0,Math.min(nm,S.hp+(nm-oldMax)));
+ S.coins=Math.max(0,n-S.coinsDm);S.slotsUsed=S.slotsUsed.map((u,i)=>Math.min(u,SLOTS[n][i+1]));
+ if(up){jingle(true);vib([50,50,50,50,200]);const nf=FEATURES.filter(f=>f.lv===n).map(f=>'• '+f.n).join('<br>');
+  toast({title:'НОВЫЙ УРОВЕНЬ!',value:n,body:nf||'Больше хитов и мощи',extra:(n===4||n===8)?'Время для УХ или 🎰 Ставки на рост!':'',cls:'crit'});}
+ addLog('⬆️ Уровень '+n);renderAll();save();}
+$('#lvMinus').addEventListener('click',()=>setLevel(S.level-1));$('#lvPlus').addEventListener('click',()=>setLevel(S.level+1));
+$('#optTough').addEventListener('change',e=>{S.tough=e.target.checked;renderAll();save();});
+$('#armorSel').addEventListener('change',e=>{S.armor=e.target.value;renderAll();save();});
+$('#cName').addEventListener('input',e=>{S.name=e.target.value;renderHeader();save();});
+$('#cBg').addEventListener('input',e=>{S.bg=e.target.value;save();});$('#cAl').addEventListener('input',e=>{S.al=e.target.value;save();});
+$('#optSound').addEventListener('change',e=>{S.sound=e.target.checked;save();});$('#optVib').addEventListener('change',e=>{S.vib=e.target.checked;save();});
+$('#optAnim').addEventListener('change',e=>{S.anim=e.target.checked;save();});$('#optKeep').addEventListener('change',e=>{S.keep=e.target.checked;keepScreen();save();});
+function keepScreen(){try{if(NATIVE&&Android.keepScreenOn)Android.keepScreenOn(!!S.keep);}catch(e){}}
+$('#bWager').addEventListener('click',()=>{const r=R(12);clack();setTimeout(()=>jingle(r>=7),150);addLog('🎰 Ставка на рост: '+r+' — '+WAGER[r-1]);
+ toast({title:'Ставка на рост (d12)',value:r,roll:true,body:WAGER[r-1],cls:r===12?'crit':r<=3?'fail':''});});
+$('#bExport').addEventListener('click',()=>{const name='gus-igrok-'+new Date().toISOString().slice(0,10)+'.json',data=JSON.stringify(S,null,1);
+ if(NATIVE&&Android.saveFile){const m=Android.saveFile(name,data);toast({title:'Копия',value:'💾',body:m});return;}
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.download=name;a.click();});
 $('#bImport').addEventListener('click',()=>$('#fileIn').click());
-$('#fileIn').addEventListener('change',e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader();
-  r.onload=()=>{ try{ S=Object.assign(fresh(), JSON.parse(r.result)); save(); renderAll(); toast({title:'Загрузка',value:'✅',body:'Персонаж загружен'}); }catch(err){ toast({title:'Ошибка',value:'❌',body:'Файл не подошёл',cls:'fail'}); } };
-  r.readAsText(f); });
-$('#bReset').addEventListener('click',()=>{ if(confirm('Сбросить всё к исходному персонажу? Сделай копию, если нужно.')){ S=fresh(); S.hp=maxHP(); S.coins=S.level; save(); renderAll(); } });
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{S=Object.assign(fresh(),JSON.parse(r.result));if(!S.active||S.active.basic!==undefined)S.active={};save();renderAll();toast({title:'Загрузка',value:'✅',body:'Персонаж загружен'});}catch(err){toast({title:'Ошибка',value:'❌',body:'Файл не подошёл',cls:'fail'});}};r.readAsText(f);e.target.value='';});
+$('#bReset').addEventListener('click',()=>ask('Сбросить персонажа?','Всё вернётся к исходному гусю 11 уровня. Сначала лучше сохранить копию.',()=>{S=fresh();S.hp=maxHP();S.coins=S.level;save();renderAll();},'Сбросить'));
 
-/* ---------- Хиты ---------- */
-function hpModal(kind){
-  modal(kind==='dmg'?'💥 Получить урон':kind==='heal'?'💚 Лечение':'❤️ Хиты', b=>{
-    const inp=h('input',{type:'number',inputmode:'numeric',placeholder:'Сколько?',style:'font-size:24px;text-align:center'});
-    b.append(inp);
-    const g=h('div',{class:'grid2',style:'margin-top:10px'});
-    g.append(h('button',{class:'btn red',on:{click:()=>{ applyDmg(+inp.value||0); closeModal(); }}},'Урон'));
-    g.append(h('button',{class:'btn green',on:{click:()=>{ applyHeal(+inp.value||0); closeModal(); }}},'Лечение'));
-    g.append(h('button',{class:'btn blue',on:{click:()=>{ S.temp=Math.max(S.temp,+inp.value||0); closeModal(); renderAll(); save(); }}},'Временные хиты'));
-    g.append(h('button',{class:'btn',on:{click:()=>{ S.hp=Math.max(0,Math.min(maxHP(),+inp.value||0)); closeModal(); renderAll(); save(); }}},'Установить хиты'));
-    b.append(g);
-    b.append(h('div',{class:'grid3',style:'margin-top:10px'}, ...[1,5,10].map(n=>h('button',{class:'btn sm',on:{click:()=>{inp.value=(+inp.value||0)+n;}}},'+'+n))));
-    setTimeout(()=>inp.focus(),50);
-  });
-}
-function applyDmg(n){
-  if(n<=0) return; let d=n;
-  const t=Math.min(S.temp,d); S.temp-=t; d-=t; S.hp=Math.max(0,S.hp-d);
-  addLog(`Получен урон ${n}${t?` (${t} съели временные)`:''} → ${S.hp}/${maxHP()}`); vib([100]);
-  const acts=[];
-  if(S.conc) acts.push([`Спас концентрации (СЛ ${Math.max(10,Math.floor(n/2))})`, ()=>{ const r=d20('Концентрация ('+S.conc+')', M('con'), 'save'); if(r.total<Math.max(10,Math.floor(n/2))){ addLog('Концентрация потеряна: '+S.conc); S.conc=null; renderConds(); save(); } }, 'purple']);
-  if(S.hp===0){ if(d>=maxHP()) toast({title:'Мгновенная смерть',value:'🪦',body:'Урон после 0 хитов не меньше максимума хитов.',cls:'fail'}); else toast({title:'Гусь падает!',value:'0',body:'Без сознания. Кидай спасброски от смерти на вкладке «Бой».',cls:'fail'}); }
-  else toast({title:'Урон',value:'−'+n,body:`Хиты: ${S.hp}/${maxHP()}${S.temp?` (+${S.temp} врем.)`:''}`,cls:'fail',actions:acts});
-  renderAll(); save();
-}
-function applyHeal(n){ if(n<=0) return; const was=S.hp; S.hp=Math.min(maxHP(),S.hp+n); if(was===0) S.death={s:0,f:0}; addLog(`Лечение +${n} → ${S.hp}/${maxHP()}`); jingle(true); toast({title:'Лечение',value:'+'+n,body:`Хиты: ${S.hp}/${maxHP()}`,cls:'crit'}); renderAll(); save(); }
-$('#bDmg').addEventListener('click',()=>hpModal('dmg'));
-$('#bHeal').addEventListener('click',()=>hpModal('heal'));
-$('#hpNum').addEventListener('click',()=>hpModal('set'));
-$('#sInit').addEventListener('click',()=>d20('Инициатива', M('dex'), 'check'));
+/* ======================= ХИТЫ ======================= */
+function hpModal(){modal('❤️ Хиты · '+S.hp+'/'+maxHP(),b=>{
+ const inp=h('input',{type:'number',inputmode:'numeric',placeholder:'0',style:'font-size:30px;text-align:center;font-weight:900'});b.append(inp);
+ b.append(h('div',{class:'grid3',style:'margin-top:8px;grid-template-columns:repeat(5,1fr)'},...[1,2,5,10,0].map(n=>h('button',{class:'btn sm ghost',on:{click:()=>{inp.value=n?(+inp.value||0)+n:'';}}},n?'+'+n:'C'))));
+ const g=h('div',{class:'grid2',style:'margin-top:10px'});
+ g.append(h('button',{class:'btn red',style:'padding:15px',on:{click:()=>{closeModal();applyDmg(+inp.value||0,false);}}},'💥 Урон'));
+ g.append(h('button',{class:'btn green',style:'padding:15px',on:{click:()=>{closeModal();applyHeal(+inp.value||0);}}},'💚 Лечение'));
+ if(d6is(3))g.append(h('button',{class:'btn red',style:'grid-column:1/-1',on:{click:()=>{closeModal();applyDmg(+inp.value||0,true);}}},'🛡 Урон немагическим оружием (½, сопротивление D6)'));
+ g.append(h('button',{class:'btn blue',on:{click:()=>{closeModal();S.temp=Math.max(S.temp,+inp.value||0);addLog('Временные хиты: '+S.temp);renderAll();save();}}},'🔷 Временные'));
+ g.append(h('button',{class:'btn ghost',on:{click:()=>{closeModal();S.hp=Math.max(0,Math.min(maxHP(),+inp.value||0));renderAll();save();}}},'✏️ Установить'));
+ b.append(g);setTimeout(()=>inp.focus(),80);});}
+function applyDmg(n,resist){if(n<=0)return;let d=resist?Math.floor(n/2):n;const raw=d;
+ const t=Math.min(S.temp,d);S.temp-=t;d-=t;const was=S.hp;S.hp=Math.max(0,S.hp-d);invisBreak('ты получил урон');
+ addLog(`💥 Урон ${n}${resist?' → ½ = '+raw:''}${t?` (${t} съели временные)`:''} → ${S.hp}/${maxHP()}`);vib([120]);
+ const hc=$('#hpCard');hc.classList.remove('flash');void hc.offsetWidth;hc.classList.add('flash');
+ if(S.hp===0){if(was===0)S.death.f=Math.min(3,S.death.f+1);if(!S.conds.includes('Без сознания'))S.conds.push('Без сознания');
+  if(d-was>=maxHP())toast({title:'Мгновенная смерть',value:'🪦',body:'Остаток урона не меньше максимума хитов.',cls:'fail'});
+  else toast({title:'Гусь падает!',value:'0',body:'Без сознания. Кидай спасброски от смерти на вкладке «Бой».',cls:'fail'});}
+ else{const acts=[];
+  if(S.conc){const cdc=Math.max(10,Math.floor(raw/2));acts.push([`🧠 Спас концентрации (СЛ ${cdc})`,()=>{hideToast();const r=core('Концентрация: '+S.conc,M('con'),'save');const ok=r.total>=cdc;
+   if(!ok){addLog('Концентрация потеряна: '+S.conc);S.conc=null;S.effects=S.effects.filter(e=>e.key!=='conc');}
+   showRoll('Концентрация, СЛ '+cdc,r,{extra:ok?'✔ Удержал!':'✖ Концентрация потеряна'});renderAll();save();},'purple']);}
+  toast({title:resist?'Урон (сопротивление)':'Урон',value:'−'+raw,body:`${resist?n+' → ½<br>':''}Хиты: ${S.hp}/${maxHP()}${S.temp?` (+${S.temp} врем.)`:''}${t?`<br><small>${t} поглощено временными</small>`:''}`,cls:'fail',actions:acts});}
+ renderAll();save();}
+function applyHeal(n){if(n<=0)return;const was=S.hp;S.hp=Math.min(maxHP(),S.hp+n);
+ if(was===0){S.death={s:0,f:0};S.conds=S.conds.filter(c=>c!=='Без сознания');}
+ addLog(`💚 +${n} → ${S.hp}/${maxHP()}`);jingle(true);toast({title:'Лечение',value:'+'+n,body:`Хиты: ${S.hp}/${maxHP()}`,cls:'crit'});renderAll();save();}
+$('#bDmg').addEventListener('click',hpModal);$('#bHeal').addEventListener('click',hpModal);$('#hpNum').addEventListener('click',hpModal);
+$('#sInit').addEventListener('click',()=>{if(!S.combat)startCombat();else d20('Инициатива',M('dex'),'check');});
 
-/* ---------- Отдых ---------- */
-function rest(long){
-  if(long){
-    S.hp=maxHP(); S.temp=0; S.hdUsed=Math.max(0,S.hdUsed-Math.max(1,Math.floor(S.level/2)));
-    S.slotsUsed=[0,0,0,0,0]; for(const k in S.used) S.used[k]=0;
-    S.pend={attack:null,check:null,save:null}; S.oneShot=null; S.active={basic:null,greater:null};
-    S.death={s:0,f:0}; S.conc=null; S.lastGamble=null;
-    addLog('Длинный отдых: всё восстановлено.'); jingle(true);
-    toast({title:'Длинный отдых',value:'😴',body:'Хиты, ячейки, кубики, искушения, ставки и удар крылом восстановлены.<br>Монеты судьбы остаются там, где были.'});
-    renderAll(); save();
-  } else {
-    modal('☕ Короткий отдых', b=>{
-      const info=h('p',{class:'muted'},`Кости хитов: ${S.level-S.hdUsed}/${S.level} (к6 ${sg(M('con'))}). Хиты ${S.hp}/${maxHP()}.`);
-      const btn=h('button',{class:'btn gold',style:'width:100%',on:{click:()=>{
-        if(S.hdUsed>=S.level) return; S.hdUsed++; const r=rollF('1d6'); const v=Math.max(0,r.total+M('con')); S.hp=Math.min(maxHP(),S.hp+v);
-        addLog(`Кость хитов: +${v}`); clack(); info.textContent=`+${v} (к6: ${r.total}). Кости: ${S.level-S.hdUsed}/${S.level}. Хиты ${S.hp}/${maxHP()}.`; renderHeader(); save(); }}},'Потратить кость хитов');
-      b.append(info, btn, h('div',{class:'note'},'По тексту класса у Gambler нет ресурсов, восстанавливающихся на коротком отдыхе.'));
-    });
-  }
-}
+/* ======================= ОТДЫХ ======================= */
+function longRest(){S.hp=maxHP();S.temp=0;S.hdUsed=Math.max(0,S.hdUsed-Math.max(1,Math.floor(S.level/2)));
+ S.slotsUsed=[0,0,0,0,0];for(const k in S.used)S.used[k]=0;
+ S.pend={attack:null,check:null,save:null};S.oneShot=null;S.active={};S.effects=[];S.combat=null;
+ S.death={s:0,f:0};S.conc=null;S.lastGamble=null;S.conds=S.conds.filter(c=>c==='Истощение');
+ addLog('😴 Длинный отдых');jingle(true);
+ toast({title:'Длинный отдых',value:'😴',body:'Хиты, ячейки, кубики, искушения, ставки и удар крылом восстановлены.<br>Монеты судьбы остаются там, где были.',cls:'crit'});renderAll();save();}
+$('#bLong').addEventListener('click',()=>ask('Длинный отдых?','Восстановить хиты, ячейки и все умения.',longRest,'Отдыхаем'));
+$('#bShort').addEventListener('click',()=>{modal('☕ Короткий отдых',b=>{const info=h('p',{class:'muted'});
+ const upd=()=>{info.textContent=`Кости хитов: ${S.level-S.hdUsed}/${S.level} (к6 ${sg(M('con'))}). Хиты ${S.hp}/${maxHP()}.`;};upd();
+ const btn=h('button',{class:'btn gold wide',style:'padding:15px',on:{click:()=>{if(S.hdUsed>=S.level||S.hp>=maxHP())return;S.hdUsed++;const r=rollF('1d6'),v=Math.max(0,r.total+M('con'));
+  S.hp=Math.min(maxHP(),S.hp+v);addLog(`☕ Кость хитов: +${v}`);clack();vib(30);upd();renderHeader();save();btn.textContent=`🎲 +${v}! Ещё кость`;}}},'🎲 Потратить кость хитов');
+ b.append(info,btn,h('div',{class:'note'},'По тексту класса у Gambler нет ресурсов, которые восстанавливаются на коротком отдыхе.'));});});
 
-/* ---------- Навигация ---------- */
-document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x===b));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on', p.id==='p-'+b.dataset.p));
-  window.scrollTo({top:0});
-}));
-// кнопки отдыха в карточке «Бой»
-(function(){
-  const c=h('div',{class:'card'}, h('h2',{},'🏕️ Отдых'), h('div',{class:'grid2'},
-    h('button',{class:'btn blue',on:{click:()=>rest(false)}},'Короткий отдых'),
-    h('button',{class:'btn green',on:{click:()=>{ if(confirm('Длинный отдых: восстановить всё?')) rest(true); }}},'Длинный отдых')));
-  $('#p-fight').append(c);
-})();
-
-function renderAll(){ renderHeader(); renderFight(); renderChar(); renderSpells(); renderFeats(); renderInv(); renderLvl(); renderLog(); }
-setMode(S.mode||'nor');
-renderAll(); save();
-
-if('serviceWorker' in navigator && location.protocol.startsWith('http')){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+/* ======================= НАВИГАЦИЯ / СТАРТ ======================= */
+function go(p){document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x.dataset.p===p));
+ document.querySelectorAll('.page').forEach(x=>x.classList.toggle('on',x.id==='p-'+p));window.scrollTo({top:0});}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>{go(b.dataset.p);vib(10);}));
+window.onAndroidBack=function(){if($('#modal').classList.contains('show')){closeModal();return true;}
+ if($('#toast').classList.contains('show')){hideToast();return true;}
+ if(!$('#p-fight').classList.contains('on')){go('fight');return true;}return false;};
+function renderAll(){renderHeader();renderFight();renderChar();renderSpells();renderFeats();renderInv();renderLvl();renderLog();}
+setMode(S.mode||'nor');renderAll();save();keepScreen();
+document.addEventListener('pointerdown',()=>ctx(),{once:true});
+if(!NATIVE&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
